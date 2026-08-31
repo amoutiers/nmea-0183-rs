@@ -115,8 +115,8 @@ Sources : go-nmea, gpsd.
 - [x] DOR — Door Status
 - [x] DSC — Digital Selective Calling Information
 - [x] DSE — DSC Extended
-- [ ] EVE — Event
-- [ ] FIR — Fire Detection
+- [x] EVE — Event
+- [x] FIR — Fire Detection
 - [x] HBT — Heartbeat Supervision
 
 ### Vessel Systems

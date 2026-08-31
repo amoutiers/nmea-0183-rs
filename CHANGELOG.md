@@ -4,6 +4,14 @@ All notable changes to nmea-kit are documented here.
 
 ## [Unreleased]
 
+## [0.8.3] — 2026-08-31
+
+### Added
+- EVE (General Event Message) sentence type — event time, tag code, and message text.
+- FIR (Fire Detection) sentence type — fire type, time, system and detector identifiers, condition, acknowledgement state, and message text.
+
+NMEA sentence coverage: 68 → 70 types.
+
 ## [0.8.2] — 2026-08-19
 
 ### Added
@@ -371,6 +379,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.8.3]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.3
 [0.8.2]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.2
 [0.8.1]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.1
 [0.8.0]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.0

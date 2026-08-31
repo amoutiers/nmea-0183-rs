@@ -1,6 +1,6 @@
 [package]
 name = "nmea-kit"
-version = "0.8.2"
+version = "0.8.3"
 edition = "2024"
 rust-version = "1.85.0"
 description = "Bidirectional NMEA 0183 parser and encoder with AIS decoding"
