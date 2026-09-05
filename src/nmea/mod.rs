@@ -165,6 +165,7 @@ nmea_sentences![
         // Radar / Target tracking
         ["rsd", Rsd, "RSD"],
         ["tll", Tll, "TLL"],
+        ["tlb", Tlb, "TLB"],
         ["ttm", Ttm, "TTM"],
         // Alert
         ["ack", Ack, "ACK"],
@@ -191,6 +192,7 @@ nmea_sentences![
         ["pashr", Pashr, "PASHR"],
         // Proprietary — Garmin
         ["pgrme", Pgrme, "PGRME"],
+        ["pgrmt", Pgrmt, "PGRMT"],
         // Proprietary — Skipper
         ["pskpdpt", Pskpdpt, "PSKPDPT"],
     ]
