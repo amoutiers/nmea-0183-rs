@@ -2,7 +2,18 @@
 
 All notable changes to nmea-kit are documented here.
 
-## [Unreleased]
+## [0.8.4] — 2026-09-08
+
+### Added
+- PGRMT (Garmin Sensor Status) sentence type — product information, sensor checks, temperature, and configuration status.
+- PHTRO (Vessel Pitch and Roll) sentence type — pitch, bow direction, roll, and port direction.
+- TLB (Target Label) sentence type — variable target number and label pairs.
+- TTD (Tracked Target Data) sentence type — encapsulated multi-fragment target payloads and fill bits.
+
+### Changed
+- TTD now uses the `!**TTD` encapsulation format and participates in typed NMEA dispatch.
+
+NMEA sentence coverage: 70 → 74 types.
 
 ## [0.8.3] — 2026-08-31
 
@@ -379,6 +390,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.8.4]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.4
 [0.8.3]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.3
 [0.8.2]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.2
 [0.8.1]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.1

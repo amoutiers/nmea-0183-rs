@@ -3,7 +3,7 @@ use crate::FrameError;
 /// A parsed NMEA 0183 frame with references into the original input.
 ///
 /// The frame layer handles:
-/// - `$` (NMEA) and `!` (AIS) prefix detection
+/// - `$` (parametric) and `!` (encapsulation) prefix detection
 /// - IEC 61162-450 tag block stripping
 /// - XOR checksum validation
 /// - Talker ID + sentence type extraction
@@ -18,7 +18,7 @@ use crate::FrameError;
 /// and `sentence_type` is the 3-char type code.
 #[derive(Debug, Clone, PartialEq)]
 pub struct NmeaFrame<'a> {
-    /// Sentence prefix: `$` for NMEA, `!` for AIS.
+    /// Sentence prefix: `$` for parametric sentences, `!` for encapsulation sentences.
     pub prefix: char,
     /// Talker identifier (typically 2 letters, e.g. "GP", "WI", "AI").
     /// Empty (`""`) for proprietary sentences (`$P...`).

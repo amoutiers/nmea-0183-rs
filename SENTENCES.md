@@ -98,9 +98,9 @@ Sources : go-nmea, gpsd.
 ### Targets
 
 - [x] RSD — Radar System Data
-- [ ] TLB — Target Label
+- [x] TLB — Target Label
 - [x] TLL — Target Latitude and Longitude
-- [ ] TTD — Tracked Target Data
+- [x] TTD — Tracked Target Data
 - [x] TTM — Tracked Target Message
 
 ### Safety & Alarms
@@ -150,8 +150,8 @@ Sources : go-nmea, gpsd.
 - [x] PASHR — RT300 Inertial Attitude (Hemisphere/Ashtech)
 - [ ] PCDIN — NMEA 2000 via SeaSmart bridge
 - [x] PGRME — Garmin Estimated Position Error
-- [ ] PGRMT — Garmin Sensor Status
-- [ ] PHTRO — Vessel Pitch and Roll (Xsens)
+- [x] PGRMT — Garmin Sensor Status
+- [x] PHTRO — Vessel Pitch and Roll (Xsens)
 - [ ] PKLDS — Keel Depth Sentence
 - [ ] PKLID — Keel ID
 - [ ] PKLSH — Keel Shallow
