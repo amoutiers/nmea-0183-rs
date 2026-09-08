@@ -363,6 +363,10 @@ impl Default for FieldWriter {
 /// address (e.g. `"PASHR"`, `"PSKPDPT"`) and [`PROPRIETARY`](Self::PROPRIETARY) to `true`.
 /// `to_sentence` then ignores the `talker` argument and emits the full address.
 pub trait NmeaEncodable {
+    /// The NMEA sentence prefix. Standard sentences use `$`; encapsulation
+    /// sentences may override this with `!`.
+    const PREFIX: char = '$';
+
     /// The wire address: the 3-character type for standard sentences (e.g. `"RMC"`),
     /// or the full address for proprietary sentences (e.g. `"PSKPDPT"`).
     const SENTENCE_TYPE: &'static str;
@@ -383,7 +387,7 @@ pub trait NmeaEncodable {
         let fields = self.encode()?;
         let field_refs: Vec<&str> = fields.iter().map(|s| s.as_str()).collect();
         let talker = if Self::PROPRIETARY { "" } else { talker };
-        crate::encode_frame('$', talker, Self::SENTENCE_TYPE, &field_refs)
+        crate::encode_frame(Self::PREFIX, talker, Self::SENTENCE_TYPE, &field_refs)
     }
 }
 

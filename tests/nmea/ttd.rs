@@ -13,10 +13,10 @@ fn decode_encode() {
         payload: Some("trackdata".to_string()),
         fill_bits: Some(0),
     };
-    let sentence = original.to_sentence("RA").expect("encode");
+    let sentence = original.to_sentence("**").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("valid");
     let ttd = Ttd::parse(&frame.fields).expect("parse");
-    let sentence2 = ttd.to_sentence("RA").expect("encode");
+    let sentence2 = ttd.to_sentence("**").expect("encode");
     let frame2 = parse_frame(sentence2.trim()).expect("re-parse");
     let ttd2 = Ttd::parse(&frame2.fields).expect("parse");
     assert_eq!(ttd, ttd2);
@@ -31,7 +31,7 @@ fn dispatch() {
         payload: Some("test".to_string()),
         fill_bits: Some(0),
     };
-    let sentence = original.to_sentence("RA").expect("encode");
+    let sentence = original.to_sentence("**").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("valid");
     assert!(matches!(NmeaSentence::parse(&frame), NmeaSentence::Ttd(_)));
 }
@@ -45,7 +45,7 @@ fn roundtrip() {
         payload: Some("trackdata".to_string()),
         fill_bits: Some(0),
     };
-    let sentence = original.to_sentence("RA").expect("encode");
+    let sentence = original.to_sentence("**").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
     let parsed = Ttd::parse(&frame.fields).expect("parse");
     assert_eq!(original, parsed);
@@ -60,7 +60,7 @@ fn ttd_values() {
         payload: Some("trackdata".to_string()),
         fill_bits: Some(0),
     };
-    let sentence = original.to_sentence("RA").expect("encode");
+    let sentence = original.to_sentence("**").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("valid");
     let t = Ttd::parse(&frame.fields).expect("parse");
     assert_eq!(t, original);

@@ -49,6 +49,13 @@ macro_rules! nmea_sentences {
             /// Returns `Unknown` for unrecognized types.
             pub fn parse(frame: &NmeaFrame<'_>) -> Self {
                 if frame.prefix != '$' {
+                    #[cfg(feature = "ttd")]
+                    if frame.prefix == '!' && frame.talker == "**" && frame.sentence_type == "TTD" {
+                        return match sentences::Ttd::parse(&frame.fields) {
+                            Some(value) => Self::Ttd(value),
+                            None => Self::from_frame(frame),
+                        };
+                    }
                     return Self::from_frame(frame);
                 }
 

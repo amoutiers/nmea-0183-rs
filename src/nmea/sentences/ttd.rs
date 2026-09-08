@@ -2,7 +2,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
 /// TTD — Tracked Target Data.
 ///
-/// Wire: `num_frags,frag_num,msg_id,payload,fill_bits`
+/// Wire: `!**TTD,num_frags,frag_num,msg_id,payload,fill_bits`
 ///
 /// Note: TTD uses hex-encoded fragment counts (e.g. "1A"). These are stored
 /// as strings to preserve the original encoding. The `msg_id` is a u8.
@@ -41,6 +41,7 @@ impl Ttd {
 }
 
 impl NmeaEncodable for Ttd {
+    const PREFIX: char = '!';
     const SENTENCE_TYPE: &str = "TTD";
 
     fn encode(&self) -> Result<Vec<String>, crate::EncodeError> {
@@ -68,7 +69,7 @@ mod tests {
             payload: None,
             fill_bits: None,
         }
-        .to_sentence("RA").expect("encode");
+        .to_sentence("**").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
         let t = Ttd::parse(&f.fields).expect("parse");
         assert!(t.num_frags.is_none());
@@ -85,7 +86,7 @@ mod tests {
             payload: Some("testpayload".to_string()),
             fill_bits: Some(0),
         };
-        let sentence = original.to_sentence("RA").expect("encode");
+        let sentence = original.to_sentence("**").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
         let parsed = Ttd::parse(&frame.fields).expect("parse");
         assert_eq!(original, parsed);
@@ -100,7 +101,7 @@ mod tests {
             payload: Some("trackdata".to_string()),
             fill_bits: Some(0),
         };
-        let sentence = original.to_sentence("RA").expect("encode");
+        let sentence = original.to_sentence("**").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
         let t = Ttd::parse(&frame.fields).expect("parse TTD");
         assert_eq!(t.num_frags, Some("1A".to_string()));
