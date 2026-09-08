@@ -90,6 +90,8 @@ mod pashr;
 mod pgrme;
 #[cfg(feature = "pgrmt")]
 mod pgrmt;
+#[cfg(feature = "phtro")]
+mod phtro;
 #[cfg(feature = "pskpdpt")]
 mod pskpdpt;
 #[cfg(feature = "rmb")]
@@ -112,6 +114,8 @@ mod ths;
 mod tll;
 #[cfg(feature = "tlb")]
 mod tlb;
+#[cfg(feature = "ttd")]
+mod ttd;
 #[cfg(feature = "ttm")]
 mod ttm;
 #[cfg(feature = "txt")]
@@ -235,6 +239,8 @@ pub use pashr::*;
 pub use pgrme::*;
 #[cfg(feature = "pgrmt")]
 pub use pgrmt::*;
+#[cfg(feature = "phtro")]
+pub use phtro::*;
 #[cfg(feature = "pskpdpt")]
 pub use pskpdpt::*;
 #[cfg(feature = "rmb")]
@@ -257,6 +263,8 @@ pub use ths::*;
 pub use tll::*;
 #[cfg(feature = "tlb")]
 pub use tlb::*;
+#[cfg(feature = "ttd")]
+pub use ttd::*;
 #[cfg(feature = "ttm")]
 pub use ttm::*;
 #[cfg(feature = "txt")]

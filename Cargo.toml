@@ -29,7 +29,7 @@ depth       = ["dbt", "dbs", "dbk", "dpt"]
 # Umbrella — all sentence types
 nmea = [
     "positioning", "speed", "heading", "wind", "depth",
-    "aam", "ack", "acn", "ala", "alc", "alf", "alr", "arc", "apb", "bec", "bod", "bwc", "bwr", "bww", "dor", "dsc", "dse", "dtm", "eve", "fir", "gbs", "gsa", "gsv", "gst", "hbt", "hsc", "mda", "mta", "mtw", "osd", "pashr", "pgrme", "pgrmt", "pskpdpt", "rmb", "rot", "rpm", "rsa", "rsd", "rte", "tlb", "tll", "ttm", "txt", "vdr", "vlw", "vpw", "vwr", "vwt", "vsd", "wcv", "wpl", "xdr", "xte", "zda",
+    "aam", "ack", "acn", "ala", "alc", "alf", "alr", "arc", "apb", "bec", "bod", "bwc", "bwr", "bww", "dor", "dsc", "dse", "dtm", "eve", "fir", "gbs", "gsa", "gsv", "gst", "hbt", "hsc", "mda", "mta", "mtw", "osd", "pashr", "pgrme", "pgrmt", "phtro", "pskpdpt", "rmb", "rot", "rpm", "rsa", "rsd", "rte", "tlb", "tll", "ttd", "ttm", "txt", "vdr", "vlw", "vpw", "vwr", "vwt", "vsd", "wcv", "wpl", "xdr", "xte", "zda",
 ]
 ais = ["abm", "bbm"]
 
@@ -79,6 +79,7 @@ osd = []
 pashr = []
 pgrme = []
 pgrmt = []
+phtro = []
 pskpdpt = []
 rmb = []
 rmc = []
@@ -90,6 +91,7 @@ rsd = []
 ths = []
 tll = []
 tlb = []
+ttd = []
 ttm = []
 txt = []
 vhw = []

@@ -88,6 +88,8 @@ mod pashr;
 mod pgrme;
 #[path = "nmea/pgrmt.rs"]
 mod pgrmt;
+#[path = "nmea/phtro.rs"]
+mod phtro;
 #[path = "nmea/pskpdpt.rs"]
 mod pskpdpt;
 #[path = "nmea/rmb.rs"]
@@ -110,6 +112,8 @@ mod ths;
 mod tlb;
 #[path = "nmea/tll.rs"]
 mod tll;
+#[path = "nmea/ttd.rs"]
+mod ttd;
 #[path = "nmea/ttm.rs"]
 mod ttm;
 #[path = "nmea/txt.rs"]

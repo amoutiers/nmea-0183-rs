@@ -166,6 +166,7 @@ nmea_sentences![
         ["rsd", Rsd, "RSD"],
         ["tll", Tll, "TLL"],
         ["tlb", Tlb, "TLB"],
+        ["ttd", Ttd, "TTD"],
         ["ttm", Ttm, "TTM"],
         // Alert
         ["ack", Ack, "ACK"],
@@ -193,6 +194,7 @@ nmea_sentences![
         // Proprietary — Garmin
         ["pgrme", Pgrme, "PGRME"],
         ["pgrmt", Pgrmt, "PGRMT"],
+        ["phtro", Phtro, "PHTRO"],
         // Proprietary — Skipper
         ["pskpdpt", Pskpdpt, "PSKPDPT"],
     ]
