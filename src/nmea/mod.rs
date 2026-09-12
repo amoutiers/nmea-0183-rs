@@ -198,10 +198,12 @@ nmea_sentences![
     proprietary: [
         // Proprietary — Ashtech/Trimble
         ["pashr", Pashr, "PASHR"],
+        ["pcdin", Pcdin, "PCDIN"],
         // Proprietary — Garmin
         ["pgrme", Pgrme, "PGRME"],
         ["pgrmt", Pgrmt, "PGRMT"],
         ["phtro", Phtro, "PHTRO"],
+        ["prdid", Prdid, "PRDID"],
         // Proprietary — Skipper
         ["pskpdpt", Pskpdpt, "PSKPDPT"],
     ]

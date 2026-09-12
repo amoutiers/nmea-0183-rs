@@ -84,12 +84,16 @@ mod mwv;
 mod osd;
 #[path = "nmea/pashr.rs"]
 mod pashr;
+#[path = "nmea/pcdin.rs"]
+mod pcdin;
 #[path = "nmea/pgrme.rs"]
 mod pgrme;
 #[path = "nmea/pgrmt.rs"]
 mod pgrmt;
 #[path = "nmea/phtro.rs"]
 mod phtro;
+#[path = "nmea/prdid.rs"]
+mod prdid;
 #[path = "nmea/pskpdpt.rs"]
 mod pskpdpt;
 #[path = "nmea/rmb.rs"]

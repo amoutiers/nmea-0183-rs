@@ -86,12 +86,16 @@ mod mwv;
 mod osd;
 #[cfg(feature = "pashr")]
 mod pashr;
+#[cfg(feature = "pcdin")]
+mod pcdin;
 #[cfg(feature = "pgrme")]
 mod pgrme;
 #[cfg(feature = "pgrmt")]
 mod pgrmt;
 #[cfg(feature = "phtro")]
 mod phtro;
+#[cfg(feature = "prdid")]
+mod prdid;
 #[cfg(feature = "pskpdpt")]
 mod pskpdpt;
 #[cfg(feature = "rmb")]
@@ -235,12 +239,16 @@ pub use mwv::*;
 pub use osd::*;
 #[cfg(feature = "pashr")]
 pub use pashr::*;
+#[cfg(feature = "pcdin")]
+pub use pcdin::*;
 #[cfg(feature = "pgrme")]
 pub use pgrme::*;
 #[cfg(feature = "pgrmt")]
 pub use pgrmt::*;
 #[cfg(feature = "phtro")]
 pub use phtro::*;
+#[cfg(feature = "prdid")]
+pub use prdid::*;
 #[cfg(feature = "pskpdpt")]
 pub use pskpdpt::*;
 #[cfg(feature = "rmb")]
