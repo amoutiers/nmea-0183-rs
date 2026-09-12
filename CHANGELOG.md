@@ -2,6 +2,14 @@
 
 All notable changes to nmea-kit are documented here.
 
+## [0.8.5] — 2026-09-12
+
+### Added
+- PCDIN (SeaSmart.Net NMEA 2000 Protocol) sentence type — PGN, timestamp, source address, and raw data payload.
+- PRDID (Vessel Pitch, Roll and Heading) sentence type — pitch, roll, and true heading.
+
+NMEA sentence coverage: 74 → 76 types.
+
 ## [0.8.4] — 2026-09-08
 
 ### Added
@@ -390,6 +398,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.8.5]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.5
 [0.8.4]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.4
 [0.8.3]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.3
 [0.8.2]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.2

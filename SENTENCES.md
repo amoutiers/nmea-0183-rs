@@ -148,7 +148,7 @@ Sources : go-nmea, gpsd.
 ### Proprietary
 
 - [x] PASHR — RT300 Inertial Attitude (Hemisphere/Ashtech)
-- [ ] PCDIN — NMEA 2000 via SeaSmart bridge
+- [x] PCDIN — NMEA 2000 via SeaSmart bridge
 - [x] PGRME — Garmin Estimated Position Error
 - [x] PGRMT — Garmin Sensor Status
 - [x] PHTRO — Vessel Pitch and Roll (Xsens)
@@ -160,7 +160,7 @@ Sources : go-nmea, gpsd.
 - [ ] PKNSH — Knudsen Shallow
 - [ ] PKWDWPL — Waypoint (unknown vendor)
 - [ ] PMTK — MediaTek GPS Command
-- [ ] PRDID — RDI Doppler Instrument Data
+- [x] PRDID — RDI Doppler Instrument Data
 - [x] PSKPDPT — Skipper Depth
 - [ ] PSONCMS — SMC IMU Data (SBG Systems)
 
