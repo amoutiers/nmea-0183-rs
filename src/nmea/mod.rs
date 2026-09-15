@@ -205,6 +205,8 @@ nmea_sentences![
         ["phtro", Phtro, "PHTRO"],
         ["prdid", Prdid, "PRDID"],
         // Proprietary — Skipper
+        ["pklid", Pklid, "PKLID"],
+        ["pklds", Pklds, "PKLDS"],
         ["pskpdpt", Pskpdpt, "PSKPDPT"],
     ]
 ];

@@ -94,6 +94,10 @@ mod pgrme;
 mod pgrmt;
 #[cfg(feature = "phtro")]
 mod phtro;
+#[cfg(feature = "pklid")]
+mod pklid;
+#[cfg(feature = "pklds")]
+mod pklds;
 #[cfg(feature = "prdid")]
 mod prdid;
 #[cfg(feature = "pskpdpt")]
@@ -247,6 +251,10 @@ pub use pgrme::*;
 pub use pgrmt::*;
 #[cfg(feature = "phtro")]
 pub use phtro::*;
+#[cfg(feature = "pklid")]
+pub use pklid::*;
+#[cfg(feature = "pklds")]
+pub use pklds::*;
 #[cfg(feature = "prdid")]
 pub use prdid::*;
 #[cfg(feature = "pskpdpt")]

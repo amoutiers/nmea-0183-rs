@@ -192,7 +192,6 @@ impl FieldWriter {
     }
 
     /// Write an optional f64. `None` → empty field. Non-finite → empty field. `-0.0` → `"0"`.
-    #[cfg_attr(not(test), expect(dead_code, reason = "reserved for future sentence types"))]
     pub(crate) fn f64(&mut self, value: Option<f64>) {
         push_optional_float!(self.fields, value);
     }

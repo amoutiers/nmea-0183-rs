@@ -34,7 +34,7 @@
 //!
 //! ## Features
 //!
-//! - `nmea` (default) — all 76 NMEA sentence types
+//! - `nmea` (default) — all 78 NMEA sentence types
 //! - `ais` (default) — decoding for all numeric AIS Types 1-27, encoder support for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27, plus ABM/BBM application sentences
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
 
@@ -94,6 +94,8 @@ macro_rules! nmea_item {
             feature = "pgrme",
             feature = "pgrmt",
             feature = "phtro",
+            feature = "pklid",
+            feature = "pklds",
             feature = "prdid",
             feature = "pskpdpt",
             feature = "rmb",

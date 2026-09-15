@@ -92,6 +92,10 @@ mod pgrme;
 mod pgrmt;
 #[path = "nmea/phtro.rs"]
 mod phtro;
+#[path = "nmea/pklds.rs"]
+mod pklds;
+#[path = "nmea/pklid.rs"]
+mod pklid;
 #[path = "nmea/prdid.rs"]
 mod prdid;
 #[path = "nmea/pskpdpt.rs"]

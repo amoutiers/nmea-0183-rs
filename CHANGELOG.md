@@ -2,6 +2,14 @@
 
 All notable changes to nmea-kit are documented here.
 
+## [0.8.6] — 2026-09-15
+
+### Added
+- PKLDS (Kenwood GPS Data, long format) sentence type — time, validity, position, speed, course, date, variation, FleetSync identifiers, status, and extension.
+- PKLID (Kenwood Unit Identification, long format) sentence type — protocol version, FleetSync identifiers, status, and extension.
+
+NMEA sentence coverage: 76 → 78 types.
+
 ## [0.8.5] — 2026-09-12
 
 ### Added
@@ -398,6 +406,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.8.6]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.6
 [0.8.5]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.5
 [0.8.4]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.4
 [0.8.3]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.3

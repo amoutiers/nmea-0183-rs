@@ -1,6 +1,13 @@
 # NMEA 0183 Sentence Coverage
 
 Checked = supported by nmea-kit.
+
+## Current status
+
+- **78** NMEA sentence types are wired for parsing and encoding.
+- **30** tracked NMEA sentence types remain to be integrated, out of **108**.
+- **7** of the remaining types have implementation drafts in `drafts/sentences/`.
+
 Sources : go-nmea, gpsd.
 
 ## NMEA Sentences
@@ -152,8 +159,8 @@ Sources : go-nmea, gpsd.
 - [x] PGRME — Garmin Estimated Position Error
 - [x] PGRMT — Garmin Sensor Status
 - [x] PHTRO — Vessel Pitch and Roll (Xsens)
-- [ ] PKLDS — Keel Depth Sentence
-- [ ] PKLID — Keel ID
+- [x] PKLDS — Keel Depth Sentence
+- [x] PKLID — Keel ID
 - [ ] PKLSH — Keel Shallow
 - [ ] PKNDS — Knudsen Depth
 - [ ] PKNID — Knudsen ID
