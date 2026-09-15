@@ -1,156 +1,219 @@
 # NMEA 0183 Sentence Coverage
 
-Checked = supported by nmea-kit.
+Cette liste distingue les sentence formatters approuvés par l’[IEC 61162-1:2024](https://webstore.iec.ch/en/publication/72729) des types legacy, propriétaires et AIS.
+
+Les cases indiquent un support actuellement présent dans nmea-kit. La liste IEC reprend les 133 formatters de la section 8.3 de l’édition 6.0. `HTC` et `HTD` sont deux formatters regroupés dans une même rubrique de la norme.
+
+Sources : [IEC 61162-1:2024](https://webstore.iec.ch/en/publication/72729), [go-nmea](https://github.com/adrianmo/go-nmea), [gpsd](https://gitlab.com/gpsd/gpsd), [SignalK](https://github.com/SignalK/signalk-parser-nmea0183) et [pynmeagps](https://github.com/semuconsulting/pynmeagps).
 
 ## Current status
 
-- **78** NMEA sentence types are wired for parsing and encoding.
-- **30** tracked NMEA sentence types remain to be integrated, out of **108**.
-- **7** of the remaining types have implementation drafts in `drafts/sentences/`.
+- **66** des **133** formatters IEC 61162-1:2024 sont supportés.
+- **67** formatters IEC 61162-1:2024 restent à intégrer.
+- **7** formatters legacy supplémentaires sont supportés hors de la liste IEC 2024.
+- Les features Cargo individuelles sont toutes représentées dans les rubriques ci-dessous.
 
-Sources : go-nmea, gpsd.
+**Cargo features**
+
+- `default` : active par défaut, équivalente à `nmea` + `ais`.
+- `nmea` : toutes les sentences individuelles de la section NMEA, y compris les propriétaires.
+- `ais` : les sentences AIS `ABM` et `BBM`, ainsi que le décodage des messages AIS.
+- `positioning` : `GGA`, `GLL`, `RMC`, `GNS`.
+- `speed` : `VTG`, `VHW`, `VBW`, `RMC`, `RPM`, `VDR`.
+- `heading` : `HDG`, `HDM`, `HDT`, `THS`.
+- `wind` : `MWD`, `MWV`.
+- `depth` : `DBT`, `DBS`, `DBK`, `DPT`.
 
 ## NMEA Sentences
 
 ### Position
 
-- [x] DTM — Datum Reference
-- [x] GGA — Global Positioning System Fix Data
-- [x] GLL — Geographic Position, Latitude/Longitude
-- [x] GNS — GNSS Fix Data
-- [ ] GTD — Geographic Location in Time Differences
-- [ ] RMA — Recommended Minimum Navigation Information
-- [x] RMC — Recommended Minimum Navigation Information
+- [x] DTM — Datum reference
+- [x] GGA — Global positioning system (GPS) fix data
+- [x] GLL — Geographic position, latitude/longitude
+- [x] GNS — GNSS fix data
+- [ ] POS — Device position and ship dimensions report or configuration command
+- [ ] RMA — Recommended minimum specific LORAN-C data
+- [x] RMB — Recommended minimum navigation information
+- [x] RMC — Recommended minimum specific GNSS data
 
 ### Satellites
 
-- [x] GBS — GPS Satellite Fault Detection
-- [ ] GRS — GPS Range Residuals
-- [x] GSA — GPS DOP and Active Satellites
-- [x] GST — GPS Pseudorange Noise Statistics
-- [x] GSV — Satellites in View
+- [x] GBS — GNSS satellite fault detection
+- [ ] GDC — GNSS differential correction
+- [ ] GFA — GNSS fix accuracy and integrity
+- [ ] GRS — GNSS range residuals
+- [x] GSA — GNSS DOP and active satellites
+- [x] GST — GNSS pseudorange error statistics
+- [x] GSV — GNSS satellites in view
 
 ### Heading
 
-- [x] HDG — Heading, Deviation & Variation
-- [x] HDM — Heading, Magnetic
-- [x] HDT — Heading, True
-- [x] THS — True Heading and Status
+- [ ] HCR — Heading correction report
+- [x] HDG — Heading, deviation and variation
+- [x] HDT — Heading true
+- [ ] HMR — Heading monitor receive
+- [ ] HMS — Heading monitor set
+- [ ] HRM — Heel angle, roll period and roll amplitude measurement device
+- [x] HSC — Heading steering command
+- [x] THS — True heading and status
+- [x] HDM — Heading, magnetic (legacy, hors IEC 61162-1:2024)
 
 ### Course & Speed
 
-- [x] OSD — Own Ship Data
-- [x] VBW — Dual Ground/Water Speed
-- [x] VHW — Water Speed and Heading
-- [x] VLW — Distance Traveled through Water
-- [x] VPW — Speed, Measured Parallel to Wind
-- [x] VTG — Track Made Good and Ground Speed
+- [x] OSD — Own ship data
+- [ ] VBC — Water-referenced and ground-referenced docking speed data
+- [x] VBW — Dual ground/water speed
+- [x] VDR — Set and drift
+- [x] VHW — Water speed and heading
+- [x] VLW — Dual ground/water distance
+- [x] VPW — Speed measured parallel to wind
+- [x] VTG — Course over ground and ground speed
+- [x] WCV — Waypoint closure velocity
+- [x] ROT — Rate of turn
 
 ### Wind
 
-- [x] MWD — Wind Direction & Speed
-- [x] MWV — Wind Speed and Angle
-- [x] VWR — Relative Wind Speed and Angle
-- [x] VWT — True Wind Speed and Angle
+- [x] MWD — Wind direction and speed
+- [x] MWV — Wind speed and angle
+- [x] VWR — Relative wind speed and angle (legacy, hors IEC 61162-1:2024)
+- [x] VWT — True wind speed and angle (legacy, hors IEC 61162-1:2024)
 
 ### Depth
 
-- [x] DBK — Depth Below Keel
-- [x] DBS — Depth Below Surface
-- [x] DBT — Depth Below Transducer
-- [x] DPT — Depth of Water
+- [x] DBT — Depth below transducer
+- [x] DPT — Depth
+- [x] DBS — Depth below surface (legacy, hors IEC 61162-1:2024)
+- [x] DBK — Depth below keel (legacy, hors IEC 61162-1:2024)
 
 ### Steering
 
-- [ ] APA — Autopilot Sentence "A"
-- [x] APB — Autopilot Sentence "B"
-- [x] HSC — Heading Steering Command
-- [x] ROT — Rate of Turn
-- [x] RSA — Rudder Sensor Angle
+- [x] APB — Heading/track controller (autopilot) sentence B
+- [ ] EPM — Command or report long equipment property value
+- [ ] EPV — Command or report equipment property value
+- [ ] ETL — Engine telegraph operation status
+- [ ] HTC — Heading/track control command
+- [ ] HTD — Heading/track control data
+- [ ] PRC — Propulsion remote control status
+- [ ] ROR — Rudder order status
+- [x] RSA — Rudder sensor angle
+- [x] RPM — Revolutions
+- [ ] TRC — Thruster control data
+- [ ] TRD — Thruster response data
 
 ### Waypoints & Routes
 
-- [x] AAM — Waypoint Arrival Alarm
-- [x] BEC — Bearing & Distance to Waypoint, Dead Reckoning
-- [x] BOD — Bearing, Waypoint to Waypoint
-- [x] BWC — Bearing & Distance to Waypoint, Great Circle
-- [x] BWR — Bearing & Distance to Waypoint, Rhumb Line
-- [x] BWW — Bearing, Waypoint to Waypoint
-- [ ] R00 — Waypoints in Active Route
-- [x] RMB — Recommended Minimum Navigation Information (to waypoint)
+- [x] AAM — Waypoint arrival alarm
+- [x] BEC — Bearing and distance to waypoint, dead reckoning
+- [x] BOD — Bearing origin to destination
+- [x] BWC — Bearing and distance to waypoint, great circle
+- [x] BWR — Bearing and distance to waypoint, rhumb line
+- [x] BWW — Bearing waypoint to waypoint
+- [ ] RRT — Report route transfer
 - [x] RTE — Routes
-- [x] WCV — Waypoint Closure Velocity
-- [ ] WNC — Distance, Waypoint to Waypoint
-- [x] WPL — Waypoint Location
-- [x] XTE — Cross-Track Error, Measured
-- [ ] XTR — Cross-Track Error, Dead Reckoning
-- [ ] ZFO — UTC & Time from Origin Waypoint
-- [ ] ZTG — UTC & Time to Destination Waypoint
+- [ ] WNC — Distance waypoint to waypoint
+- [x] WPL — Waypoint location
+- [x] XTE — Cross-track error, measured
+- [ ] XTR — Cross-track error, dead reckoning
+- [ ] ZFO — UTC and time from origin waypoint
+- [ ] ZTG — UTC and time to destination waypoint
+- [ ] ZDL — Time and distance to variable point
 
 ### Environment
 
-- [x] MDA — Meteorological Composite
-- [x] MTA — Air Temperature
-- [x] MTW — Mean Temperature of Water
-- [x] XDR — Transducer Measurement
+- [ ] CUR — Water current layer, multi-layer water current data
+- [x] MTW — Water temperature
+- [ ] WAT — Water level detection
+- [x] XDR — Transducer measurements
+- [x] MDA — Meteorological composite (legacy, hors IEC 61162-1:2024)
+- [x] MTA — Air temperature (legacy, hors IEC 61162-1:2024)
 
 ### Time
 
-- [x] ZDA — Time & Date
+- [x] ZDA — Time and date
 
 ### AIS Interface
 
-- [x] VSD — AIS Voyage Static Data
+- [ ] ABK — AIS addressed and binary broadcast acknowledgement
+- [x] ABM — AIS addressed binary and safety-related message
+- [ ] ACA — AIS channel assignment
+- [ ] ACS — AIS channel management information source
+- [ ] AIR — AIS interrogation request
+- [x] BBM — AIS broadcast binary message
+- [ ] LR1 — AIS long-range reply sentence 1
+- [ ] LR2 — AIS long-range reply sentence 2
+- [ ] LR3 — AIS long-range reply sentence 3
+- [ ] LRF — AIS long-range function
+- [ ] LRI — AIS long-range interrogation
+- [ ] SSD — AIS ship static data
+- [ ] TRL — AIS transmitter non-functioning log
+- [x] VDM — AIS VHF data-link message
+- [x] VDO — AIS VHF data-link own-vessel report
+- [x] VSD — AIS voyage static data
 
 ### Targets
 
-- [x] RSD — Radar System Data
-- [x] TLB — Target Label
-- [x] TLL — Target Latitude and Longitude
-- [x] TTD — Tracked Target Data
-- [x] TTM — Tracked Target Message
+- [x] RSD — Radar system data
+- [x] TLB — Target label
+- [x] TLL — Target latitude and longitude
+- [x] TTD — Tracked target data
+- [x] TTM — Tracked target message
 
 ### Safety & Alarms
 
-- [x] ACK — Acknowledge Alarm
-- [x] ACN — Alert Command
-- [x] ALA — Alert
-- [x] ALC — Cyclic Alert List
-- [x] ALF — Alert
-- [x] ALR — Alert Response
-- [x] ARC — Alert Response Command
-- [x] DOR — Door Status
-- [x] DSC — Digital Selective Calling Information
-- [x] DSE — DSC Extended
-- [x] EVE — Event
-- [x] FIR — Fire Detection
-- [x] HBT — Heartbeat Supervision
+- [x] ACK — Acknowledge alarm
+- [x] ACN — Alert command
+- [ ] AGL — Alert group list
+- [ ] AKD — Acknowledge detail alarm condition
+- [x] ALA — Report detailed alarm condition
+- [x] ALC — Cyclic alert list
+- [x] ALF — Alert sentence
+- [x] ALR — Set alarm state
+- [x] ARC — Alert command refused
+- [x] DOR — Door status detection
+- [x] DSC — Digital selective calling information
+- [x] DSE — Expanded digital selective calling
+- [x] EVE — General event message
+- [x] FIR — Fire detection
+- [x] HBT — Heartbeat supervision sentence
+- [ ] MOB — Man over board notification
+- [ ] NAK — Negative acknowledgement
+- [ ] NSR — Navigation status report
+- [ ] SM1 — SafetyNET message, all ships/NavArea
+- [ ] SM2 — SafetyNET message, coastal warning area
+- [ ] SM3 — SafetyNET message, circular area address
+- [ ] SM4 — SafetyNET message, rectangular area address
+- [ ] SMB — IMO SafetyNET message body
+- [ ] SMV — SafetyNET message, vessel in distress information
 
 ### Vessel Systems
 
-- [x] RPM — Revolutions
-- [x] VDR — Set and Drift
+- [ ] DDC — Display dimming control
+- [ ] GEN — Generic binary information
+- [ ] HSS — Hull stress surveillance systems
+- [ ] SEL — Selection report
+- [ ] SLM — Steering location/mode
+- [ ] STN — Multiple data ID
+- [ ] NLS — Navigation light status
 
 ### Communication
 
-- [ ] ALM — GPS Almanac Data
-- [ ] FSI — Frequency Set Information
-- [ ] MSK — Control for a Beacon Receiver
-- [ ] MSS — Beacon Receiver Status
-- [ ] RLM — Return Link Message
-- [ ] SFI — Scanning Frequency Information
-- [ ] STN — Multiple Data ID
-- [x] TXT — Text Transmission
+- [ ] FSI — Frequency set information
+- [ ] MSK — MSK receiver interface
+- [ ] MSS — MSK receiver signal status
+- [ ] NRM — NAVTEX receiver mask
+- [ ] NRX — MSI received message
+- [ ] RLM — Return link message
+- [ ] SFI — Scanning frequency information
+- [ ] SPW — Security password sentence
+- [x] TXT — Text transmission
+- [ ] TUT — Transmission of multi-language text
+- [ ] UID — User identification code transmission
+- [ ] VER — Version
 
 ### Trawl / Fishing
 
-- [ ] HFB — Trawl Headrope to Footrope and Bottom
-- [ ] ITS — Trawl Door Spread 2 Distance
-- [ ] TDS — Trawl Door Spread Distance
-- [ ] TFI — Trawl Filling Indicator
-- [ ] TPC — Trawl Position Cartesian Coordinates
-- [ ] TPR — Trawl Position Relative Vessel
-- [ ] TPT — Trawl Position True
+Aucun formatter de cette rubrique n’est publié dans la section 8.3 de l’IEC 61162-1:2024.
 
 ### Proprietary
 
