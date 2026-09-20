@@ -50,7 +50,7 @@ pub struct NmeaFrame<'a> {
 /// # Examples
 ///
 /// ```
-/// use nmea_kit::parse_frame;
+/// use nmea_0183_rs::parse_frame;
 ///
 /// let frame = parse_frame("$WIMWD,270.0,T,268.5,M,12.4,N,6.4,M*63").unwrap();
 /// assert_eq!(frame.prefix, '$');
@@ -150,13 +150,15 @@ pub fn parse_frame(line: &str) -> Result<NmeaFrame<'_>, FrameError> {
 /// Computes the XOR checksum and appends `*XX\r\n`.
 ///
 /// Returns an [`EncodeError`](crate::EncodeError) when the prefix is not `$`/`!`,
-/// the talker or sentence type is not ASCII, the sentence type is empty, or a field
-/// contains `,`, `*`, `\r`, `\n`, or a non-ASCII character.
+/// the address contains non-alphanumeric ASCII characters, the sentence type is
+/// empty, or a field contains `,`, `*`, `\r`, `\n`, or a non-ASCII character.
+/// Non-ASCII addresses are also rejected. An empty talker is allowed; the only
+/// non-alphanumeric address exception is the `**` talker in `!**TTD`.
 ///
 /// # Examples
 ///
 /// ```
-/// use nmea_kit::encode_frame;
+/// use nmea_0183_rs::encode_frame;
 ///
 /// let sentence = encode_frame('$', "WI", "MWD", &["270.0", "T", "268.5", "M", "12.4", "N", "6.4", "M"]).expect("valid");
 /// assert!(sentence.starts_with("$WIMWD,"));
@@ -176,6 +178,15 @@ pub fn encode_frame(
     }
     if sentence_type.is_empty() {
         return Err(crate::EncodeError::EmptySentenceType);
+    }
+    if !(prefix == '!' && talker == "**" && sentence_type == "TTD") {
+        if let Some(c) = talker
+            .chars()
+            .chain(sentence_type.chars())
+            .find(|c| !c.is_ascii_alphanumeric())
+        {
+            return Err(crate::EncodeError::InvalidAddressCharacter(c));
+        }
     }
     for field in fields {
         validate_field(field)?;

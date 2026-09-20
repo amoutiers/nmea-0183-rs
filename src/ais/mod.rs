@@ -9,8 +9,8 @@
 //! ```
 //! #[cfg(feature = "ais")]
 //! {
-//!     use nmea_kit::ais::{AisParser, AisMessage};
-//!     use nmea_kit::parse_frame;
+//!     use nmea_0183_rs::ais::{AisParser, AisMessage};
+//!     use nmea_0183_rs::parse_frame;
 //!
 //!     let mut parser = AisParser::new();
 //!

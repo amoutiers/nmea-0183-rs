@@ -1,8 +1,8 @@
 //! AIS Type 21 — Aid-to-Navigation Report.
 #![cfg(feature = "ais")]
 
-use nmea_kit::ais::{AisMessage, AisParser};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::{AisMessage, AisParser};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn type_21_aid_to_navigation_gpsd() {

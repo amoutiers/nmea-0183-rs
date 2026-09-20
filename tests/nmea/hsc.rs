@@ -1,8 +1,8 @@
 #![cfg(feature = "hsc")]
-use nmea_kit::nmea::NmeaEncodable;
+use nmea_0183_rs::nmea::NmeaEncodable;
 
-use nmea_kit::nmea::sentences::Hsc;
-use nmea_kit::{NmeaSentence, parse_frame};
+use nmea_0183_rs::nmea::sentences::Hsc;
+use nmea_0183_rs::{NmeaSentence, parse_frame};
 
 #[test]
 fn decode_encode() {

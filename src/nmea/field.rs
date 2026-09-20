@@ -348,7 +348,7 @@ impl Default for FieldWriter {
 /// ```
 /// #[cfg(feature = "dpt")]
 /// {
-///     use nmea_kit::nmea::{NmeaEncodable, sentences::Dpt};
+///     use nmea_0183_rs::nmea::{NmeaEncodable, sentences::Dpt};
 ///
 ///     let dpt = Dpt { depth: Some(4.1), offset: Some(0.0), rangescale: None };
 ///     let sentence = dpt.to_sentence("II").expect("encode");
@@ -399,7 +399,7 @@ pub trait NmeaEncodable {
 /// # Example
 ///
 /// ```
-/// use nmea_kit::nmea::ddmm_to_decimal;
+/// use nmea_0183_rs::nmea::ddmm_to_decimal;
 ///
 /// // 4807.038 → 48°07.038′ → 48.1173°
 /// let lat = ddmm_to_decimal(4807.038);
@@ -419,7 +419,7 @@ pub fn ddmm_to_decimal(ddmm: f64) -> f64 {
 /// # Example
 ///
 /// ```
-/// use nmea_kit::nmea::decimal_to_ddmm;
+/// use nmea_0183_rs::nmea::decimal_to_ddmm;
 ///
 /// // 48.1173° → 48°07.038′ → 4807.038
 /// let ddmm = decimal_to_ddmm(48.1173);

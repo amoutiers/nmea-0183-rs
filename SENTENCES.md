@@ -2,7 +2,7 @@
 
 Cette matrice distingue les sentence formatters publiés par les six éditions de l’IEC 61162-1, des formats legacy, propriétaires et AIS.
 
-Les coches indiquent un support actuellement présent dans nmea-kit. `HTC` et `HTD` sont comptés séparément bien qu’ils soient regroupés dans une même rubrique du sommaire IEC.
+Les coches indiquent un support actuellement présent dans nmea-0183-rs. `HTC` et `HTD` sont comptés séparément bien qu’ils soient regroupés dans une même rubrique du sommaire IEC.
 
 Sources des TOC et deltas : [IEC 61162-1:1995](https://webstore.iec.ch/en/publication/19259), [IEC 61162-1:2000](https://webstore.iec.ch/en/publication/19260), [IEC 61162-1:2007](https://standards.iteh.ai/catalog/standards/iec/2bf36711-dd76-4e3e-b19c-1b46bbf88495/iec-61162-1-2007), [IEC 61162-1:2010](https://webstore.iec.ch/en/publication/4709), [IEC 61162-1:2016](https://webstore.iec.ch/en/publication/25754) et [IEC 61162-1:2024](https://webstore.iec.ch/en/publication/72729). Chronologie des versions NMEA : [NMEA 0183](https://en.wikipedia.org/wiki/NMEA_0183#Revisions).
 
@@ -28,7 +28,7 @@ Chronologie NMEA secondaire : 2.00 (1992), 2.01 (1994), 2.10 (1995), 2.20 (1997)
 
 ## NMEA Sentences
 
-Le support reflète `nmea-kit` aujourd’hui. Les deux bornes donnent les première et dernière versions NMEA observées dans les TOC IEC disponibles, avec leur année de publication. Elles ne prouvent pas une présence continue entre ces points.
+Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les première et dernière versions NMEA observées dans les TOC IEC disponibles, avec leur année de publication. Elles ne prouvent pas une présence continue entre ces points.
 
 **Inférence vérifiable :** les bornes qui passent par 2.10 ou 3.01 reposent sur les TOC IEC reconstitués des éditions 1 et 3, à partir des TOC voisins et des deltas publiés.
 

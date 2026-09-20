@@ -58,6 +58,8 @@ pub enum EncodeError {
     NonAsciiAddress,
     /// Sentence type is empty.
     EmptySentenceType,
+    /// Address contains a non-alphanumeric ASCII character (except the `!**TTD` address).
+    InvalidAddressCharacter(char),
     /// A field contains `,`, `*`, `\r`, `\n`, or a non-ASCII character.
     InvalidFieldCharacter(char),
     /// Coordinate magnitude is NaN, infinite, or negative.
@@ -82,6 +84,9 @@ impl core::fmt::Display for EncodeError {
             Self::InvalidPrefix(c) => write!(f, "invalid prefix '{c}', expected '$' or '!'"),
             Self::NonAsciiAddress => write!(f, "talker or sentence type is not ASCII"),
             Self::EmptySentenceType => write!(f, "sentence type is empty"),
+            Self::InvalidAddressCharacter(c) => {
+                write!(f, "address contains invalid character {c:?}")
+            }
             Self::InvalidFieldCharacter(c) => {
                 write!(f, "field contains invalid character {c:?}")
             }

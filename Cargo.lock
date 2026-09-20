@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "nmea-kit"
+name = "nmea-0183-rs"
 version = "0.8.7"

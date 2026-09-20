@@ -1,6 +1,6 @@
 #![cfg(feature = "bbm")]
-use nmea_kit::ais::sentences::{AisSentence, Bbm};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::sentences::{AisSentence, Bbm};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn bbm_values() {

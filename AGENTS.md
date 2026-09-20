@@ -1,16 +1,16 @@
-# nmea-kit
+# nmea-0183-rs
 
 Bidirectional NMEA 0183 parser/encoder + AIS decoder and transponder-message encoder. Zero dependencies. MIT/Apache-2.0.
 
 | Key | Value |
 |---|---|
-| Crate | `nmea-kit` v0.8.7 |
+| Crate | `nmea-0183-rs` v0.8.7 |
 | Edition | 2024, MSRV 1.85.0 |
 | Dependencies | 0 |
 | NMEA sentences | 85 (bidirectional) |
 | AIS application sentences | 2 (bidirectional) |
 | AIS message types | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
-| Tests | 888, 0 failures |
+| Tests | 892, 0 failures |
 | Unsafe blocks | 0 |
 
 For contribution workflow, test rules, and the sentence-type checklist see [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -21,34 +21,34 @@ For contribution workflow, test rules, and the sentence-type checklist see [CONT
 
 ```rust
 // Frame layer (always available)
-use nmea_kit::{parse_frame, encode_frame, EncodeError, NmeaFrame, FrameError};
+use nmea_0183_rs::{parse_frame, encode_frame, EncodeError, NmeaFrame, FrameError};
 
 parse_frame(input: &str) -> Result<NmeaFrame, FrameError>
 encode_frame(prefix: char, talker: &str, sentence_type: &str, fields: &[&str]) -> Result<String, EncodeError>
 
 // NMEA dispatch
-use nmea_kit::{NmeaSentence, NmeaEncodable};
+use nmea_0183_rs::{NmeaSentence, NmeaEncodable};
 
 NmeaSentence::parse(&frame) -> NmeaSentence   // enum variant per type
 value.to_sentence(talker: &str) -> Result<String, EncodeError> // NmeaEncodable; proprietary types ignore talker
 
 // Individual sentence types
-use nmea_kit::nmea::sentences::{Mwd, Rmc, Dbt, Vsd, ...}; // standard
-use nmea_kit::nmea::sentences::{Pashr, Pskpdpt, ...};    // proprietary
+use nmea_0183_rs::nmea::sentences::{Mwd, Rmc, Dbt, Vsd, ...}; // standard
+use nmea_0183_rs::nmea::sentences::{Pashr, Pskpdpt, ...};    // proprietary
 
 Type::parse(fields: &[&str]) -> Option<Self>   // always Some for known types
 value.encode() -> Result<Vec<String>, EncodeError> // fields in wire order
 
 // Coordinate helpers
-use nmea_kit::nmea::{ddmm_to_decimal, decimal_to_ddmm};
+use nmea_0183_rs::nmea::{ddmm_to_decimal, decimal_to_ddmm};
 
 ddmm_to_decimal(ddmm: f64) -> f64   // DDMM.MMMM → decimal degrees
 decimal_to_ddmm(decimal: f64) -> f64 // decimal degrees → DDMM.MMMM
 
 // AIS decoder and !-prefixed application-layer sentences
-use nmea_kit::ais::{AisParser, AisMessage};
-use nmea_kit::ais::sentences::{Abm, Bbm, AisSentence};
-use nmea_kit::ais::transmit::{AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition};
+use nmea_0183_rs::ais::{AisParser, AisMessage};
+use nmea_0183_rs::ais::sentences::{Abm, Bbm, AisSentence};
+use nmea_0183_rs::ais::transmit::{AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition};
 
 let mut parser = AisParser::new();
 parser.decode(&frame) -> Option<AisMessage>    // None while awaiting fragments
@@ -59,7 +59,7 @@ message.to_sentences(AisTransmitOptions::vdm(AisChannel::A)) -> Result<Vec<Strin
 ### Error model
 
 - **Frame layer**: `parse_frame()` returns `Result<NmeaFrame, FrameError>`. Variants: `Empty`, `InvalidPrefix`, `MalformedChecksum`, `BadChecksum`, `MalformedTagBlock`, `BadTagChecksum`, `TooShort`, `NonAsciiAddress`. When a tag-block checksum is present it is validated, and `tag_block` excludes its `*hh` suffix.
-- **Encode layer**: all encode APIs return `Result<_, EncodeError>`. Variants: `InvalidPrefix`, `NonAsciiAddress`, `EmptySentenceType`, `InvalidFieldCharacter`, `InvalidCoordinate`, `InvalidAisField`, `AisTextTooLong`, `MissingAisSequenceId`, `TooManyAisFragments`.
+- **Encode layer**: all encode APIs return `Result<_, EncodeError>`. Variants: `InvalidPrefix`, `NonAsciiAddress`, `EmptySentenceType`, `InvalidAddressCharacter`, `InvalidFieldCharacter`, `InvalidCoordinate`, `InvalidAisField`, `AisTextTooLong`, `MissingAisSequenceId`, `TooManyAisFragments`.
 - **NMEA content**: `parse()` always returns `Some`. Missing/malformed fields → `None` inside the struct. Intentional for marine instruments that send partial data.
 - **AIS content**: `decode()` returns `Option<AisMessage>`. `None` = awaiting fragments or decode failure.
 - **No panics**: 0 `panic!`, 0 `unwrap()`, 0 `todo!` in library code.

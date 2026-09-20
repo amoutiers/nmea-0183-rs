@@ -1,4 +1,4 @@
-use nmea_kit::{FrameError, encode_frame, parse_frame};
+use nmea_0183_rs::{FrameError, encode_frame, parse_frame};
 
 #[test]
 fn ais_multi_fragment_fixture_signalk() {
@@ -56,6 +56,81 @@ fn encode_no_fields() {
     let result = encode_frame('$', "GP", "RMC", &[]).expect("valid");
     assert!(result.starts_with("$GPRMC*"));
     assert!(result.ends_with("\r\n"));
+}
+
+#[test]
+fn encode_rejects_address_characters() {
+    for c in [
+        ',', '*', '\r', '\n', '$', '!', '\\', '\0', ' ', '\t', '\u{7f}',
+    ] {
+        let talker = format!("G{c}P");
+        let sentence_type = format!("RM{c}C");
+        for prefix in ['$', '!'] {
+            for fields in [&[][..], &["1"][..]] {
+                assert!(
+                    encode_frame(prefix, &talker, "RMC", fields).is_err(),
+                    "talker {talker:?}"
+                );
+                assert!(
+                    encode_frame(prefix, "GP", &sentence_type, fields).is_err(),
+                    "type {sentence_type:?}"
+                );
+            }
+        }
+    }
+    assert!(encode_frame('$', "**", "TTD", &[]).is_err());
+    assert!(encode_frame('!', "**", "VDM", &[]).is_err());
+}
+
+#[test]
+fn encode_rejects_address_injection_gpsd() {
+    let fixture = "$SDDBT,7.7,f,2.3,M,1.3,F*05";
+    parse_frame(fixture).expect("valid GPSD fixture checksum");
+    let address = format!("{}\r\n$GP", fixture.strip_prefix('$').expect("prefix"));
+    assert!(encode_frame('$', &address, "RMC", &[]).is_err());
+    assert!(encode_frame('$', "", &address, &[]).is_err());
+}
+
+#[test]
+fn encode_supported_addresses_roundtrip() {
+    for (prefix, talker, sentence_type) in [
+        ('$', "GP", "RMC"),
+        ('$', "04", "HDM"),
+        ('$', "gp", "rmc"),
+        ('$', "", "PMTK001"),
+        ('$', "", "RMC"),
+        ('!', "**", "TTD"),
+    ] {
+        let encoded = encode_frame(prefix, talker, sentence_type, &["1"]).expect("encode");
+        let frame = parse_frame(&encoded).expect("valid checksum");
+        assert_eq!(
+            (frame.prefix, frame.talker, frame.sentence_type),
+            (prefix, talker, sentence_type)
+        );
+        assert_eq!(frame.fields, ["1"]);
+    }
+}
+
+#[test]
+#[cfg(any(feature = "dbt", feature = "abm", feature = "bbm"))]
+fn encode_typed_rejects_address_injection() {
+    let talker = "AI\r\n$GP";
+    #[cfg(feature = "dbt")]
+    {
+        use nmea_0183_rs::NmeaEncodable;
+        let sentence = nmea_0183_rs::nmea::sentences::Dbt::parse(&[]).expect("parse");
+        assert!(sentence.to_sentence(talker).is_err());
+    }
+    #[cfg(feature = "abm")]
+    {
+        let sentence = nmea_0183_rs::ais::sentences::Abm::parse(&[]).expect("parse");
+        assert!(sentence.to_sentence(talker).is_err());
+    }
+    #[cfg(feature = "bbm")]
+    {
+        let sentence = nmea_0183_rs::ais::sentences::Bbm::parse(&[]).expect("parse");
+        assert!(sentence.to_sentence(talker).is_err());
+    }
 }
 
 #[test]

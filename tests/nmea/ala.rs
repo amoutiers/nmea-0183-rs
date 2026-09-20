@@ -1,6 +1,6 @@
 #![cfg(feature = "ala")]
-use nmea_kit::nmea::{NmeaEncodable, sentences::Ala};
-use nmea_kit::{NmeaSentence, parse_frame};
+use nmea_0183_rs::nmea::{NmeaEncodable, sentences::Ala};
+use nmea_0183_rs::{NmeaSentence, parse_frame};
 
 #[test]
 fn ala_values() {

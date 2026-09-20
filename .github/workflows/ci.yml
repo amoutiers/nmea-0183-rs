@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           cargo check --no-default-features
-          features="$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.name == "nmea-kit") | .features | keys[] | select(. != "default")')"
+          features="$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.name == "nmea-0183-rs") | .features | keys[] | select(. != "default")')"
           while IFS= read -r feature; do
             cargo check --no-default-features --features "$feature"
           done <<< "$features"

@@ -1,6 +1,6 @@
 #![cfg(feature = "nmea")]
 
-use nmea_kit::{NmeaSentence, parse_frame};
+use nmea_0183_rs::{NmeaSentence, parse_frame};
 
 #[test]
 fn dispatch_unknown() {

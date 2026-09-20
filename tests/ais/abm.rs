@@ -1,6 +1,6 @@
 #![cfg(feature = "abm")]
-use nmea_kit::ais::sentences::{Abm, AisSentence};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::sentences::{Abm, AisSentence};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn abm_values() {
@@ -39,7 +39,7 @@ fn dispatch() {
 
 #[test]
 fn dispatch_rejects_dollar_prefixed_abm() {
-    let frame = nmea_kit::NmeaFrame {
+    let frame = nmea_0183_rs::NmeaFrame {
         prefix: '$',
         talker: "AI",
         sentence_type: "ABM",

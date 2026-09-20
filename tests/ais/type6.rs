@@ -1,6 +1,6 @@
 #![cfg(feature = "ais")]
-use nmea_kit::ais::{AisMessage, AisParser};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::{AisMessage, AisParser};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn type6_binary_addressed_gpsd() {

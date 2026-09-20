@@ -1,13 +1,13 @@
-use nmea_kit::ais::armor::{decode_armor, extract_u32};
-use nmea_kit::ais::messages::NavigationStatus;
-use nmea_kit::ais::transmit::{
+use nmea_0183_rs::ais::armor::{decode_armor, extract_u32};
+use nmea_0183_rs::ais::messages::NavigationStatus;
+use nmea_0183_rs::ais::transmit::{
     AidToNavigation, AisChannel, AisEncodable, AisTransmitOptions, BaseStation, ClassAPosition,
     ClassAPositionType, ClassAStaticVoyage, ClassBCommunicationState, ClassBExtendedPosition,
     ClassBPosition, ClassBStaticPartA, ClassBStaticPartB, LongRangePosition, PositionTimestamp,
     SafetyAddressed, SafetyBroadcast, SarAircraft, UtcDateResponse,
 };
-use nmea_kit::ais::{AisMessage, AisParser};
-use nmea_kit::{EncodeError, parse_frame};
+use nmea_0183_rs::ais::{AisMessage, AisParser};
+use nmea_0183_rs::{EncodeError, parse_frame};
 
 fn decode_lines(lines: &[String]) -> AisMessage {
     let mut parser = AisParser::new();
@@ -459,7 +459,7 @@ fn class_b_position_encodes_to_a_decodable_vdm_sentence() {
             assert_eq!(position.communication_state, Some(0));
             assert_eq!(
                 position.class_b,
-                Some(nmea_kit::ais::ClassBPositionMetadata {
+                Some(nmea_0183_rs::ais::ClassBPositionMetadata {
                     transmit_power_low: report.transmit_power_low,
                     class_b_cs: report.class_b_cs,
                     display_available: report.display_available,
@@ -525,7 +525,7 @@ fn class_b_static_parts_encode_to_decodable_vdm_sentences() {
         .expect("decode type 24B");
     assert!(matches!(
         decoded_a,
-        AisMessage::StaticReport(nmea_kit::ais::StaticDataReport::PartA {
+        AisMessage::StaticReport(nmea_0183_rs::ais::StaticDataReport::PartA {
             repeat_indicator,
             mmsi,
             vessel_name,
@@ -533,7 +533,7 @@ fn class_b_static_parts_encode_to_decodable_vdm_sentences() {
     ));
     assert!(matches!(
         decoded_b,
-        AisMessage::StaticReport(nmea_kit::ais::StaticDataReport::PartB {
+        AisMessage::StaticReport(nmea_0183_rs::ais::StaticDataReport::PartB {
             repeat_indicator,
             mmsi,
             manufacturer_id,

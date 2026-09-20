@@ -1,6 +1,14 @@
 # Changelog
 
-All notable changes to nmea-kit are documented here.
+All notable changes to nmea-0183-rs are documented here.
+
+## [Unreleased]
+
+### Changed
+- Renamed the crate from `nmea-kit` to `nmea-0183-rs`; Rust imports now use `nmea_0183_rs`.
+
+### Fixed
+- Reject non-alphanumeric address characters during encoding to prevent NMEA sentence injection through `talker` or `sentence_type`; preserve the `!**TTD` address.
 
 ## [0.8.7] — 2026-09-20
 

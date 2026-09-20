@@ -43,8 +43,8 @@ jobs:
 
           ---
 
-          📜 [Full changelog](https://github.com/amoutiers/nmea-kit/blob/master/CHANGELOG.md#${anchor})
-          📦 [crates.io](https://crates.io/crates/nmea-kit/${version})"
+          📜 [Full changelog](https://github.com/amoutiers/nmea-0183-rs/blob/master/CHANGELOG.md#${anchor})
+          📦 [crates.io](https://crates.io/crates/nmea-0183-rs/${version})"
           echo "$body" > release-notes.md
       - name: Create GitHub Release
         run: |

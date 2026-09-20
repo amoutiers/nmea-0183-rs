@@ -1,4 +1,4 @@
-# Releasing nmea-kit
+# Releasing nmea-0183-rs
 
 Templates for CHANGELOG entries and GitHub release descriptions. Keep them in sync — the GH release body should mirror the CHANGELOG entry, not invent new wording.
 
@@ -59,8 +59,8 @@ NMEA sentence coverage: <prev> → <new> types.
 
 ---
 
-📜 [Full changelog](https://github.com/amoutiers/nmea-kit/blob/master/CHANGELOG.md#xyz--YYYY-MM-DD)
-📦 [crates.io](https://crates.io/crates/nmea-kit/X.Y.Z)
+📜 [Full changelog](https://github.com/amoutiers/nmea-0183-rs/blob/master/CHANGELOG.md#xyz--YYYY-MM-DD)
+📦 [crates.io](https://crates.io/crates/nmea-0183-rs/X.Y.Z)
 ```
 
 Rules:
@@ -73,7 +73,7 @@ Rules:
 After cutting each release, add:
 
 ```markdown
-[X.Y.Z]: https://github.com/amoutiers/nmea-kit/releases/tag/vX.Y.Z
+[X.Y.Z]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/vX.Y.Z
 ```
 
 Newest version on top. Every entry heading must have a corresponding footnote.

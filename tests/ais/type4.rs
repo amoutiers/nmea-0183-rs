@@ -1,8 +1,8 @@
 //! AIS Type 4 — Base Station Report.
 #![cfg(feature = "ais")]
 
-use nmea_kit::ais::{AisMessage, AisParser};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::{AisMessage, AisParser};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn type_4_base_station_gpsd() {

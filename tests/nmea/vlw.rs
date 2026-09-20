@@ -1,8 +1,8 @@
 #![cfg(feature = "vlw")]
-use nmea_kit::nmea::NmeaEncodable;
+use nmea_0183_rs::nmea::NmeaEncodable;
 
-use nmea_kit::nmea::sentences::Vlw;
-use nmea_kit::{NmeaSentence, parse_frame};
+use nmea_0183_rs::nmea::sentences::Vlw;
+use nmea_0183_rs::{NmeaSentence, parse_frame};
 
 #[test]
 fn decode_encode() {

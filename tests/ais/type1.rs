@@ -1,8 +1,8 @@
 //! AIS Types 1/2/3 — Class A Position Report.
 #![cfg(feature = "ais")]
 
-use nmea_kit::ais::{AisClass, AisMessage, AisParser};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::{AisClass, AisMessage, AisParser};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn type_1_single_fragment_class_a_signalk() {

@@ -1,7 +1,7 @@
 #![cfg(feature = "eve")]
-use nmea_kit::nmea::sentences::Eve;
-use nmea_kit::nmea::{NmeaEncodable, NmeaSentence};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::nmea::sentences::Eve;
+use nmea_0183_rs::nmea::{NmeaEncodable, NmeaSentence};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn decode_encode() {

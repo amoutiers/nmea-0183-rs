@@ -1,10 +1,10 @@
-# nmea-kit
+# nmea-0183-rs
 
 Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message encoding, written in Rust.
 
 | | |
 | --- | --- |
-| **Crate** | `nmea-kit` |
+| **Crate** | `nmea-0183-rs` |
 | **Version** | 0.8.7 |
 | **MSRV** | 1.85.0 |
 | **Edition** | 2024 |
@@ -22,7 +22,7 @@ Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message
 ### Parse an NMEA sentence
 
 ```rust
-use nmea_kit::{parse_frame, NmeaSentence};
+use nmea_0183_rs::{parse_frame, NmeaSentence};
 
 let frame = parse_frame("$IIMWD,046.,T,046.,M,10.1,N,05.2,M*43").unwrap();
 let sentence = NmeaSentence::parse(&frame);
@@ -39,8 +39,8 @@ match sentence {
 ### Encode and send an NMEA sentence
 
 ```rust
-use nmea_kit::NmeaEncodable;
-use nmea_kit::nmea::sentences::Dbt;
+use nmea_0183_rs::NmeaEncodable;
+use nmea_0183_rs::nmea::sentences::Dbt;
 
 let dbt = Dbt {
     depth_feet: Some(7.7),
@@ -55,8 +55,8 @@ let sentence = dbt.to_sentence("SD").expect("valid depth sentence");
 ### Decode AIS messages
 
 ```rust
-use nmea_kit::parse_frame;
-use nmea_kit::ais::{AisParser, AisMessage};
+use nmea_0183_rs::parse_frame;
+use nmea_0183_rs::ais::{AisParser, AisMessage};
 
 let mut parser = AisParser::new();
 let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26").unwrap();
@@ -69,8 +69,8 @@ if let Some(AisMessage::Position(pos)) = parser.decode(&frame) {
 ### Encode an AIS transponder message
 
 ```rust
-use nmea_kit::ais::messages::NavigationStatus;
-use nmea_kit::ais::transmit::{
+use nmea_0183_rs::ais::messages::NavigationStatus;
+use nmea_0183_rs::ais::transmit::{
     AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition, ClassAPositionType,
 };
 
@@ -106,7 +106,7 @@ constructs sentences only: the simulator owns cadence, TDMA access, and reaction
 ### Encode an AIS application-layer sentence
 
 ```rust
-use nmea_kit::ais::sentences::Abm;
+use nmea_0183_rs::ais::sentences::Abm;
 
 let abm = Abm {
     num_frags: Some(1),
@@ -206,7 +206,7 @@ flowchart TD
 
 ### Key improvements over existing crates
 
-| Issue                  | `nmea` 0.7 / `ais` 0.12             | `nmea-kit`                               |
+| Issue                  | `nmea` 0.7 / `ais` 0.12             | `nmea-0183-rs`                               |
 | ---------------------- | ----------------------------------- | ---------------------------------------- |
 | NMEA sentence coverage | ~10 types, rest manual              | 85 NMEA types + 2 AIS application sentences |
 | AIS message coverage   | ~5 types                            | All numeric Types 1-27                    |
@@ -221,7 +221,7 @@ flowchart TD
 
 ```toml
 [dependencies]
-nmea-kit = "0.8"
+nmea-0183-rs = "0.8"
 ```
 
 | Feature                                                                                                                                                                                                                                | Default    | Enables                    |
@@ -240,19 +240,19 @@ Use a group feature for common use cases:
 
 ```toml
 # Only positioning sentences (GGA, GLL, RMC, GNS), no AIS
-nmea-kit = { version = "0.8", default-features = false, features = ["positioning"] }
+nmea-0183-rs = { version = "0.8", default-features = false, features = ["positioning"] }
 ```
 
 Cherry-pick individual sentences you need:
 
 ```toml
-nmea-kit = { version = "0.8", default-features = false, features = ["rmc", "mwd"] }
+nmea-0183-rs = { version = "0.8", default-features = false, features = ["rmc", "mwd"] }
 ```
 
 NMEA-only (no AIS, all sentences):
 
 ```toml
-nmea-kit = { version = "0.8", default-features = false, features = ["nmea"] }
+nmea-0183-rs = { version = "0.8", default-features = false, features = ["nmea"] }
 ```
 
 ## Coordinate conversion
@@ -260,7 +260,7 @@ nmea-kit = { version = "0.8", default-features = false, features = ["nmea"] }
 NMEA sentences encode lat/lon as `DDMM.MMMM`; AIS uses decimal degrees. Two helpers bridge the gap:
 
 ```rust
-use nmea_kit::nmea::{ddmm_to_decimal, decimal_to_ddmm};
+use nmea_0183_rs::nmea::{ddmm_to_decimal, decimal_to_ddmm};
 
 // Parse a GGA latitude field: "4807.038" N → 48.1173°
 let lat = ddmm_to_decimal(4807.038); // → 48.1173

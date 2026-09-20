@@ -1,8 +1,8 @@
 //! AIS Type 19 — Class B Extended Position Report.
 #![cfg(feature = "ais")]
 
-use nmea_kit::ais::{AisClass, AisMessage, AisParser};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::{AisClass, AisMessage, AisParser};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn type_19_class_b_extended_gpsd() {

@@ -1,8 +1,8 @@
 //! AIS Type 14 — Safety-Related Broadcast Message.
 #![cfg(feature = "ais")]
 
-use nmea_kit::ais::{AisMessage, AisParser};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::{AisMessage, AisParser};
+use nmea_0183_rs::parse_frame;
 
 const FIX: &str = "!AIVDM,1,1,,A,>5?Per18=HB1U:1@E=B0m<L,0*53";
 

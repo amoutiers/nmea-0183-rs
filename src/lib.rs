@@ -8,7 +8,7 @@
         clippy::unreachable
     )
 )]
-//! # nmea-kit
+//! # nmea-0183-rs
 //!
 //! Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message encoding.
 //!

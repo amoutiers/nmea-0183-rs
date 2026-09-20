@@ -1,8 +1,8 @@
 //! AIS Type 5 — Static and Voyage Related Data (multi-fragment).
 #![cfg(feature = "ais")]
 
-use nmea_kit::ais::{AisClass, AisMessage, AisParser};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::{AisClass, AisMessage, AisParser};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn type_5_multi_fragment_static_voyage_gpsd() {

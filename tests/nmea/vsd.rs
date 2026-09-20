@@ -1,7 +1,7 @@
 #![cfg(feature = "vsd")]
 
-use nmea_kit::nmea::sentences::Vsd;
-use nmea_kit::{NmeaEncodable, NmeaFrame, NmeaSentence, parse_frame};
+use nmea_0183_rs::nmea::sentences::Vsd;
+use nmea_0183_rs::{NmeaEncodable, NmeaFrame, NmeaSentence, parse_frame};
 
 const RAW_VSD: &str = "$RAVSD,0,4.5,6,@@@@@@@@@@@@@@@@@@@@,220516,01,02,8,*6E";
 

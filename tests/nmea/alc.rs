@@ -1,9 +1,9 @@
 #![cfg(feature = "alc")]
-use nmea_kit::nmea::{
+use nmea_0183_rs::nmea::{
     NmeaEncodable,
     sentences::{Alc, AlcEntry},
 };
-use nmea_kit::{NmeaSentence, parse_frame};
+use nmea_0183_rs::{NmeaSentence, parse_frame};
 
 #[test]
 fn alc_values() {

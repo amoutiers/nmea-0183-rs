@@ -1,10 +1,10 @@
-# Contributing to nmea-kit
+# Contributing to nmea-0183-rs
 
 ## Getting started
 
 ```sh
-git clone https://github.com/amoutiers/nmea-kit
-cd nmea-kit
+git clone https://github.com/amoutiers/nmea-0183-rs
+cd nmea-0183-rs
 git config core.hooksPath .githooks   # enable pre-commit checks (fmt + clippy)
 cargo test --all-features             # verify everything passes
 ```

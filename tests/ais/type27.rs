@@ -1,8 +1,8 @@
 //! AIS Type 27 — Long Range Position Report.
 #![cfg(feature = "ais")]
 
-use nmea_kit::ais::{AisMessage, AisParser};
-use nmea_kit::parse_frame;
+use nmea_0183_rs::ais::{AisMessage, AisParser};
+use nmea_0183_rs::parse_frame;
 
 #[test]
 fn type_27_long_range_gpsd() {

@@ -1,7 +1,7 @@
 #![cfg(feature = "alr")]
-use nmea_kit::nmea::NmeaEncodable;
-use nmea_kit::nmea::sentences::Alr;
-use nmea_kit::{NmeaSentence, parse_frame};
+use nmea_0183_rs::nmea::NmeaEncodable;
+use nmea_0183_rs::nmea::sentences::Alr;
+use nmea_0183_rs::{NmeaSentence, parse_frame};
 
 #[test]
 fn alr_values() {
