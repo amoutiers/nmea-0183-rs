@@ -2,7 +2,7 @@
 #![cfg(feature = "ais")]
 
 use nmea_0183_rs::ais::transmit::{AisChannel, AisEncodable, AisTransmitOptions, SafetyBroadcast};
-use nmea_0183_rs::ais::{AisMessage, AisParser};
+use nmea_0183_rs::ais::{AisDecodeError, AisDecodeOutcome, AisMessage, AisParser};
 use nmea_0183_rs::parse_frame;
 
 #[test]
@@ -124,4 +124,108 @@ fn reset_clears_vdm_and_vdo_fragments() {
             .decode(&parse_frame(&vdo[1]).expect("parse VDO"))
             .is_none()
     );
+}
+
+#[test]
+fn detailed_decode_distinguishes_outcomes() {
+    use AisDecodeOutcome::{Ignored, Message, Pending};
+    // Synthetic field/error probes, deliberately using compatible framing.
+    let mut p = AisParser::new();
+    for (line, expected) in [
+        ("$GPRMC,", Ok(Ignored)),
+        ("$AIVDM,1,1,,A,1,0", Ok(Ignored)),
+        ("!AIABM,", Ok(Ignored)),
+        ("!AIVDM,2,1,0,A,1,0", Ok(Pending)),
+        ("!AIVDM,1,1,,A,X,0", Err(AisDecodeError::InvalidArmor)),
+        (
+            "!AIVDM,1,1,,A,1,0",
+            Err(AisDecodeError::InvalidMessage { msg_type: Some(1) }),
+        ),
+        (
+            "!AIVDM,1,1,,A,,0",
+            Err(AisDecodeError::InvalidMessage { msg_type: None }),
+        ),
+        ("!AIVDM,1,1,,A,,1", Err(AisDecodeError::InvalidArmor)),
+        (
+            "!AIVDM,1,1,,A,L,0",
+            Ok(Message(AisMessage::Unknown { msg_type: 28 })),
+        ),
+    ] {
+        assert_eq!(
+            p.decode_detailed(&parse_frame(line).expect("frame")),
+            expected,
+            "{line}"
+        );
+    }
+    let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26")
+        .expect("existing Type 1 fixture");
+    assert!(matches!(
+        p.decode_detailed(&frame),
+        Ok(Message(AisMessage::Position(_)))
+    ));
+}
+
+#[test]
+fn detailed_decode_preserves_stream_isolation_and_reset() {
+    let options = [
+        AisTransmitOptions::vdm(AisChannel::A),
+        AisTransmitOptions::vdo(AisChannel::A),
+        AisTransmitOptions::vdm(AisChannel::B),
+    ];
+    let lines: Vec<_> = options
+        .into_iter()
+        .enumerate()
+        .map(|(i, option)| {
+            SafetyBroadcast {
+                repeat_indicator: 0,
+                mmsi: 111_111_111 + i as u32,
+                text: "A".repeat(100),
+            }
+            .to_sentences(option.with_sequence_id(0))
+            .expect("encode")
+        })
+        .collect();
+    let mut detailed = AisParser::new();
+    let mut legacy = AisParser::new();
+    for message in &lines {
+        assert_eq!(message.len(), 2);
+        let frame = parse_frame(&message[0]).expect("first fragment");
+        assert_eq!(
+            detailed.decode_detailed(&frame),
+            Ok(AisDecodeOutcome::Pending)
+        );
+        assert_eq!(legacy.decode(&frame), None);
+    }
+    // A malformed unrelated frame must not discard the three valid assemblies.
+    let invalid = parse_frame("!AIVDM,2,2,0,Z,1,0").expect("frame");
+    assert_eq!(
+        detailed.decode_detailed(&invalid),
+        Err(AisDecodeError::InvalidFragmentField { field: "channel" })
+    );
+    assert_eq!(legacy.decode(&invalid), None);
+    for (i, message) in lines.iter().enumerate() {
+        let frame = parse_frame(&message[1]).expect("last fragment");
+        let decoded = detailed.decode_detailed(&frame).expect("decode");
+        assert!(
+            matches!(&decoded, AisDecodeOutcome::Message(AisMessage::Safety(value))
+            if value.mmsi == 111_111_111 + i as u32 && value.text == "A".repeat(100))
+        );
+        assert_eq!(
+            decoded,
+            AisDecodeOutcome::Message(legacy.decode(&frame).expect("legacy decode"))
+        );
+    }
+    for message in &lines {
+        assert_eq!(
+            detailed.decode_detailed(&parse_frame(&message[0]).expect("first")),
+            Ok(AisDecodeOutcome::Pending)
+        );
+    }
+    detailed.reset();
+    for message in &lines {
+        assert_eq!(
+            detailed.decode_detailed(&parse_frame(&message[1]).expect("last")),
+            Err(AisDecodeError::UnexpectedFragment)
+        );
+    }
 }

@@ -107,6 +107,19 @@ pub enum AisMessage {
     Unknown { msg_type: u8 },
 }
 
+/// Successful outcome of feeding a frame to [`AisParser::decode_detailed`].
+#[cfg(feature = "ais")]
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq)]
+pub enum AisDecodeOutcome {
+    /// The frame is not a `!`-prefixed VDM/VDO sentence.
+    Ignored,
+    /// More fragments are needed, or an already accepted continuation was repeated.
+    Pending,
+    /// A complete message, including an unknown numeric AIS type.
+    Message(AisMessage),
+}
+
 /// Stateful AIS parser with multi-fragment reassembly.
 ///
 /// Maintains separate VDM and VDO fragment buffers for up to 40 concurrent
@@ -138,10 +151,26 @@ impl AisParser {
 
     /// Decode an AIS frame. Returns `Some(AisMessage)` for complete messages,
     /// `None` for incomplete fragments, parse errors, or non-AIS frames.
+    /// Use [`Self::decode_detailed`] when rejected frames need diagnostics.
     pub fn decode(&mut self, frame: &NmeaFrame<'_>) -> Option<AisMessage> {
+        match self.decode_detailed(frame) {
+            Ok(AisDecodeOutcome::Message(message)) => Some(message),
+            _ => None,
+        }
+    }
+
+    /// Decode a frame, distinguishing ignored frames, pending fragments and errors.
+    ///
+    /// Frame checksum errors belong to [`crate::parse_frame`]. Unknown numeric
+    /// message types are returned as [`AisMessage::Unknown`], not as errors.
+    /// Use one parser per physical source, just as with [`Self::decode`].
+    pub fn decode_detailed(
+        &mut self,
+        frame: &NmeaFrame<'_>,
+    ) -> Result<AisDecodeOutcome, AisDecodeError> {
         // Only handle VDM and VDO sentences
         if frame.prefix != '!' || (frame.sentence_type != "VDM" && frame.sentence_type != "VDO") {
-            return None;
+            return Ok(AisDecodeOutcome::Ignored);
         }
 
         // Reassemble fragments
@@ -150,13 +179,17 @@ impl AisParser {
         } else {
             &mut self.vdo_collector
         };
-        let payload = collector.process(&frame.fields)?;
+        let Some(payload) = collector.process_checked(&frame.fields)? else {
+            return Ok(AisDecodeOutcome::Pending);
+        };
 
         // Decode armor
-        let bits = decode_armor(&payload.payload, payload.fill_bits)?;
+        let bits = decode_armor(&payload.payload, payload.fill_bits)
+            .ok_or(AisDecodeError::InvalidArmor)?;
 
         // Extract message type (first 6 bits)
-        let msg_type = armor::extract_u32(&bits, 0, 6)? as u8;
+        let msg_type = armor::extract_u32(&bits, 0, 6)
+            .ok_or(AisDecodeError::InvalidMessage { msg_type: None })? as u8;
 
         // Dispatch to message decoder
         match msg_type {
@@ -186,6 +219,10 @@ impl AisParser {
             27 => LongRangePosition::decode(&bits).map(AisMessage::LongRangePosition),
             _ => Some(AisMessage::Unknown { msg_type }),
         }
+        .map(AisDecodeOutcome::Message)
+        .ok_or(AisDecodeError::InvalidMessage {
+            msg_type: Some(msg_type),
+        })
     }
 }
 
