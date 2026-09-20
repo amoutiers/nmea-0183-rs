@@ -276,12 +276,12 @@ Aucun formatter de cette rubrique n’est publié dans les six éditions de l’
 - [x] PGRME — Garmin Estimated Position Error
 - [x] PGRMT — Garmin Sensor Status
 - [x] PHTRO — Vessel Pitch and Roll (Xsens)
-- [x] PKLDS — Keel Depth Sentence
-- [x] PKLID — Keel ID
-- [x] PKLSH — Keel Shallow
-- [x] PKNDS — Knudsen Depth
-- [x] PKNID — Knudsen ID
-- [x] PKNSH — Knudsen Shallow
+- [x] PKLDS — Kenwood GPS Data (Long format)
+- [x] PKLID — Kenwood Unit Identification (Long format)
+- [x] PKLSH — Kenwood Short Position Report (Long format)
+- [x] PKNDS — Kenwood GPS Data (Normal format)
+- [x] PKNID — Kenwood Unit Identification (Normal format)
+- [x] PKNSH — Kenwood Short Position Report (Normal format)
 - [x] PKWDWPL — Waypoint (unknown vendor)
 - [x] PMTK — MediaTek GPS Command
 - [x] PRDID — RDI Doppler Instrument Data

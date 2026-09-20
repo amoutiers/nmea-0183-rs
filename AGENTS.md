@@ -114,17 +114,23 @@ pub struct Dbt {
 ```rust
 pub struct PositionReport {          // Types 1/2/3/18/19
     pub msg_type: u8,
+    pub repeat_indicator: u8,
     pub mmsi: u32,
     pub nav_status: Option<NavigationStatus>,
     pub rate_of_turn: Option<f32>,
-    pub sog: Option<f32>,            // 1/10 knot
+    pub sog: Option<f32>,            // knots
     pub position_accuracy: bool,
     pub longitude: Option<f64>,      // decimal degrees (already converted)
     pub latitude: Option<f64>,       // decimal degrees (already converted)
-    pub cog: Option<f32>,            // 1/10 degree
+    pub cog: Option<f32>,            // degrees
     pub heading: Option<u16>,        // integer degrees
     pub timestamp: Option<u8>,
-    pub ais_class: AisClass,         // ClassA or ClassB
+    pub maneuver_indicator: Option<u8>,
+    pub raim: bool,
+    pub communication_state: Option<u32>,
+    pub class_b: Option<ClassBPositionMetadata>,
+    pub class_b_extended: Option<ClassBExtendedData>,
+    pub ais_class: AisClass,         // A, B, or BPlus
 }
 
 pub enum AisMessage {

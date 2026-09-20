@@ -7,7 +7,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 pub struct Dpt {
     /// Water depth below transducer in meters.
     pub depth: Option<f32>,
-    /// Offset from transducer in meters (positive = keel, negative = surface).
+    /// Offset from transducer in meters (positive = waterline, negative = keel).
     pub offset: Option<f32>,
     /// Maximum range scale in use in meters.
     pub rangescale: Option<f32>,

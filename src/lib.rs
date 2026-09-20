@@ -28,9 +28,9 @@
 //! ## Public API
 //!
 //! - [`parse_frame`] / [`encode_frame`] — frame layer (always available)
-//! - [`NmeaSentence`] — dispatch enum for all typed NMEA sentences
-//! - [`NmeaEncodable`] — trait for encoding NMEA sentences to wire format
-//! - [`ais`] — AIS decoder, transponder-message encoder, and `!`-prefixed AIS application sentences
+//! - `NmeaSentence` — dispatch enum for all typed NMEA sentences (requires an NMEA feature)
+//! - `NmeaEncodable` — trait for encoding NMEA sentences to wire format (requires an NMEA feature)
+//! - `ais` — AIS decoder, transponder-message encoder, and `!`-prefixed AIS application sentences (requires `ais`, `abm`, or `bbm`)
 //!
 //! ## Features
 //!
