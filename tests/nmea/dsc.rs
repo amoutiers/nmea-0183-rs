@@ -65,3 +65,16 @@ fn dsc_values() {
         }
     );
 }
+
+#[test]
+fn indicators_require_one_character_after_trimming() {
+    for (ack, expansion, expected) in [
+        ("AB", "EF", (None, None)),
+        (" AB ", " EF ", (None, None)),
+        (" S", " E  ", (Some('S'), Some('E'))),
+        ("", " ", (None, None)),
+    ] {
+        let value = Dsc::parse(&["", "", "", "", "", "", "", "", "", ack, expansion]);
+        assert_eq!((value.ack, value.expansion), expected);
+    }
+}

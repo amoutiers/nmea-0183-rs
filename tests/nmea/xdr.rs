@@ -56,3 +56,20 @@ fn xdr_values() {
     assert_eq!(xdr.groups[0].unit, Some('C'));
     assert_eq!(xdr.groups[0].name.as_deref(), Some("WTHI"));
 }
+
+#[test]
+fn indicators_require_one_character() {
+    for (kind, unit, expected) in [
+        ("Pressure", "Bars", (None, None)),
+        ("P", "B", (Some('P'), Some('B'))),
+        ("", "", (None, None)),
+    ] {
+        let value = Xdr::parse(&[kind, "1", unit, "S"]);
+        assert_eq!(value.groups.len(), 1);
+        let group = &value.groups[0];
+        assert_eq!((group.sensor_type, group.unit), expected);
+        assert_eq!(group.value, Some(1.0));
+        assert_eq!(group.name.as_deref(), Some("S"));
+    }
+    assert!(Xdr::parse(&["P", "1", "B"]).groups.is_empty());
+}

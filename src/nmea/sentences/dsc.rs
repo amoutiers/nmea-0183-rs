@@ -45,8 +45,8 @@ impl Dsc {
         let time_or_tel = r.string();
         let mmsi = r.string();
         let distress_cause = r.string();
-        let ack = r.string().and_then(|value| value.trim().chars().next());
-        let expansion = r.string().and_then(|value| value.trim().chars().next());
+        let ack = r.string().and_then(|value| FieldReader::new(&[value.trim()]).char());
+        let expansion = r.string().and_then(|value| FieldReader::new(&[value.trim()]).char());
         Self {
             format_specifier,
             address,

@@ -1,4 +1,4 @@
-use crate::nmea::field::{FieldWriter, NmeaEncodable};
+use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
 /// A single transducer measurement group within an XDR sentence.
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -75,37 +75,15 @@ impl Xdr {
     /// Parse fields from a decoded NMEA frame.
     /// Missing or malformed fields become `None` in the returned value.
     pub fn parse(fields: &[&str]) -> Self {
-        let mut groups = Vec::new();
-        let mut i = 0;
-        while i + 4 <= fields.len() {
-            let sensor_type = if fields[i].is_empty() {
-                None
-            } else {
-                fields[i].chars().next()
-            };
-            let value = if fields[i + 1].is_empty() {
-                None
-            } else {
-                fields[i + 1].parse::<f32>().ok().filter(|value| value.is_finite())
-            };
-            let unit = if fields[i + 2].is_empty() {
-                None
-            } else {
-                fields[i + 2].chars().next()
-            };
-            let name = if fields[i + 3].is_empty() {
-                None
-            } else {
-                Some(fields[i + 3].to_string())
-            };
-            groups.push(XdrGroup {
-                sensor_type,
-                value,
-                unit,
-                name,
-            });
-            i += 4;
-        }
+        let groups = fields.chunks_exact(4).map(|group| {
+            let mut r = FieldReader::new(group);
+            XdrGroup {
+                sensor_type: r.char(),
+                value: r.f32(),
+                unit: r.char(),
+                name: r.string(),
+            }
+        }).collect();
         Self { groups }
     }
 
