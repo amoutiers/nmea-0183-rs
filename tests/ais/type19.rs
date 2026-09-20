@@ -1,6 +1,7 @@
 //! AIS Type 19 — Class B Extended Position Report.
 #![cfg(feature = "ais")]
 
+use super::expect_message;
 use nmea_0183_rs::ais::{AisClass, AisMessage, AisParser};
 use nmea_0183_rs::parse_frame;
 
@@ -10,7 +11,7 @@ fn type_19_class_b_extended_gpsd() {
     let frame =
         parse_frame("!AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B")
             .expect("valid Type 19 frame");
-    let msg = parser.decode(&frame).expect("Type 19 should decode");
+    let msg = expect_message(parser.decode(&frame).expect("Type 19 should decode"));
 
     match msg {
         AisMessage::Position(pos) => {
@@ -28,7 +29,7 @@ fn type19_values() {
     let frame =
         parse_frame("!AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B")
             .expect("valid Type 19 frame");
-    let msg = parser.decode(&frame).expect("Type 19 should decode");
+    let msg = expect_message(parser.decode(&frame).expect("Type 19 should decode"));
     match msg {
         AisMessage::Position(pos) => {
             assert_eq!(pos.mmsi, 367059850);

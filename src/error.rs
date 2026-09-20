@@ -66,10 +66,6 @@ pub enum EncodeError {
     InvalidFieldCharacter(char),
     /// A tag contains non-ASCII characters, controls, `\\` or `*`.
     InvalidTagBlockCharacter(char),
-    /// Legacy error for a sentence without its frame envelope.
-    /// Current `NmeaSentence` and `AisSentence` variants retain that context
-    /// and do not return this error.
-    MissingFrameContext,
     /// Coordinate magnitude is NaN, infinite, or negative.
     InvalidCoordinate,
     /// A numeric NMEA field is NaN or infinite rather than absent.
@@ -105,9 +101,6 @@ impl core::fmt::Display for EncodeError {
             }
             Self::InvalidTagBlockCharacter(c) => {
                 write!(f, "tag block contains invalid character {c:?}")
-            }
-            Self::MissingFrameContext => {
-                write!(f, "unknown sentence requires its original frame context")
             }
             Self::InvalidCoordinate => {
                 write!(f, "coordinate magnitude is NaN, infinite, or negative")

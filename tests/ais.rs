@@ -61,3 +61,14 @@ mod type8;
 #[cfg(feature = "ais")]
 #[path = "ais/type9.rs"]
 mod type9;
+
+#[cfg(feature = "ais")]
+use nmea_0183_rs::ais::{AisDecodeOutcome, AisMessage};
+
+#[cfg(feature = "ais")]
+fn expect_message(outcome: AisDecodeOutcome) -> AisMessage {
+    match outcome {
+        AisDecodeOutcome::Message(message) => message,
+        other => panic!("expected complete AIS message, got {other:?}"),
+    }
+}

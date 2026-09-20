@@ -36,7 +36,7 @@ match sentence {
 }
 ```
 
-`parse_frame()` is the compatibility API for real-world device input: it accepts
+`parse_frame()` is the permissive API for real-world device input: it accepts
 common deviations such as a missing checksum or terminator. Use
 `parse_frame_strict()` when the complete wire sentence must satisfy the strict
 frame envelope:
@@ -70,7 +70,7 @@ let sentence = dbt
 ```
 
 `encode_frame_strict()` and `to_sentence_strict()` are recommended for conforming
-production output. The compatibility APIs `encode_frame()` and `to_sentence()`
+production output. The permissive APIs `encode_frame()` and `to_sentence()`
 remain available for reproducing device frames, including frames longer than 82
 bytes.
 
@@ -117,17 +117,17 @@ Keep the original input line when exact bytes are required.
 
 ```rust
 use nmea_0183_rs::parse_frame;
-use nmea_0183_rs::ais::{AisParser, AisMessage};
+use nmea_0183_rs::ais::{AisDecodeOutcome, AisParser, AisMessage};
 
 let mut parser = AisParser::new();
 let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26").unwrap();
 
-if let Some(AisMessage::Position(pos)) = parser.decode(&frame) {
+if let Ok(AisDecodeOutcome::Message(AisMessage::Position(pos))) = parser.decode(&frame) {
     println!("MMSI: {}, lat: {:?}, lon: {:?}", pos.mmsi, pos.latitude, pos.longitude);
 }
 ```
 
-Use `decode_detailed()` when a pending fragment must be distinguished from rejected data:
+`decode()` distinguishes pending fragments, ignored frames, messages and rejected data:
 
 ```rust
 use nmea_0183_rs::ais::{AisDecodeOutcome, AisParser};
@@ -135,7 +135,7 @@ use nmea_0183_rs::parse_frame;
 
 let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26")
     .expect("frame");
-match AisParser::new().decode_detailed(&frame) {
+match AisParser::new().decode(&frame) {
     Ok(AisDecodeOutcome::Message(message)) => println!("{message:?}"),
     Ok(AisDecodeOutcome::Pending) => println!("Awaiting fragments"),
     Ok(AisDecodeOutcome::Ignored) => {},
@@ -145,8 +145,7 @@ match AisParser::new().decode_detailed(&frame) {
 ```
 
 Use one parser per physical source. `reset()` clears pending VDM and VDO assemblies.
-The historical `decode()` still maps errors, pending fragments and ignored frames
-to `None`. Position reports preserve all timestamp states through
+Position reports preserve all timestamp states through
 `ais::messages::PositionTimestamp`: `Exact(0..=59)`, `NotAvailable` (60),
 `ManualInput` (61), `DeadReckoning` (62), and `Inoperative` (63). Types
 1/2/3/9/18/19/21 use this type in both reception and transmission. Calendar
@@ -155,9 +154,9 @@ seconds in Types 4/11 remain optional numeric values.
 ### Encode an AIS transponder message
 
 ```rust
-use nmea_0183_rs::ais::messages::NavigationStatus;
+use nmea_0183_rs::ais::messages::{NavigationStatus, PositionTimestamp};
 use nmea_0183_rs::ais::transmit::{
-    AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition, ClassAPositionType, PositionTimestamp,
+    AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition, ClassAPositionType,
 };
 
 let report = ClassAPosition {
@@ -217,6 +216,8 @@ the individual `abm` or `bbm` feature without enabling `nmea`.
 
 These changes break source compatibility. The package version remains unchanged
 until a release decision; update consumers before using this unreleased code.
+Source compatibility is not a constraint anywhere in the public API: obsolete
+interfaces are removed instead of retained as aliases or adapters.
 
 - **Sentence parsing:** all 85 NMEA parsers and ABM/BBM return `Self` instead of
   `Option<Self>`. Remove the outer `.expect(...)`, `?`, or `Some` match. Field
@@ -227,15 +228,20 @@ until a release decision; update consumers before using this unreleased code.
   `ClassAPosition` and `ClassBPosition`. Received `PositionReport`,
   `SarAircraftReport` and `AidToNavigation` now use the same enum. Handle all
   five variants instead of testing for `Some`/`None`. `Exact(60)` and larger
-  values fail encoding. The existing `ais::transmit::PositionTimestamp` import
-  remains valid; the shared definition is `ais::messages::common::PositionTimestamp`,
-  also reexported by `ais::messages`.
+  values fail encoding. Import `PositionTimestamp` from `ais::messages`; the
+  old `ais::transmit::PositionTimestamp` path has been removed.
 - **Unknown sentences:** manual constructors for `NmeaSentence::Unknown` and
   `AisSentence::Unknown` now require `prefix`, `talker` and `tag_block`. Prefer
   parsing the frame to capture these values. Add `..` to patterns that only
   inspect payload fields. Encoding uses the stored talker, not its argument.
-  The legacy `EncodeError::MissingFrameContext` variant remains available but
-  is no longer returned by these enums.
+  The unused `EncodeError::MissingFrameContext` variant has been removed.
+- **AIS decoding:** `decode()` now returns `Result<AisDecodeOutcome, AisDecodeError>`
+  instead of `Option<AisMessage>`. Match `Message`, `Pending`, `Ignored`, or an
+  error explicitly. Replace `decode_detailed()` calls with `decode()`.
+- **Fragment assembly:** `FragmentCollector::process()` now returns
+  `Result<Option<AisPayload>, AisDecodeError>`. `Ok(None)` means pending,
+  `Ok(Some(payload))` complete, and `Err` rejected input. Replace
+  `process_checked()` calls with `process()`.
 
 ```rust
 use nmea_0183_rs::{NmeaSentence, parse_frame};

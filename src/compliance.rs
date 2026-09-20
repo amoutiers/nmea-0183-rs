@@ -1,8 +1,7 @@
 //! Strict validation for complete NMEA 0183 wire sentences.
 //!
-//! The existing frame parser intentionally accepts common device deviations.
-//! This module provides an opt-in standards boundary without changing that
-//! compatibility behavior.
+//! The permissive frame parser accepts common device deviations.
+//! This module validates the complete standards envelope for stricter consumers.
 
 use crate::{EncodeError, FrameError, NmeaFrame, parse_frame};
 
@@ -85,7 +84,7 @@ impl From<FrameError> for ComplianceError {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StrictEncodeError {
-    /// The compatibility encoder rejected an address or field.
+    /// The permissive encoder rejected an address or field.
     Encode(EncodeError),
     /// The encoded sentence violates a strict wire rule.
     Compliance(ComplianceError),

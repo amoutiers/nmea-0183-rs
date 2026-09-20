@@ -1,10 +1,13 @@
+use super::expect_message;
+use nmea_0183_rs::ais::AisDecodeOutcome;
 use nmea_0183_rs::ais::armor::{decode_armor, extract_u32};
 use nmea_0183_rs::ais::messages::NavigationStatus;
+use nmea_0183_rs::ais::messages::PositionTimestamp;
 use nmea_0183_rs::ais::transmit::{
     AidToNavigation, AisChannel, AisEncodable, AisTransmitOptions, BaseStation, ClassAPosition,
     ClassAPositionType, ClassAStaticVoyage, ClassBCommunicationState, ClassBExtendedPosition,
-    ClassBPosition, ClassBStaticPartA, ClassBStaticPartB, LongRangePosition, PositionTimestamp,
-    SafetyAddressed, SafetyBroadcast, SarAircraft, UtcDateResponse,
+    ClassBPosition, ClassBStaticPartA, ClassBStaticPartB, LongRangePosition, SafetyAddressed,
+    SafetyBroadcast, SarAircraft, UtcDateResponse,
 };
 use nmea_0183_rs::ais::{AisMessage, AisParser};
 use nmea_0183_rs::{EncodeError, parse_frame};
@@ -13,7 +16,14 @@ fn decode_lines(lines: &[String]) -> AisMessage {
     let mut parser = AisParser::new();
     let mut decoded = None;
     for line in lines {
-        decoded = parser.decode(&parse_frame(line).expect("parse encoded AIS sentence"));
+        match parser
+            .decode(&parse_frame(line).expect("parse encoded AIS sentence"))
+            .expect("valid AIS content")
+        {
+            AisDecodeOutcome::Pending => {}
+            AisDecodeOutcome::Message(message) => decoded = Some(message),
+            other => panic!("unexpected AIS outcome: {other:?}"),
+        }
     }
     decoded.expect("decode encoded AIS message")
 }
@@ -396,7 +406,7 @@ fn class_a_position_encodes_to_a_decodable_vdm_sentence() {
     assert!(lines[0].len() <= 82);
 
     let frame = parse_frame(&lines[0]).expect("parse encoded type 1");
-    let decoded = AisParser::new().decode(&frame).expect("decode type 1");
+    let decoded = expect_message(AisParser::new().decode(&frame).expect("decode type 1"));
     match decoded {
         AisMessage::Position(position) => {
             assert_eq!(position.msg_type, 1);
@@ -483,14 +493,15 @@ fn class_a_static_voyage_encodes_to_two_decodable_vdm_fragments() {
     assert!(lines.iter().all(|line| line.len() <= 82));
 
     let mut parser = AisParser::new();
-    assert!(
-        parser
-            .decode(&parse_frame(&lines[0]).expect("parse first type 5 fragment"))
-            .is_none()
+    assert_eq!(
+        parser.decode(&parse_frame(&lines[0]).expect("parse first type 5 fragment")),
+        Ok(AisDecodeOutcome::Pending)
     );
-    let decoded = parser
-        .decode(&parse_frame(&lines[1]).expect("parse second type 5 fragment"))
-        .expect("decode type 5");
+    let decoded = expect_message(
+        parser
+            .decode(&parse_frame(&lines[1]).expect("parse second type 5 fragment"))
+            .expect("decode type 5"),
+    );
     match decoded {
         AisMessage::StaticVoyage(data) => {
             assert_eq!(data.mmsi, report.mmsi);
@@ -574,9 +585,11 @@ fn class_b_position_encodes_to_a_decodable_vdm_sentence() {
     assert!(lines[0].starts_with("!AIVDM,1,1,,B,"));
     assert!(lines[0].len() <= 82);
 
-    let decoded = AisParser::new()
-        .decode(&parse_frame(&lines[0]).expect("parse encoded type 18"))
-        .expect("decode type 18");
+    let decoded = expect_message(
+        AisParser::new()
+            .decode(&parse_frame(&lines[0]).expect("parse encoded type 18"))
+            .expect("decode type 18"),
+    );
     match decoded {
         AisMessage::Position(position) => {
             assert_eq!(position.msg_type, 18);
@@ -648,12 +661,16 @@ fn class_b_static_parts_encode_to_decodable_vdm_sentences() {
     assert!(part_b_line[0].len() <= 82);
 
     let mut parser = AisParser::new();
-    let decoded_a = parser
-        .decode(&parse_frame(&part_a_line[0]).expect("parse type 24A"))
-        .expect("decode type 24A");
-    let decoded_b = parser
-        .decode(&parse_frame(&part_b_line[0]).expect("parse type 24B"))
-        .expect("decode type 24B");
+    let decoded_a = expect_message(
+        parser
+            .decode(&parse_frame(&part_a_line[0]).expect("parse type 24A"))
+            .expect("decode type 24A"),
+    );
+    let decoded_b = expect_message(
+        parser
+            .decode(&parse_frame(&part_b_line[0]).expect("parse type 24B"))
+            .expect("decode type 24B"),
+    );
     assert!(matches!(
         decoded_a,
         AisMessage::StaticReport(nmea_0183_rs::ais::StaticDataReport::PartA {
@@ -751,14 +768,15 @@ fn class_a_static_voyage_encodes_unavailable_eta_with_ais_sentinels() {
         .to_sentences(AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(0))
         .expect("encode type 5");
     let mut parser = AisParser::new();
-    assert!(
+    assert!(matches!(
+        parser.decode(&parse_frame(&lines[0]).expect("parse first fragment")),
+        Ok(AisDecodeOutcome::Pending)
+    ));
+    let decoded = expect_message(
         parser
-            .decode(&parse_frame(&lines[0]).expect("parse first fragment"))
-            .is_none()
+            .decode(&parse_frame(&lines[1]).expect("parse second fragment"))
+            .expect("decode type 5"),
     );
-    let decoded = parser
-        .decode(&parse_frame(&lines[1]).expect("parse second fragment"))
-        .expect("decode type 5");
     let AisMessage::StaticVoyage(data) = decoded else {
         panic!("expected static voyage data");
     };

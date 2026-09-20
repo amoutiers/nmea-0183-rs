@@ -79,24 +79,13 @@ impl FragmentCollector {
     /// - `[4]` payload (6-bit armored)
     /// - `[5]` fill_bits
     ///
-    /// Returns `Some(AisPayload)` when a complete message is assembled.
-    /// Returns `None` for pending fragments and invalid input. Use
-    /// [`Self::process_checked`] to distinguish those cases.
-    pub fn process(&mut self, fields: &[&str]) -> Option<AisPayload> {
-        self.process_checked(fields).ok().flatten()
-    }
-
-    /// Process VDM/VDO fields with diagnostics for rejected fragments.
-    ///
+    /// Returns `Ok(Some(payload))` when a complete message is assembled.
     /// Returns `Ok(None)` while awaiting more fragments, including a repeated
     /// continuation already accepted by the assembly. A sequence mismatch or an
     /// oversized continuation discards the affected assembly; other slots are
     /// retained. Field validation errors and oversized first fragments leave
     /// assemblies unchanged.
-    pub fn process_checked(
-        &mut self,
-        fields: &[&str],
-    ) -> Result<Option<AisPayload>, AisDecodeError> {
+    pub fn process(&mut self, fields: &[&str]) -> Result<Option<AisPayload>, AisDecodeError> {
         if fields.len() < 6 {
             return Err(AisDecodeError::MissingFragmentFields {
                 actual: fields.len(),
@@ -238,23 +227,23 @@ mod tests {
         use crate::ais::AisDecodeError;
         let mut c = FragmentCollector::new();
         assert_eq!(
-            c.process_checked(&[]).err(),
+            c.process(&[]).err(),
             Some(AisDecodeError::MissingFragmentFields { actual: 0 })
         );
         assert_eq!(
-            c.process_checked(&["1", "1", "", "Z", "1", "0"]).err(),
+            c.process(&["1", "1", "", "Z", "1", "0"]).err(),
             Some(AisDecodeError::InvalidFragmentField { field: "channel" })
         );
         assert!(matches!(
-            c.process_checked(&["2", "1", "0", "A", "1", "0"]),
+            c.process(&["2", "1", "0", "A", "1", "0"]),
             Ok(None)
         ));
         assert_eq!(
-            c.process_checked(&["2", "2", "1", "A", "1", "0"]).err(),
+            c.process(&["2", "2", "1", "A", "1", "0"]).err(),
             Some(AisDecodeError::UnexpectedFragment)
         );
         let complete = c
-            .process_checked(&["2", "2", "0", "A", "2", "0"])
+            .process(&["2", "2", "0", "A", "2", "0"])
             .expect("valid continuation")
             .expect("complete");
         assert_eq!(complete.payload, "12");
@@ -279,7 +268,7 @@ mod tests {
             let mut fields = ["2", "1", "0", "A", "1", "0"];
             fields[index] = value;
             assert_eq!(
-                FragmentCollector::new().process_checked(&fields).err(),
+                FragmentCollector::new().process(&fields).err(),
                 Some(AisDecodeError::InvalidFragmentField { field }),
                 "{fields:?}"
             );
@@ -288,7 +277,7 @@ mod tests {
         for total in ["1", "2"] {
             assert_eq!(
                 FragmentCollector::new()
-                    .process_checked(&[total, "1", "0", "A", &oversized, "0"])
+                    .process(&[total, "1", "0", "A", &oversized, "0"])
                     .err(),
                 Some(AisDecodeError::PayloadTooLong {
                     actual: 257,
@@ -299,29 +288,29 @@ mod tests {
         let mut c = FragmentCollector::new();
         let at_limit = "1".repeat(256);
         assert!(matches!(
-            c.process_checked(&["2", "1", "0", "A", &at_limit, "0"]),
+            c.process(&["2", "1", "0", "A", &at_limit, "0"]),
             Ok(None)
         ));
         assert_eq!(
-            c.process_checked(&["2", "2", "0", "A", "1", "0"]).err(),
+            c.process(&["2", "2", "0", "A", "1", "0"]).err(),
             Some(AisDecodeError::PayloadTooLong {
                 actual: 257,
                 maximum: 256
             })
         );
         assert_eq!(
-            c.process_checked(&["2", "2", "0", "A", "", "0"]).err(),
+            c.process(&["2", "2", "0", "A", "", "0"]).err(),
             Some(AisDecodeError::UnexpectedFragment)
         );
     }
 
     #[test]
-    fn checked_fragments_preserve_compatibility_and_other_slots() {
+    fn fragments_preserve_compatibility_and_other_slots() {
         use crate::ais::AisDecodeError;
         let mut c = FragmentCollector::new();
         for channel in ["", "1", "2", "A", "B"] {
             let payload = c
-                .process_checked(&["1", "1", "ignored", channel, "1", "0", "extra"])
+                .process(&["1", "1", "ignored", channel, "1", "0", "extra"])
                 .expect("compatible fields")
                 .expect("complete");
             assert_eq!(
@@ -335,29 +324,29 @@ mod tests {
         }
         for channel in ["A", "B"] {
             assert!(matches!(
-                c.process_checked(&["3", "1", "0", channel, "1", "0"]),
+                c.process(&["3", "1", "0", channel, "1", "0"]),
                 Ok(None)
             ));
         }
         assert!(matches!(
-            c.process_checked(&["3", "2", "0", "A", "2", "0"]),
+            c.process(&["3", "2", "0", "A", "2", "0"]),
             Ok(None)
         ));
         assert!(matches!(
-            c.process_checked(&["3", "2", "0", "A", "2", "0"]),
+            c.process(&["3", "2", "0", "A", "2", "0"]),
             Ok(None)
         ));
         assert_eq!(
-            c.process_checked(&["3", "3", "0", "B", "3", "0"]).err(),
+            c.process(&["3", "3", "0", "B", "3", "0"]).err(),
             Some(AisDecodeError::UnexpectedFragment)
         );
         let payload = c
-            .process_checked(&["3", "3", "0", "A", "3", "0"])
+            .process(&["3", "3", "0", "A", "3", "0"])
             .expect("A unaffected")
             .expect("complete");
         assert_eq!(payload.payload, "123");
         assert_eq!(
-            c.process_checked(&["3", "2", "0", "B", "2", "0"]).err(),
+            c.process(&["3", "2", "0", "B", "2", "0"]).err(),
             Some(AisDecodeError::UnexpectedFragment)
         );
     }
@@ -367,18 +356,22 @@ mod tests {
         let mut c = FragmentCollector::new();
 
         // Fragment 1 of 2
-        let r1 = c.process(&[
-            "2",
-            "1",
-            "0",
-            "A",
-            "53brRt4000010SG700iE@LE8@Tp4000000000153P615t0Ht0SCkjH4jC1C",
-            "0",
-        ]);
+        let r1 = c
+            .process(&[
+                "2",
+                "1",
+                "0",
+                "A",
+                "53brRt4000010SG700iE@LE8@Tp4000000000153P615t0Ht0SCkjH4jC1C",
+                "0",
+            ])
+            .expect("valid fragment");
         assert!(r1.is_none());
 
         // Fragment 2 of 2
-        let r2 = c.process(&["2", "2", "0", "A", "`0000000001", "2"]);
+        let r2 = c
+            .process(&["2", "2", "0", "A", "`0000000001", "2"])
+            .expect("valid fragment");
         assert!(r2.is_some());
         let p = r2.expect("valid");
         assert!(p.payload.starts_with("53brRt"));
@@ -391,10 +384,12 @@ mod tests {
         let mut c = FragmentCollector::new();
 
         // Fragment 1 of 3
-        let _ = c.process(&["3", "1", "1", "A", "AAAA", "0"]);
+        let _ = c
+            .process(&["3", "1", "1", "A", "AAAA", "0"])
+            .expect("valid fragment");
         // Fragment 3 of 3 (skipped 2) — should discard
         let r = c.process(&["3", "3", "1", "A", "CCCC", "0"]);
-        assert!(r.is_none());
+        assert!(r.is_err());
         // Slot should be cleared
         assert!(c.slots[0][1].is_none());
     }
@@ -402,7 +397,9 @@ mod tests {
     #[test]
     fn single_fragment() {
         let mut c = FragmentCollector::new();
-        let result = c.process(&["1", "1", "", "A", "13u@Dt002s000000000000000000", "0"]);
+        let result = c
+            .process(&["1", "1", "", "A", "13u@Dt002s000000000000000000", "0"])
+            .expect("valid fragment");
         assert!(result.is_some());
         let p = result.expect("valid");
         assert_eq!(p.payload, "13u@Dt002s000000000000000000");
@@ -416,12 +413,13 @@ mod tests {
         let oversized = "A".repeat(MAX_PAYLOAD_SIZE + 1);
         assert!(
             c.process(&["1", "1", "", "A", oversized.as_str(), "0"])
-                .is_none(),
+                .is_err(),
             "single-fragment payload over MAX_PAYLOAD_SIZE must be rejected"
         );
         let at_limit = "A".repeat(MAX_PAYLOAD_SIZE);
         assert!(
             c.process(&["1", "1", "", "A", at_limit.as_str(), "0"])
+                .expect("valid fragment")
                 .is_some()
         );
     }
@@ -431,10 +429,12 @@ mod tests {
         let mut c = FragmentCollector::new();
         let p = c
             .process(&["1", "1", "", "1", "13u@Dt002s000000000000000000", "0"])
+            .expect("valid fragment")
             .expect("valid single fragment");
         assert_eq!(p.channel, 'A');
         let p = c
             .process(&["1", "1", "", "2", "13u@Dt002s000000000000000000", "0"])
+            .expect("valid fragment")
             .expect("valid single fragment");
         assert_eq!(p.channel, 'B');
     }
@@ -443,23 +443,25 @@ mod tests {
     fn total_count_mismatch_discards() {
         let mut c = FragmentCollector::new();
         // Fragment 1 says total=2
-        let _ = c.process(&["2", "1", "0", "A", "AAAA", "0"]);
+        let _ = c
+            .process(&["2", "1", "0", "A", "AAAA", "0"])
+            .expect("valid fragment");
         // Fragment 2 says total=3 — mismatch
         let r = c.process(&["3", "2", "0", "A", "BBBB", "0"]);
-        assert!(r.is_none());
+        assert!(r.is_err());
         assert!(c.slots[0][0].is_none());
     }
 
     #[test]
     fn too_few_fields() {
         let mut c = FragmentCollector::new();
-        assert!(c.process(&["1", "1"]).is_none());
+        assert!(c.process(&["1", "1"]).is_err());
     }
 
     #[test]
     fn zero_total_rejected() {
         let mut c = FragmentCollector::new();
-        assert!(c.process(&["0", "1", "", "A", "payload", "0"]).is_none());
+        assert!(c.process(&["0", "1", "", "A", "payload", "0"]).is_err());
     }
 
     #[test]
@@ -468,15 +470,15 @@ mod tests {
         // fill_bits 7 is out of range (valid 0-5) -> reject.
         assert!(
             c.process(&["1", "1", "", "A", "13u@Dt002s000000000000000000", "7"])
-                .is_none()
+                .is_err()
         );
     }
 
     #[test]
     fn invalid_channel_cannot_start_assembly() {
         let mut c = FragmentCollector::new();
-        assert!(c.process(&["2", "1", "0", "Z", "AAAA", "0"]).is_none());
-        assert!(c.process(&["2", "2", "0", "A", "BBBB", "0"]).is_none());
+        assert!(c.process(&["2", "1", "0", "Z", "AAAA", "0"]).is_err());
+        assert!(c.process(&["2", "2", "0", "A", "BBBB", "0"]).is_err());
         assert!(c.slots[0][0].is_none());
     }
 
@@ -484,15 +486,25 @@ mod tests {
     fn concurrent_channels_same_id() {
         let mut c = FragmentCollector::new();
         // Two 2-fragment messages, both message-id 0, on channels A and B, interleaved.
-        assert!(c.process(&["2", "1", "0", "A", "53brRt", "0"]).is_none());
-        assert!(c.process(&["2", "1", "0", "B", "AAAA", "0"]).is_none());
+        assert!(
+            c.process(&["2", "1", "0", "A", "53brRt", "0"])
+                .expect("valid fragment")
+                .is_none()
+        );
+        assert!(
+            c.process(&["2", "1", "0", "B", "AAAA", "0"])
+                .expect("valid fragment")
+                .is_none()
+        );
         let a = c
             .process(&["2", "2", "0", "A", "`0000000001", "2"])
+            .expect("valid fragment")
             .expect("channel A completes");
         assert!(a.payload.starts_with("53brRt"));
         assert_eq!(a.channel, 'A');
         let b = c
             .process(&["2", "2", "0", "B", "BBBB", "0"])
+            .expect("valid fragment")
             .expect("channel B completes");
         assert!(b.payload.starts_with("AAAA"));
         assert_eq!(b.channel, 'B');
@@ -501,12 +513,25 @@ mod tests {
     #[test]
     fn duplicate_fragment_is_idempotent() {
         let mut c = FragmentCollector::new();
-        assert!(c.process(&["3", "1", "1", "A", "AAAA", "0"]).is_none());
-        assert!(c.process(&["3", "2", "1", "A", "BBBB", "0"]).is_none());
+        assert!(
+            c.process(&["3", "1", "1", "A", "AAAA", "0"])
+                .expect("valid fragment")
+                .is_none()
+        );
+        assert!(
+            c.process(&["3", "2", "1", "A", "BBBB", "0"])
+                .expect("valid fragment")
+                .is_none()
+        );
         // Re-sent fragment 2 must be ignored, NOT discard the whole assembly.
-        assert!(c.process(&["3", "2", "1", "A", "BBBB", "0"]).is_none());
+        assert!(
+            c.process(&["3", "2", "1", "A", "BBBB", "0"])
+                .expect("valid fragment")
+                .is_none()
+        );
         let done = c
             .process(&["3", "3", "1", "A", "CCCC", "0"])
+            .expect("valid fragment")
             .expect("completes despite the duplicate");
         assert_eq!(done.payload, "AAAABBBBCCCC");
     }
@@ -515,12 +540,17 @@ mod tests {
     fn fragment_channel_mismatch_discarded() {
         let mut c = FragmentCollector::new();
         // Fragment 1 of 2 on channel A (message id 0).
-        assert!(c.process(&["2", "1", "0", "A", "AAAA", "0"]).is_none());
+        assert!(
+            c.process(&["2", "1", "0", "A", "AAAA", "0"])
+                .expect("valid fragment")
+                .is_none()
+        );
         // Fragment 2 of 2, SAME message id, but on channel B — no slot in row B.
-        assert!(c.process(&["2", "2", "0", "B", "BBBB", "0"]).is_none());
+        assert!(c.process(&["2", "2", "0", "B", "BBBB", "0"]).is_err());
         // Channel A's in-progress assembly is untouched; its own fragment 2 completes it.
         let done = c
             .process(&["2", "2", "0", "A", "CCCC", "2"])
+            .expect("valid fragment")
             .expect("A completes");
         assert_eq!(done.payload, "AAAACCCC");
         assert_eq!(done.channel, 'A');

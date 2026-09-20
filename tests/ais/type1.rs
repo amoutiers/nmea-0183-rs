@@ -1,6 +1,7 @@
 //! AIS Types 1/2/3 — Class A Position Report.
 #![cfg(feature = "ais")]
 
+use super::expect_message;
 use nmea_0183_rs::ais::{AisClass, AisMessage, AisParser};
 use nmea_0183_rs::parse_frame;
 
@@ -9,7 +10,7 @@ fn type_1_single_fragment_class_a_signalk() {
     let mut parser = AisParser::new();
     let frame =
         parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26").expect("valid Type 1 frame");
-    let msg = parser.decode(&frame).expect("Type 1 should decode");
+    let msg = expect_message(parser.decode(&frame).expect("Type 1 should decode"));
 
     match msg {
         AisMessage::Position(pos) => {
@@ -33,7 +34,7 @@ fn sentinel_filtering_signalk() {
     let mut parser = AisParser::new();
     let frame =
         parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26").expect("valid Type 1 frame");
-    let msg = parser.decode(&frame).expect("Type 1 should decode");
+    let msg = expect_message(parser.decode(&frame).expect("Type 1 should decode"));
 
     if let AisMessage::Position(pos) = msg {
         if let Some(lat) = pos.latitude {
@@ -53,7 +54,7 @@ fn type1_values() {
     let mut parser = AisParser::new();
     let frame =
         parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26").expect("valid Type 1 frame");
-    let msg = parser.decode(&frame).expect("Type 1 should decode");
+    let msg = expect_message(parser.decode(&frame).expect("Type 1 should decode"));
     match msg {
         AisMessage::Position(pos) => {
             assert_eq!(pos.msg_type, 1);

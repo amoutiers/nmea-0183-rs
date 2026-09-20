@@ -1,6 +1,7 @@
 //! AIS Type 4 — Base Station Report.
 #![cfg(feature = "ais")]
 
+use super::expect_message;
 use nmea_0183_rs::ais::{AisMessage, AisParser};
 use nmea_0183_rs::parse_frame;
 
@@ -9,7 +10,7 @@ fn type_4_base_station_gpsd() {
     let mut parser = AisParser::new();
     let frame =
         parse_frame("!AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D").expect("valid Type 4 frame");
-    let msg = parser.decode(&frame).expect("Type 4 should decode");
+    let msg = expect_message(parser.decode(&frame).expect("Type 4 should decode"));
 
     match msg {
         AisMessage::BaseStation(report) => {
@@ -37,7 +38,7 @@ fn type4_values() {
     let mut parser = AisParser::new();
     let frame =
         parse_frame("!AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D").expect("valid Type 4 frame");
-    let msg = parser.decode(&frame).expect("Type 4 should decode");
+    let msg = expect_message(parser.decode(&frame).expect("Type 4 should decode"));
     match msg {
         AisMessage::BaseStation(r) => {
             assert_eq!(r.mmsi, 3669702);

@@ -1,6 +1,7 @@
 //! AIS Type 27 — Long Range Position Report.
 #![cfg(feature = "ais")]
 
+use super::expect_message;
 use nmea_0183_rs::ais::{AisMessage, AisParser};
 use nmea_0183_rs::parse_frame;
 
@@ -8,7 +9,7 @@ use nmea_0183_rs::parse_frame;
 fn type_27_long_range_gpsd() {
     let mut parser = AisParser::new();
     let frame = parse_frame("!AIVDM,1,1,,A,KCQ9r=hrFUnH7P00,0*41").expect("valid Type 27 frame");
-    let msg = parser.decode(&frame).expect("Type 27 should decode");
+    let msg = expect_message(parser.decode(&frame).expect("Type 27 should decode"));
 
     match msg {
         AisMessage::LongRangePosition(pos) => {
@@ -29,7 +30,7 @@ fn type_27_long_range_gpsd() {
 fn type_27_latlon_scaling_gpsd() {
     let mut parser = AisParser::new();
     let frame = parse_frame("!AIVDM,1,1,,A,KCQ9r=hrFUnH7P00,0*41").expect("valid Type 27 frame");
-    match parser.decode(&frame).expect("Type 27 should decode") {
+    match expect_message(parser.decode(&frame).expect("Type 27 should decode")) {
         AisMessage::LongRangePosition(pos) => {
             let lat = pos.latitude.expect("latitude present after /600 fix");
             let lon = pos.longitude.expect("longitude present after /600 fix");

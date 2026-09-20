@@ -99,7 +99,7 @@ impl LongRangePosition {
 mod tests {
     use super::LongRangePosition;
     use crate::ais::messages::test_helpers::set_bits;
-    use crate::ais::{AisMessage, AisParser};
+    use crate::ais::{AisDecodeOutcome, AisMessage, AisParser};
     use crate::parse_frame;
 
     #[test]
@@ -108,7 +108,7 @@ mod tests {
         // Type 27 from gpsd ais.nmea fixture
         let frame = parse_frame("!AIVDM,1,1,,A,KCQ9r=hrFUnH7P00,0*41").expect("valid");
         let msg = parser.decode(&frame).expect("decoded");
-        if let AisMessage::LongRangePosition(pos) = msg {
+        if let AisDecodeOutcome::Message(AisMessage::LongRangePosition(pos)) = msg {
             assert!(pos.mmsi > 0, "MMSI must be set");
             if let (Some(lat), Some(lon)) = (pos.latitude, pos.longitude) {
                 assert!((-90.0..=90.0).contains(&lat), "lat out of range: {lat}");
@@ -124,7 +124,7 @@ mod tests {
         let mut parser = AisParser::new();
         let frame = parse_frame("!AIVDM,1,1,,A,KCQ9r=hrFUnH7P00,0*41").expect("valid");
         let msg = parser.decode(&frame).expect("decoded");
-        if let AisMessage::LongRangePosition(pos) = msg {
+        if let AisDecodeOutcome::Message(AisMessage::LongRangePosition(pos)) = msg {
             if let Some(lat) = pos.latitude {
                 assert!(
                     (-90.0..=90.0).contains(&lat),

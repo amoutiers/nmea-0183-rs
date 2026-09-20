@@ -1,4 +1,5 @@
 #![cfg(feature = "ais")]
+use super::expect_message;
 use nmea_0183_rs::ais::{AisMessage, AisParser};
 use nmea_0183_rs::parse_frame;
 
@@ -6,7 +7,7 @@ use nmea_0183_rs::parse_frame;
 fn type11_utc_date_response_gpsd() {
     let mut parser = AisParser::new();
     let frame = parse_frame("!AIVDM,1,1,,B,;4R33:1uUK2F`q?mOt@@GoQ00000,0*5D").expect("valid");
-    let msg = parser.decode(&frame).expect("decoded");
+    let msg = expect_message(parser.decode(&frame).expect("decoded"));
     if let AisMessage::UtcDateResponse(utc) = msg {
         assert!(utc.mmsi > 0);
         if let Some(lat) = utc.latitude {
@@ -27,7 +28,7 @@ fn type11_utc_date_response_gpsd() {
 fn type11_values() {
     let mut parser = AisParser::new();
     let frame = parse_frame("!AIVDM,1,1,,B,;4R33:1uUK2F`q?mOt@@GoQ00000,0*5D").expect("valid");
-    let msg = parser.decode(&frame).expect("decoded");
+    let msg = expect_message(parser.decode(&frame).expect("decoded"));
     match msg {
         AisMessage::UtcDateResponse(u) => {
             assert_eq!(u.mmsi, 304137000);

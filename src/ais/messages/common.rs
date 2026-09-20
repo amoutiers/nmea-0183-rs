@@ -127,10 +127,10 @@ mod tests {
 
 #[cfg(test)]
 mod timestamp_tests {
+    use super::PositionTimestamp;
     use crate::ais::messages::{
         AidToNavigation, PositionReport, SarAircraftReport, test_helpers::set_bits,
     };
-    use crate::ais::transmit::PositionTimestamp;
 
     #[test]
     fn position_timestamp_states_survive_all_decoders() {

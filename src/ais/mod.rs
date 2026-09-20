@@ -9,14 +9,14 @@
 //! ```
 //! #[cfg(feature = "ais")]
 //! {
-//!     use nmea_0183_rs::ais::{AisParser, AisMessage};
+//!     use nmea_0183_rs::ais::{AisDecodeOutcome, AisParser, AisMessage};
 //!     use nmea_0183_rs::parse_frame;
 //!
 //!     let mut parser = AisParser::new();
 //!
 //!     // Single-fragment message
 //!     let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26").expect("valid");
-//!     if let Some(msg) = parser.decode(&frame) {
+//!     if let Ok(AisDecodeOutcome::Message(msg)) = parser.decode(&frame) {
 //!         match msg {
 //!             AisMessage::Position(pos) => println!("MMSI: {}, lat: {:?}", pos.mmsi, pos.latitude),
 //!             _ => {}
@@ -107,7 +107,7 @@ pub enum AisMessage {
     Unknown { msg_type: u8 },
 }
 
-/// Successful outcome of feeding a frame to [`AisParser::decode_detailed`].
+/// Successful outcome of feeding a frame to [`AisParser::decode`].
 #[cfg(feature = "ais")]
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
@@ -149,37 +149,24 @@ impl AisParser {
         self.vdo_collector = FragmentCollector::new();
     }
 
-    /// Decode an AIS frame. Returns `Some(AisMessage)` for complete messages,
-    /// `None` for incomplete fragments, parse errors, or non-AIS frames.
-    /// Use [`Self::decode_detailed`] when rejected frames need diagnostics.
-    pub fn decode(&mut self, frame: &NmeaFrame<'_>) -> Option<AisMessage> {
-        match self.decode_detailed(frame) {
-            Ok(AisDecodeOutcome::Message(message)) => Some(message),
-            _ => None,
-        }
-    }
-
     /// Decode a frame, distinguishing ignored frames, pending fragments and errors.
     ///
     /// Frame checksum errors belong to [`crate::parse_frame`]. Unknown numeric
     /// message types are returned as [`AisMessage::Unknown`], not as errors.
-    /// Use one parser per physical source, just as with [`Self::decode`].
+    /// Use one parser per physical source.
     ///
     /// ```
     /// use nmea_0183_rs::ais::{AisDecodeOutcome, AisParser};
     /// use nmea_0183_rs::parse_frame;
     /// let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26")?;
-    /// match AisParser::new().decode_detailed(&frame)? {
+    /// match AisParser::new().decode(&frame)? {
     ///     AisDecodeOutcome::Message(message) => println!("{message:?}"),
     ///     AisDecodeOutcome::Pending | AisDecodeOutcome::Ignored => {},
     ///     _ => {},
     /// }
     /// # Ok::<(), Box<dyn std::error::Error>>(())
     /// ```
-    pub fn decode_detailed(
-        &mut self,
-        frame: &NmeaFrame<'_>,
-    ) -> Result<AisDecodeOutcome, AisDecodeError> {
+    pub fn decode(&mut self, frame: &NmeaFrame<'_>) -> Result<AisDecodeOutcome, AisDecodeError> {
         // Only handle VDM and VDO sentences
         if frame.prefix != '!' || (frame.sentence_type != "VDM" && frame.sentence_type != "VDO") {
             return Ok(AisDecodeOutcome::Ignored);
@@ -191,7 +178,7 @@ impl AisParser {
         } else {
             &mut self.vdo_collector
         };
-        let Some(payload) = collector.process_checked(&frame.fields)? else {
+        let Some(payload) = collector.process(&frame.fields)? else {
             return Ok(AisDecodeOutcome::Pending);
         };
 
@@ -248,6 +235,12 @@ impl Default for AisParser {
 #[cfg(test)]
 #[cfg(feature = "ais")]
 mod tests {
+    fn expect_message(outcome: AisDecodeOutcome) -> AisMessage {
+        match outcome {
+            AisDecodeOutcome::Message(message) => message,
+            other => panic!("expected complete AIS message, got {other:?}"),
+        }
+    }
     use super::*;
     use crate::ais::armor::encode_armor;
     use crate::ais::messages::test_helpers::set_bits;
@@ -258,9 +251,11 @@ mod tests {
         let fill_bits = fill_bits.to_string();
         let frame = encode_frame('!', "AI", "VDM", &["1", "1", "", "A", &payload, &fill_bits])
             .expect("frame");
-        AisParser::new()
-            .decode(&parse_frame(&frame).expect("parse"))
-            .expect("decode")
+        expect_message(
+            AisParser::new()
+                .decode(&parse_frame(&frame).expect("parse"))
+                .expect("decode"),
+        )
     }
 
     #[test]
@@ -301,14 +296,17 @@ mod tests {
         let frame =
             parse_frame("$GPRMC,175957.917,A,3857.1234,N,07705.1234,W,0.0,0.0,010100,,,A*77")
                 .expect("valid");
-        assert!(parser.decode(&frame).is_none());
+        assert!(matches!(
+            parser.decode(&frame),
+            Ok(AisDecodeOutcome::Ignored)
+        ));
     }
 
     #[test]
     fn sentinel_values_filtered() {
         let mut parser = AisParser::new();
         let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26").expect("valid");
-        let msg = parser.decode(&frame).expect("decoded");
+        let msg = expect_message(parser.decode(&frame).expect("decoded"));
         if let AisMessage::Position(pos) = msg {
             assert!(pos.heading.is_none() || pos.heading.expect("heading") < 360);
         }
@@ -321,7 +319,7 @@ mod tests {
         let msg = parser.decode(&frame);
         // This might be a type 18 or might not decode depending on exact payload
         // At minimum it shouldn't panic
-        if let Some(AisMessage::Position(pos)) = &msg {
+        if let Ok(AisDecodeOutcome::Message(AisMessage::Position(pos))) = &msg {
             assert_eq!(pos.ais_class, AisClass::B);
         }
     }
@@ -333,7 +331,7 @@ mod tests {
         let frame =
             parse_frame("!AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B")
                 .expect("valid type 19 frame");
-        let msg = parser.decode(&frame).expect("decode type 19");
+        let msg = expect_message(parser.decode(&frame).expect("decode type 19"));
         if let AisMessage::Position(pos) = msg {
             assert_eq!(pos.msg_type, 19);
             assert!(pos.mmsi > 0);
@@ -349,7 +347,7 @@ mod tests {
     fn type_1_position_report() {
         let mut parser = AisParser::new();
         let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26").expect("valid");
-        let msg = parser.decode(&frame).expect("decoded");
+        let msg = expect_message(parser.decode(&frame).expect("decoded"));
         if let AisMessage::Position(pos) = msg {
             assert_eq!(pos.msg_type, 1);
             assert!(pos.mmsi > 0);
@@ -372,7 +370,7 @@ mod tests {
         // Type 24 Part A: vessel name
         let frame = parse_frame("!AIVDM,1,1,,A,H52N>V@T2rNVPJ2000000000000,2*29")
             .expect("valid type 24 frame");
-        let msg = parser.decode(&frame).expect("decode type 24");
+        let msg = expect_message(parser.decode(&frame).expect("decode type 24"));
         if let AisMessage::StaticReport(report) = msg {
             match report {
                 StaticDataReport::PartA {
@@ -400,10 +398,10 @@ mod tests {
             "!AIVDM,2,1,1,A,55?MbV02;H;s<HtKR20EHE:0@T4@Dn2222222216L961O5Gf0NSQEp6ClRp8,0*1C",
         )
         .expect("valid frag1");
-        assert!(parser.decode(&f1).is_none()); // incomplete
+        assert!(matches!(parser.decode(&f1), Ok(AisDecodeOutcome::Pending))); // incomplete
 
         let f2 = parse_frame("!AIVDM,2,2,1,A,88888888880,2*25").expect("valid frag2");
-        let msg = parser.decode(&f2).expect("decoded");
+        let msg = expect_message(parser.decode(&f2).expect("decoded"));
         if let AisMessage::StaticVoyage(svd) = msg {
             assert!(svd.mmsi > 0);
             assert!(!svd.vessel_name.is_empty());
@@ -421,12 +419,15 @@ mod tests {
             "!AIVDM,2,1,1,A,55?MbV02;H;s<HtKR20EHE:0@T4@Dn2222222216L961O5Gf0NSQEp6ClRp8,0*1C",
         )
         .expect("valid");
-        assert!(parser.decode(&f1).is_none());
+        assert!(matches!(parser.decode(&f1), Ok(AisDecodeOutcome::Pending)));
         // Reset clears the pending fragment
         parser.reset();
         // Fragment 2 alone should not produce a message
         let f2 = parse_frame("!AIVDM,2,2,1,A,88888888880,2*25").expect("valid");
-        assert!(parser.decode(&f2).is_none());
+        assert!(matches!(
+            parser.decode(&f2),
+            Err(AisDecodeError::UnexpectedFragment)
+        ));
     }
 
     #[test]
@@ -434,7 +435,7 @@ mod tests {
         let mut parser = AisParser::new();
         let frame = parse_frame("!AIVDM,1,1,,A,85Mv070j2d>=<e<<=PQhhg`59P00,0*26").expect("valid");
         let msg = parser.decode(&frame);
-        if let Some(AisMessage::BinaryBroadcast(bb)) = msg {
+        if let Ok(AisDecodeOutcome::Message(AisMessage::BinaryBroadcast(bb))) = msg {
             assert!(bb.mmsi > 0);
         } else {
             panic!("expected BinaryBroadcast type 8, got {msg:?}");
@@ -447,7 +448,7 @@ mod tests {
         // Type 14 safety broadcast — payload starts with '>' (val=14)
         let frame =
             parse_frame("!AIVDM,1,1,,A,>5?Per18=HB1U:1@E=B0m<L,0*53").expect("valid type 14 frame");
-        let msg = parser.decode(&frame).expect("decoded");
+        let msg = expect_message(parser.decode(&frame).expect("decoded"));
         if let AisMessage::Safety(broadcast) = msg {
             assert!(broadcast.mmsi > 0, "MMSI must be set");
         } else {
@@ -472,7 +473,7 @@ mod tests {
         let frame =
             parse_frame("!AIVDM,1,1,,B,E>jCfrv2`0c2h0W:0a0h6220d5Du0`Htp00000l1@Dc2P0,4*3C")
                 .expect("valid type 21 frame");
-        let msg = parser.decode(&frame).expect("decoded");
+        let msg = expect_message(parser.decode(&frame).expect("decoded"));
         if let AisMessage::AidToNavigation(aton) = msg {
             assert!(aton.mmsi > 0, "MMSI must be set");
             assert!(
@@ -491,7 +492,7 @@ mod tests {
         let frame =
             parse_frame("!AIVDM,1,1,,B,E>jCfrv2`0c2h0W:0a0h6220d5Du0`Htp00000l1@Dc2P0,4*3C")
                 .expect("valid type 21");
-        let msg = parser.decode(&frame).expect("decoded");
+        let msg = expect_message(parser.decode(&frame).expect("decoded"));
         if let AisMessage::AidToNavigation(aton) = msg {
             if let (Some(lat), Some(lon)) = (aton.lat, aton.lon) {
                 assert!((-90.0..=90.0).contains(&lat), "lat out of range: {lat}");

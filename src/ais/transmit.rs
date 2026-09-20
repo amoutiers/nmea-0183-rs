@@ -85,8 +85,6 @@ pub trait AisEncodable {
     fn to_sentences(&self, options: AisTransmitOptions) -> Result<Vec<String>, EncodeError>;
 }
 
-pub use crate::ais::messages::common::PositionTimestamp;
-
 fn encode_payload(bits: &[u8], options: AisTransmitOptions) -> Result<Vec<String>, EncodeError> {
     if bits.is_empty() {
         return Err(EncodeError::InvalidAisField("payload"));

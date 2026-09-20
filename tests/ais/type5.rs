@@ -1,7 +1,8 @@
 //! AIS Type 5 — Static and Voyage Related Data (multi-fragment).
 #![cfg(feature = "ais")]
 
-use nmea_0183_rs::ais::{AisClass, AisMessage, AisParser};
+use super::expect_message;
+use nmea_0183_rs::ais::{AisClass, AisDecodeOutcome, AisMessage, AisParser};
 use nmea_0183_rs::parse_frame;
 
 #[test]
@@ -13,14 +14,16 @@ fn type_5_multi_fragment_static_voyage_gpsd() {
     )
     .expect("valid Type 5 fragment 1");
     assert!(
-        parser.decode(&f1).is_none(),
-        "fragment 1 should return None"
+        matches!(parser.decode(&f1), Ok(AisDecodeOutcome::Pending)),
+        "fragment 1 should be Pending"
     );
 
     let f2 = parse_frame("!AIVDM,2,2,1,A,88888888880,2*25").expect("valid Type 5 fragment 2");
-    let msg = parser
-        .decode(&f2)
-        .expect("fragment 2 should complete Type 5");
+    let msg = expect_message(
+        parser
+            .decode(&f2)
+            .expect("fragment 2 should complete Type 5"),
+    );
 
     match msg {
         AisMessage::StaticVoyage(svd) => {
@@ -43,13 +46,15 @@ fn type5_values() {
     )
     .expect("valid Type 5 fragment 1");
     assert!(
-        parser.decode(&f1).is_none(),
-        "fragment 1 should return None"
+        matches!(parser.decode(&f1), Ok(AisDecodeOutcome::Pending)),
+        "fragment 1 should be Pending"
     );
     let f2 = parse_frame("!AIVDM,2,2,1,A,88888888880,2*25").expect("valid Type 5 fragment 2");
-    let msg = parser
-        .decode(&f2)
-        .expect("fragment 2 should complete Type 5");
+    let msg = expect_message(
+        parser
+            .decode(&f2)
+            .expect("fragment 2 should complete Type 5"),
+    );
     match msg {
         AisMessage::StaticVoyage(sv) => {
             assert_eq!(sv.mmsi, 351759000);

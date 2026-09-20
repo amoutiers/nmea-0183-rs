@@ -1,4 +1,5 @@
 #![cfg(feature = "ais")]
+use super::expect_message;
 use nmea_0183_rs::ais::{AisMessage, AisParser};
 use nmea_0183_rs::parse_frame;
 
@@ -6,7 +7,7 @@ use nmea_0183_rs::parse_frame;
 fn type9_sar_aircraft_gpsd() {
     let mut parser = AisParser::new();
     let frame = parse_frame("!AIVDM,1,1,,A,91b77=h3h00nHt0Q3r@@07000<0b,0*69").expect("valid");
-    let msg = parser.decode(&frame).expect("decoded");
+    let msg = expect_message(parser.decode(&frame).expect("decoded"));
     if let AisMessage::SarAircraft(sar) = msg {
         assert!(sar.mmsi > 0);
         if let Some(lat) = sar.latitude {
@@ -24,7 +25,7 @@ fn type9_sar_aircraft_gpsd() {
 fn type9_second_fixture_gpsd() {
     let mut parser = AisParser::new();
     let frame = parse_frame("!AIVDM,1,1,,B,91b55wi;hbOS@OdQAC062Ch2089h,0*30").expect("valid");
-    let msg = parser.decode(&frame).expect("decoded");
+    let msg = expect_message(parser.decode(&frame).expect("decoded"));
     if let AisMessage::SarAircraft(sar) = msg {
         assert!(sar.mmsi > 0);
     } else {
@@ -39,7 +40,7 @@ fn type9_flag_offsets_gpsd() {
     // Verified by hand-decoding the 6-bit armor payload. These three bits
     // were corrected from wrong offsets (138/139) to ITU-R M.1371 (146/147).
     let frame = parse_frame("!AIVDM,1,1,,B,91b55wi;hbOS@OdQAC062Ch2089h,0*30").expect("valid");
-    match parser.decode(&frame).expect("decoded") {
+    match expect_message(parser.decode(&frame).expect("decoded")) {
         AisMessage::SarAircraft(sar) => {
             assert!(sar.dte, "DTE@142 should be true for this fixture");
             assert!(

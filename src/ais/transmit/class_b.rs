@@ -3,8 +3,9 @@ use crate::ais::encode::{
     BitWriter, encode_cog, encode_epfd, encode_heading, encode_latitude, encode_longitude,
     encode_position_timestamp, encode_sog,
 };
+use crate::ais::messages::PositionTimestamp;
 
-use super::{AisEncodable, AisTransmitOptions, PositionTimestamp, encode_payload};
+use super::{AisEncodable, AisTransmitOptions, encode_payload};
 
 /// AIS Type 18 communication-state selector and its 19-bit state value.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

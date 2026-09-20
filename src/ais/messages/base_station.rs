@@ -118,7 +118,7 @@ impl BaseStationReport {
 mod tests {
     use super::*;
     use crate::ais::messages::test_helpers::set_bits;
-    use crate::ais::{AisMessage, AisParser};
+    use crate::ais::{AisDecodeOutcome, AisMessage, AisParser};
     use crate::parse_frame;
 
     #[test]
@@ -127,7 +127,7 @@ mod tests {
         // Type 4 from gpsd ais.nmea fixture
         let frame = parse_frame("!AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D").expect("valid");
         let msg = parser.decode(&frame).expect("decoded");
-        if let AisMessage::BaseStation(report) = msg {
+        if let AisDecodeOutcome::Message(AisMessage::BaseStation(report)) = msg {
             assert!(report.mmsi > 0, "MMSI must be set");
             if let (Some(lat), Some(lon)) = (report.latitude, report.longitude) {
                 assert!((-90.0..=90.0).contains(&lat), "lat out of range: {lat}");
@@ -143,7 +143,7 @@ mod tests {
         let mut parser = AisParser::new();
         let frame = parse_frame("!AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D").expect("valid");
         let msg = parser.decode(&frame).expect("decoded");
-        if let AisMessage::BaseStation(report) = msg {
+        if let AisDecodeOutcome::Message(AisMessage::BaseStation(report)) = msg {
             if let Some(h) = report.hour {
                 assert!(h < 24, "hour sentinel not filtered: {h}");
             }

@@ -6,13 +6,15 @@ All notable changes to nmea-0183-rs are documented here.
 
 ### Added
 - Added opt-in strict frame validation and encoding APIs while preserving the existing compatibility APIs.
-- Added `AisParser::decode_detailed()` with distinct ignored, pending, and message outcomes, plus typed `AisDecodeError` diagnostics. `FragmentCollector::process_checked()` reports reassembly errors; the historical `Option` methods remain available.
+- Added detailed `AisParser::decode()` outcomes with ignored, pending and message states, plus typed `AisDecodeError` diagnostics. `FragmentCollector::process()` reports reassembly errors.
 - Added `NmeaFrame::to_sentence()` to retain frame addresses, fields, and tag data when re-encoding unknown sentences, with normalized checksums and CRLF.
 - Added `Default` for NMEA and ABM/BBM sentence structs and their field groups, compatible/strict encoding on `NmeaSentence` and `AisSentence`, and strict encoding on ABM/BBM.
 
 ### Changed
+- **Breaking:** removed historical API adapters. `AisParser::decode()` returns `Result<AisDecodeOutcome, AisDecodeError>`; `FragmentCollector::process()` returns `Result<Option<AisPayload>, AisDecodeError>`. The `decode_detailed()` and `process_checked()` names are removed. Match explicit outcomes and errors instead of relying on a silent `Option` projection.
+- Removed the unused `EncodeError::MissingFrameContext` variant.
 - **Breaking:** NMEA and ABM/BBM sentence parsers return `Self` instead of `Option<Self>`. Remove outer `expect`, `?`, or `Some` matches; optional field values and lenient parsing are unchanged.
-- **Breaking:** received position timestamps and `ClassAPosition`/`ClassBPosition` timestamps use `PositionTimestamp`, preserving wire states 60/61/62/63. Migrate `Some(n)` to `Exact(n)` and `None` to `NotAvailable`; calendar seconds in Types 4/11 are unchanged. The enum lives in `ais::messages::common` and remains reexported at `ais::transmit::PositionTimestamp`.
+- **Breaking:** received position timestamps and `ClassAPosition`/`ClassBPosition` timestamps use `PositionTimestamp`, preserving wire states 60/61/62/63. Migrate `Some(n)` to `Exact(n)` and `None` to `NotAvailable`; calendar seconds in Types 4/11 are unchanged. Import the enum from `ais::messages`; the historical transmit-module reexport is removed.
 - **Breaking:** `NmeaSentence::Unknown` and `AisSentence::Unknown` include owned `prefix`, `talker` and `tag_block` fields. They can encode without the original frame and ignore the supplied talker. Update manual constructors and exhaustive field patterns; see the README migration guide.
 - NMEA encoding now rejects supplied NaN and infinite numeric values with `EncodeError::NonFiniteNumber` instead of silently emitting an empty field. Use `None` for absent values; coordinate errors remain `InvalidCoordinate`.
 - `encode_frame()` now rejects combined addresses shorter than the frame parser accepts (three bytes, or four for proprietary addresses) with `EncodeError::InvalidAddressLength`. These are behavioral changes without changes to existing signatures.

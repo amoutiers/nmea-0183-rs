@@ -41,9 +41,9 @@
 //! NMEA and ABM/BBM structs implement `Default` for construction with partial data.
 //! Their field parsers return `Self` directly; missing or malformed fields remain optional.
 //!
-//! With `ais`, `AisParser::decode_detailed()` distinguishes ignored frames,
-//! pending fragments, messages and `AisDecodeError`. The historical `decode()`
-//! method retains its `Option` contract. Both use one parser per physical source.
+//! With `ais`, `AisParser::decode()` distinguishes ignored frames,
+//! pending fragments, messages and `AisDecodeError` through a `Result`.
+//! Use one parser per physical source.
 //! Position timestamps use `ais::messages::PositionTimestamp`, preserving the
 //! unavailable, manual-input, dead-reckoning and inoperative states.
 //!

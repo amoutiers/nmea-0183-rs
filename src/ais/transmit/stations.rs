@@ -6,10 +6,9 @@ use crate::ais::encode::{
     encode_utc_hour, encode_utc_minute_or_second, encode_utc_month, encode_utc_year,
 };
 use crate::ais::messages::NavigationStatus;
+use crate::ais::messages::PositionTimestamp;
 
-use super::{
-    AisEncodable, AisTransmitOptions, ClassBCommunicationState, PositionTimestamp, encode_payload,
-};
+use super::{AisEncodable, AisTransmitOptions, ClassBCommunicationState, encode_payload};
 
 /// AIS Type 4 base-station report.
 #[derive(Debug, Clone, PartialEq)]

@@ -10,7 +10,7 @@ Bidirectional NMEA 0183 parser/encoder + AIS decoder and transponder-message enc
 | NMEA sentences | 85 (bidirectional) |
 | AIS application sentences | 2 (bidirectional) |
 | AIS message types | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
-| Tests | 942 unit/integration + 9 doctests, 0 failures (all features) |
+| Tests | 943 unit/integration + 9 doctests, 0 failures (all features) |
 | Unsafe blocks | 0 |
 
 For contribution workflow, test rules, and the sentence-type checklist see [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -52,14 +52,13 @@ decimal_to_ddmm(decimal: f64) -> f64 // decimal degrees → DDMM.MMMM
 
 // AIS decoder and !-prefixed application-layer sentences
 use nmea_0183_rs::ais::{AisParser, AisMessage, AisDecodeOutcome, AisDecodeError};
-use nmea_0183_rs::ais::messages::PositionTimestamp; // also available under ais::transmit
+use nmea_0183_rs::ais::messages::PositionTimestamp;
 use nmea_0183_rs::ais::sentences::{Abm, Bbm, AisSentence};
 use nmea_0183_rs::ais::transmit::{AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition};
 
 let mut parser = AisParser::new();
-parser.decode(&frame) -> Option<AisMessage> // None = pending, ignored, or error
-parser.decode_detailed(&frame) -> Result<AisDecodeOutcome, AisDecodeError> // Ignored, Pending, Message
-// FragmentCollector::process_checked(&mut self, fields: &[&str]) -> Result<Option<AisPayload>, AisDecodeError>
+parser.decode(&frame) -> Result<AisDecodeOutcome, AisDecodeError> // Ignored, Pending, Message
+// FragmentCollector::process(&mut self, fields: &[&str]) -> Result<Option<AisPayload>, AisDecodeError>
 parser.reset()                                  // clear fragment buffers
 message.to_sentences(AisTransmitOptions::vdm(AisChannel::A)) -> Result<Vec<String>, EncodeError>
 ```
@@ -67,9 +66,9 @@ message.to_sentences(AisTransmitOptions::vdm(AisChannel::A)) -> Result<Vec<Strin
 ### Error model
 
 - **Frame layer**: `parse_frame()` returns `Result<NmeaFrame, FrameError>`. Variants: `Empty`, `InvalidPrefix`, `MalformedChecksum`, `BadChecksum`, `MalformedTagBlock`, `BadTagChecksum`, `TooShort`, `NonAsciiAddress`. When a tag-block checksum is present it is validated, and `tag_block` excludes its `*hh` suffix.
-- **Encode layer**: compatible encode APIs return `Result<_, EncodeError>`; strict encode APIs return `Result<_, StrictEncodeError>` (`Encode` or `Compliance`). `EncodeError` variants: `InvalidPrefix`, `NonAsciiAddress`, `EmptySentenceType`, `InvalidAddressLength`, `InvalidAddressCharacter`, `InvalidFieldCharacter`, `InvalidTagBlockCharacter`, `MissingFrameContext`, `InvalidCoordinate`, `NonFiniteNumber`, `InvalidAisField`, `AisTextTooLong`, `MissingAisSequenceId`, `TooManyAisFragments`.
+- **Encode layer**: compatible encode APIs return `Result<_, EncodeError>`; strict encode APIs return `Result<_, StrictEncodeError>` (`Encode` or `Compliance`). `EncodeError` variants: `InvalidPrefix`, `NonAsciiAddress`, `EmptySentenceType`, `InvalidAddressLength`, `InvalidAddressCharacter`, `InvalidFieldCharacter`, `InvalidTagBlockCharacter`, `InvalidCoordinate`, `NonFiniteNumber`, `InvalidAisField`, `AisTextTooLong`, `MissingAisSequenceId`, `TooManyAisFragments`.
 - **NMEA content**: `parse()` returns the struct directly. Missing/malformed fields → `None` inside the struct. Intentional for marine instruments that send partial data.
-- **AIS content**: `decode()` retains `Option<AisMessage>`; `None` means awaiting fragments, ignored frame or decode failure. `decode_detailed()` distinguishes those states and returns `AisDecodeError` (`MissingFragmentFields`, `InvalidFragmentField`, `UnexpectedFragment`, `PayloadTooLong`, `InvalidArmor`, `InvalidMessage`). Unknown numeric types remain decoded `AisMessage::Unknown` values.
+- **AIS content**: `decode()` returns `Result<AisDecodeOutcome, AisDecodeError>`: Ignored, Pending or Message, with rejected input reported as `AisDecodeError` (`MissingFragmentFields`, `InvalidFragmentField`, `UnexpectedFragment`, `PayloadTooLong`, `InvalidArmor`, `InvalidMessage`). Unknown numeric types remain decoded `AisMessage::Unknown` values.
 - **Re-encoding**: typed enums expose compatible/strict methods. Their `Unknown` variants own prefix, talker and tag_block and ignore the encoding talker argument. Typed variants still need the original `NmeaFrame` for full envelope preservation; retain the input line for exact bytes.
 - **Encoding validity**: supplied non-finite NMEA floats are errors, not absent fields. Defaults mean absent data, not semantic validity. Strict methods validate the frame envelope only.
 - **No panics**: 0 `panic!`, 0 `unwrap()`, 0 `todo!` in library code.
@@ -257,6 +256,8 @@ cargo fmt                                                # format
 ```
 
 ## Constraints
+
+- Source-breaking changes are allowed throughout the public API. Remove obsolete compatibility aliases and adapters instead of maintaining historical signatures. Keep interfaces with distinct current use cases, including permissive and strict frame validation.
 
 - No `nom`, no proc-macro, no `syn`/`quote` — keep compile times minimal
 - Zero dependencies (serde was removed as unused)

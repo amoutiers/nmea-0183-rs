@@ -4,8 +4,9 @@ use crate::ais::encode::{
     encode_position_timestamp, encode_rot, encode_sog,
 };
 use crate::ais::messages::NavigationStatus;
+use crate::ais::messages::PositionTimestamp;
 
-use super::{AisEncodable, AisTransmitOptions, PositionTimestamp, encode_payload};
+use super::{AisEncodable, AisTransmitOptions, encode_payload};
 
 /// Class A dynamic position-report type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
