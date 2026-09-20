@@ -23,16 +23,14 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 - **7** formatters legacy supplémentaires sont supportés hors de la liste IEC 2024.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 
-**Cargo features**
+**Features Cargo**
 
-- `default` : active par défaut, équivalente à `nmea` + `ais`.
-- `nmea` : toutes les sentences individuelles de la section NMEA, y compris les propriétaires.
-- `ais` : les sentences AIS `ABM` et `BBM`, ainsi que le décodage des messages AIS.
-- `positioning` : `GGA`, `GLL`, `RMC`, `GNS`.
-- `speed` : `VTG`, `VHW`, `VBW`, `RMC`, `RPM`, `VDR`.
-- `heading` : `HDG`, `HDM`, `HDT`, `THS`.
-- `wind` : `MWD`, `MWV`.
-- `depth` : `DBT`, `DBS`, `DBK`, `DPT`.
+- `default` active `nmea`, `nmea_proprietary` et `ais`.
+- `nmea` regroupe les 69 formatters NMEA standard supportés.
+- `nmea_proprietary` regroupe les 16 formatters propriétaires supportés.
+- `ais` active le décodage et l’encodage AIS, ainsi que `ABM`, `BBM` et `VSD`.
+
+Chaque feature de catégorie ci-dessous active uniquement les formatters marqués ✓. Chaque formatter supporté conserve aussi sa feature individuelle en minuscules.
 
 ## NMEA Sentences
 
@@ -41,6 +39,8 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 **Inférence vérifiable :** les bornes qui passent par 2.10 ou 3.01 reposent sur les TOC IEC reconstitués des éditions 1 et 3, à partir des TOC voisins et des deltas publiés.
 
 ### Position
+
+Feature Cargo : `position`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -61,6 +61,8 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 
 ### Satellites
 
+Feature Cargo : `satellites`.
+
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
 | `GBS` | GNSS satellite fault detection | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
@@ -75,9 +77,12 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 
 ### Heading
 
+Feature Cargo : `heading`.
+
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
 | `HDG` | Heading, deviation and variation | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
+| `HDM` | Heading, magnetic | ✓ | Hors TOC IEC | Hors TOC IEC |
 | `HDT` | Heading true | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `HSC` | Heading steering command | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `THS` | True heading and status | ✓ | 3.01<br>(2002) | 4.30<br>(2023) |
@@ -87,6 +92,8 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 | `HRM` | Heel angle, roll period and roll amplitude measurement device |   | 4.10<br>(2012) | 4.30<br>(2023) |
 
 ### Course & Speed
+
+Feature Cargo : `course_speed`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -103,19 +110,29 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 
 ### Wind
 
+Feature Cargo : `wind`.
+
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
 | `MWD` | Wind direction and speed | ✓ | 2.30<br>(1998) | 4.30<br>(2023) |
 | `MWV` | Wind speed and angle | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
+| `VWR` | Relative wind speed and angle | ✓ | Hors TOC IEC | Hors TOC IEC |
+| `VWT` | True wind speed and angle | ✓ | Hors TOC IEC | Hors TOC IEC |
 
 ### Depth
 
+Feature Cargo : `depth`.
+
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
+| `DBK` | Depth below keel | ✓ | Hors TOC IEC | Hors TOC IEC |
+| `DBS` | Depth below surface | ✓ | Hors TOC IEC | Hors TOC IEC |
 | `DBT` | Depth below transducer | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `DPT` | Depth | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 
 ### Steering
+
+Feature Cargo : `steering`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -134,6 +151,8 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 | `ASD` | Autopilot system data |   | 2.10<br>(1995) | 2.10<br>(1995) |
 
 ### Waypoints & Routes
+
+Feature Cargo : `waypoints_routes`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -155,8 +174,12 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 
 ### Environment
 
+Feature Cargo : `environment`.
+
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
+| `MDA` | Meteorological composite | ✓ | Hors TOC IEC | Hors TOC IEC |
+| `MTA` | Air temperature | ✓ | Hors TOC IEC | Hors TOC IEC |
 | `MTW` | Water temperature | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `XDR` | Transducer measurements | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `CUR` | Water current layer, multi-layer water current data |   | 3.01<br>(2002) | 4.30<br>(2023) |
@@ -164,11 +187,15 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 
 ### Time
 
+Feature Cargo : `time`.
+
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
 | `ZDA` | Time and date | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 
 ### AIS Interface
+
+Feature Cargo : `ais`. `VSD` est aussi activé par `nmea`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -191,6 +218,8 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 
 ### Targets
 
+Feature Cargo : `targets`.
+
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
 | `RSD` | Radar system data | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
@@ -200,6 +229,8 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 | `TTM` | Tracked target message | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 
 ### Safety & Alarms
+
+Feature Cargo : `safety_alarms`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -232,6 +263,8 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 
 ### Vessel Systems
 
+Aucune feature de catégorie tant qu’aucun formatter n’est supporté.
+
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
 | `DDC` | Display dimming control |   | 3.01<br>(2002) | 4.30<br>(2023) |
@@ -243,6 +276,8 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 | `STN` | Multiple data ID |   | 2.10<br>(1995) | 4.30<br>(2023) |
 
 ### Communication
+
+Feature Cargo : `communication`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -260,25 +295,10 @@ Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les pr
 | `VER` | Version |   | 4.00<br>(2008) | 4.30<br>(2023) |
 | `LCD` | LORAN-C signal data |   | 2.10<br>(1995) | 3.01<br>(2002) |
 
-### Trawl / Fishing
-
-| Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
-| --- | --- | :---: | :---: | :---: |
-
-Aucun formatter de cette rubrique n’est publié dans les six éditions de l’IEC 61162-1.
-## Legacy hors TOC IEC
-
-| Formatter | Description | Support |
-| --- | --- | :---: |
-| `DBK` | Depth below keel | ✓ |
-| `DBS` | Depth below surface | ✓ |
-| `HDM` | Heading, magnetic | ✓ |
-| `MDA` | Meteorological composite | ✓ |
-| `MTA` | Air temperature | ✓ |
-| `VWR` | Relative wind speed and angle | ✓ |
-| `VWT` | True wind speed and angle | ✓ |
-
 ## Proprietary
+
+Feature Cargo : `nmea_proprietary`.
+
 - [x] PASHR — RT300 Inertial Attitude (Hemisphere/Ashtech)
 - [x] PCDIN — NMEA 2000 via SeaSmart bridge
 - [x] PGRME — Garmin Estimated Position Error
