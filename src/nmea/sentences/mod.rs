@@ -98,6 +98,10 @@ mod phtro;
 mod pklid;
 #[cfg(feature = "pklds")]
 mod pklds;
+#[cfg(feature = "pklsh")]
+mod pklsh;
+#[cfg(feature = "pknds")]
+mod pknds;
 #[cfg(feature = "prdid")]
 mod prdid;
 #[cfg(feature = "pskpdpt")]
@@ -255,6 +259,10 @@ pub use phtro::*;
 pub use pklid::*;
 #[cfg(feature = "pklds")]
 pub use pklds::*;
+#[cfg(feature = "pklsh")]
+pub use pklsh::*;
+#[cfg(feature = "pknds")]
+pub use pknds::*;
 #[cfg(feature = "prdid")]
 pub use prdid::*;
 #[cfg(feature = "pskpdpt")]

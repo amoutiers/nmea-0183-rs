@@ -96,6 +96,8 @@ macro_rules! nmea_item {
             feature = "phtro",
             feature = "pklid",
             feature = "pklds",
+            feature = "pklsh",
+            feature = "pknds",
             feature = "prdid",
             feature = "pskpdpt",
             feature = "rmb",

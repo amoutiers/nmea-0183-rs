@@ -207,6 +207,8 @@ nmea_sentences![
         // Proprietary — Skipper
         ["pklid", Pklid, "PKLID"],
         ["pklds", Pklds, "PKLDS"],
+        ["pklsh", Pklsh, "PKLSH"],
+        ["pknds", Pknds, "PKNDS"],
         ["pskpdpt", Pskpdpt, "PSKPDPT"],
     ]
 ];

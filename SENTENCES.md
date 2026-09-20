@@ -224,8 +224,8 @@ Aucun formatter de cette rubrique n’est publié dans la section 8.3 de l’IEC
 - [x] PHTRO — Vessel Pitch and Roll (Xsens)
 - [x] PKLDS — Keel Depth Sentence
 - [x] PKLID — Keel ID
-- [ ] PKLSH — Keel Shallow
-- [ ] PKNDS — Knudsen Depth
+- [x] PKLSH — Keel Shallow
+- [x] PKNDS — Knudsen Depth
 - [ ] PKNID — Knudsen ID
 - [ ] PKNSH — Knudsen Shallow
 - [ ] PKWDWPL — Waypoint (unknown vendor)
