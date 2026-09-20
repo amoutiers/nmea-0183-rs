@@ -252,23 +252,23 @@ impl FieldWriter {
     /// Write an optional latitude in NMEA `DDMM.MMMM` form (integer part zero-padded
     /// to 4 digits). `None` → empty field.
     pub(crate) fn lat(&mut self, value: Option<f64>) {
-        self.push_coord(value, 4);
+        self.push_coord(value, 4, 90.0);
     }
 
     /// Write an optional longitude in NMEA `DDDMM.MMMM` form (integer part zero-padded
     /// to 5 digits). `None` → empty field.
     pub(crate) fn lon(&mut self, value: Option<f64>) {
-        self.push_coord(value, 5);
+        self.push_coord(value, 5, 180.0);
     }
 
     /// Format a coordinate by zero-padding the integer part to `int_width` digits and
     /// keeping the fractional part as the shortest `f64` representation. The value must
-    /// be a non-negative magnitude — the N/S·E/W sign lives in a separate indicator
-    /// field. Non-finite or negative values record `EncodeError::InvalidCoordinate`
+    /// be a valid non-negative DDMM magnitude — the N/S·E/W sign lives in a separate
+    /// indicator field. Invalid values record `EncodeError::InvalidCoordinate`
     /// (surfaced by `finish()`) and emit an empty field. `-0.0` is normalized to `0.0`.
-    fn push_coord(&mut self, value: Option<f64>, int_width: usize) {
+    fn push_coord(&mut self, value: Option<f64>, int_width: usize, max_degrees: f64) {
         let v = match value {
-            Some(v) if v.is_finite() && v >= 0.0 => v,
+            Some(v) if valid_ddmm(v, max_degrees) => v,
             Some(_) => {
                 if self.error.is_none() {
                     self.error = Some(EncodeError::InvalidCoordinate);
@@ -323,6 +323,17 @@ impl FieldWriter {
             None => Ok(self.fields),
         }
     }
+}
+
+fn valid_ddmm(value: f64, max_degrees: f64) -> bool {
+    if !value.is_finite() || value < 0.0 {
+        return false;
+    }
+    let degrees = (value / 100.0).floor();
+    let minutes = value - degrees * 100.0;
+    minutes < 60.0
+        && degrees <= max_degrees
+        && (degrees < max_degrees || minutes == 0.0)
 }
 
 impl Default for FieldWriter {
@@ -577,6 +588,33 @@ mod tests {
         let mut w = FieldWriter::new();
         w.lat(Some(-4807.038));
         assert_eq!(w.finish(), Err(EncodeError::InvalidCoordinate));
+    }
+
+    #[test]
+    fn writer_rejects_invalid_ddmm_coordinates() {
+        for value in [1260.0, 9000.0001, 9060.0, 9999.0] {
+            let mut writer = FieldWriter::new();
+            writer.lat(Some(value));
+            assert_eq!(writer.finish(), Err(EncodeError::InvalidCoordinate));
+        }
+
+        for value in [1260.0, 18000.0001, 18060.0, 18100.0] {
+            let mut writer = FieldWriter::new();
+            writer.lon(Some(value));
+            assert_eq!(writer.finish(), Err(EncodeError::InvalidCoordinate));
+        }
+    }
+
+    #[test]
+    fn writer_accepts_ddmm_coordinate_boundaries() {
+        let mut writer = FieldWriter::new();
+        writer.lat(Some(0.0));
+        writer.lat(Some(5959.9999));
+        writer.lat(Some(9000.0));
+        writer.lon(Some(0.0));
+        writer.lon(Some(17959.9999));
+        writer.lon(Some(18000.0));
+        assert!(writer.finish().is_ok());
     }
 
     #[test]

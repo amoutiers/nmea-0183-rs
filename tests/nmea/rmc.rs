@@ -2,7 +2,7 @@
 use nmea_0183_rs::nmea::NmeaEncodable;
 
 use nmea_0183_rs::nmea::sentences::Rmc;
-use nmea_0183_rs::{NmeaSentence, parse_frame};
+use nmea_0183_rs::{EncodeError, NmeaSentence, parse_frame};
 
 fn sentence(body: &str) -> String {
     let checksum = body[1..].bytes().fold(0u8, |acc, byte| acc ^ byte);
@@ -92,4 +92,21 @@ fn rmc_rejects_multi_character_status() {
     let frame = parse_frame(&valid).expect("valid frame");
     let parsed = Rmc::parse(&frame.fields).expect("typed parse");
     assert_eq!(parsed.status, Some('A'));
+}
+
+#[test]
+fn rmc_rejects_invalid_ddmm_coordinates_on_encode() {
+    let mut invalid_lat = Rmc::parse(&[]).expect("empty RMC");
+    invalid_lat.lat = Some(1260.0);
+    assert_eq!(
+        invalid_lat.to_sentence("GP"),
+        Err(EncodeError::InvalidCoordinate)
+    );
+
+    let mut invalid_lon = Rmc::parse(&[]).expect("empty RMC");
+    invalid_lon.lon = Some(18100.0);
+    assert_eq!(
+        invalid_lon.to_sentence("GP"),
+        Err(EncodeError::InvalidCoordinate)
+    );
 }
