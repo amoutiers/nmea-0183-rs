@@ -209,6 +209,11 @@ nmea_sentences![
         ["pklds", Pklds, "PKLDS"],
         ["pklsh", Pklsh, "PKLSH"],
         ["pknds", Pknds, "PKNDS"],
+        ["pknid", Pknid, "PKNID"],
+        ["pknsh", Pknsh, "PKNSH"],
+        ["pkwdwpl", Pkwdwpl, "PKWDWPL"],
+        ["pmtk", Pmtk, "PMTK001"],
+        ["psoncms", Psoncms, "PSONCMS"],
         ["pskpdpt", Pskpdpt, "PSKPDPT"],
     ]
 ];

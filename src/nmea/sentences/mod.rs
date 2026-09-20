@@ -102,8 +102,18 @@ mod pklds;
 mod pklsh;
 #[cfg(feature = "pknds")]
 mod pknds;
+#[cfg(feature = "pknid")]
+mod pknid;
+#[cfg(feature = "pknsh")]
+mod pknsh;
+#[cfg(feature = "pkwdwpl")]
+mod pkwdwpl;
+#[cfg(feature = "pmtk")]
+mod pmtk;
 #[cfg(feature = "prdid")]
 mod prdid;
+#[cfg(feature = "psoncms")]
+mod psoncms;
 #[cfg(feature = "pskpdpt")]
 mod pskpdpt;
 #[cfg(feature = "rmb")]
@@ -263,8 +273,18 @@ pub use pklds::*;
 pub use pklsh::*;
 #[cfg(feature = "pknds")]
 pub use pknds::*;
+#[cfg(feature = "pknid")]
+pub use pknid::*;
+#[cfg(feature = "pknsh")]
+pub use pknsh::*;
+#[cfg(feature = "pkwdwpl")]
+pub use pkwdwpl::*;
+#[cfg(feature = "pmtk")]
+pub use pmtk::*;
 #[cfg(feature = "prdid")]
 pub use prdid::*;
+#[cfg(feature = "psoncms")]
+pub use psoncms::*;
 #[cfg(feature = "pskpdpt")]
 pub use pskpdpt::*;
 #[cfg(feature = "rmb")]

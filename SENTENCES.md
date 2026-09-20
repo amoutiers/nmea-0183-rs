@@ -4,7 +4,7 @@ Cette liste distingue les sentence formatters approuvés par l’[IEC 61162-1:20
 
 Les cases indiquent un support actuellement présent dans nmea-kit. La liste IEC reprend les 133 formatters de la section 8.3 de l’édition 6.0. `HTC` et `HTD` sont deux formatters regroupés dans une même rubrique de la norme.
 
-Version de la couverture : `nmea-kit` 0.8.7, avec 80 sentences NMEA bidirectionnelles et 2 sentences AIS d’application.
+Version de la couverture : `nmea-kit` 0.8.7, avec 85 sentences NMEA bidirectionnelles et 2 sentences AIS d’application.
 
 Sources : [IEC 61162-1:2024](https://webstore.iec.ch/en/publication/72729), [go-nmea](https://github.com/adrianmo/go-nmea), [gpsd](https://gitlab.com/gpsd/gpsd), [SignalK](https://github.com/SignalK/signalk-parser-nmea0183) et [pynmeagps](https://github.com/semuconsulting/pynmeagps).
 
@@ -228,13 +228,13 @@ Aucun formatter de cette rubrique n’est publié dans la section 8.3 de l’IEC
 - [x] PKLID — Keel ID
 - [x] PKLSH — Keel Shallow
 - [x] PKNDS — Knudsen Depth
-- [ ] PKNID — Knudsen ID
-- [ ] PKNSH — Knudsen Shallow
-- [ ] PKWDWPL — Waypoint (unknown vendor)
-- [ ] PMTK — MediaTek GPS Command
+- [x] PKNID — Knudsen ID
+- [x] PKNSH — Knudsen Shallow
+- [x] PKWDWPL — Waypoint (unknown vendor)
+- [x] PMTK — MediaTek GPS Command
 - [x] PRDID — RDI Doppler Instrument Data
 - [x] PSKPDPT — Skipper Depth
-- [ ] PSONCMS — SMC IMU Data (SBG Systems)
+- [x] PSONCMS — SMC IMU Data (SBG Systems)
 
 ## AIS
 

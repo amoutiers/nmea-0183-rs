@@ -100,10 +100,20 @@ mod pklid;
 mod pklsh;
 #[path = "nmea/pknds.rs"]
 mod pknds;
+#[path = "nmea/pknid.rs"]
+mod pknid;
+#[path = "nmea/pknsh.rs"]
+mod pknsh;
+#[path = "nmea/pkwdwpl.rs"]
+mod pkwdwpl;
+#[path = "nmea/pmtk.rs"]
+mod pmtk;
 #[path = "nmea/prdid.rs"]
 mod prdid;
 #[path = "nmea/pskpdpt.rs"]
 mod pskpdpt;
+#[path = "nmea/psoncms.rs"]
+mod psoncms;
 #[path = "nmea/rmb.rs"]
 mod rmb;
 #[path = "nmea/rmc.rs"]
