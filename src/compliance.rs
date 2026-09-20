@@ -4,7 +4,7 @@
 //! This module provides an opt-in standards boundary without changing that
 //! compatibility behavior.
 
-use crate::{FrameError, NmeaFrame, parse_frame};
+use crate::{EncodeError, FrameError, NmeaFrame, parse_frame};
 
 /// Maximum NMEA 0183 sentence length, including the leading delimiter and CRLF.
 pub const MAX_SENTENCE_LEN: usize = 82;
@@ -81,9 +81,62 @@ impl From<FrameError> for ComplianceError {
     }
 }
 
+/// Errors returned while building and strictly validating an encoded sentence.
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StrictEncodeError {
+    /// The compatibility encoder rejected an address or field.
+    Encode(EncodeError),
+    /// The encoded sentence violates a strict wire rule.
+    Compliance(ComplianceError),
+}
+
+impl core::fmt::Display for StrictEncodeError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Encode(error) => write!(f, "encoding failed: {error}"),
+            Self::Compliance(error) => write!(f, "strict validation failed: {error}"),
+        }
+    }
+}
+
+impl std::error::Error for StrictEncodeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Encode(error) => Some(error),
+            Self::Compliance(error) => Some(error),
+        }
+    }
+}
+
+impl From<EncodeError> for StrictEncodeError {
+    fn from(error: EncodeError) -> Self {
+        Self::Encode(error)
+    }
+}
+
+impl From<ComplianceError> for StrictEncodeError {
+    fn from(error: ComplianceError) -> Self {
+        Self::Compliance(error)
+    }
+}
+
 /// Validate a complete NMEA 0183 sentence using the strict wire rules.
 pub fn validate_sentence(input: &str) -> Result<(), ComplianceError> {
     parse_frame_strict(input).map(|_| ())
+}
+
+/// Encode a sentence and require the resulting wire representation to satisfy
+/// the strict frame rules.
+pub fn encode_frame_strict(
+    prefix: char,
+    talker: &str,
+    sentence_type: &str,
+    fields: &[&str],
+) -> Result<String, StrictEncodeError> {
+    let sentence = crate::encode_frame(prefix, talker, sentence_type, fields)?;
+    validate_sentence(&sentence)?;
+    Ok(sentence)
 }
 
 /// Parse a complete sentence only when it satisfies the strict wire rules.

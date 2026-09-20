@@ -1,5 +1,6 @@
 use nmea_0183_rs::{
-    ComplianceError, FrameError, parse_frame, parse_frame_strict, validate_sentence,
+    ComplianceError, FrameError, StrictEncodeError, encode_frame, encode_frame_strict, parse_frame,
+    parse_frame_strict, validate_sentence,
 };
 
 fn sentence(body: &str) -> String {
@@ -139,4 +140,37 @@ fn strict_rejects_ascii_control_characters() {
             "control byte {byte:?}"
         );
     }
+}
+
+#[test]
+fn strict_encoder_accepts_valid_standard_sentence() {
+    let line = encode_frame_strict('$', "GP", "RMC", &["120000.00", "A"]).expect("strict encode");
+    validate_sentence(&line).expect("strict output");
+}
+
+#[test]
+fn strict_encoder_rejects_legacy_addresses_and_overlong_output() {
+    assert!(encode_frame('$', "gp", "rmc", &["A"]).is_ok());
+    assert!(matches!(
+        encode_frame_strict('$', "gp", "rmc", &["A"]),
+        Err(StrictEncodeError::Compliance(
+            ComplianceError::InvalidAddressCharacter(_)
+        ))
+    ));
+
+    let long = "A".repeat(90);
+    assert!(encode_frame('$', "GP", "TXT", &[&long]).is_ok());
+    assert!(matches!(
+        encode_frame_strict('$', "GP", "TXT", &[&long]),
+        Err(StrictEncodeError::Compliance(
+            ComplianceError::SentenceTooLong { .. }
+        ))
+    ));
+}
+
+#[test]
+fn strict_encoder_rejects_reserved_raw_data_but_accepts_escape() {
+    assert!(encode_frame('$', "GP", "TXT", &["raw$payload"]).is_ok());
+    assert!(encode_frame_strict('$', "GP", "TXT", &["raw$payload"]).is_err());
+    encode_frame_strict('$', "GP", "TXT", &["raw^24payload"]).expect("escaped dollar");
 }

@@ -381,6 +381,14 @@ pub trait NmeaEncodable {
         let talker = if Self::PROPRIETARY { "" } else { talker };
         crate::encode_frame(Self::PREFIX, talker, Self::SENTENCE_TYPE, &field_refs)
     }
+
+    /// Encode into a complete sentence and enforce the strict NMEA wire rules.
+    fn to_sentence_strict(&self, talker: &str) -> Result<String, crate::StrictEncodeError> {
+        let fields = self.encode()?;
+        let field_refs: Vec<&str> = fields.iter().map(String::as_str).collect();
+        let talker = if Self::PROPRIETARY { "" } else { talker };
+        crate::encode_frame_strict(Self::PREFIX, talker, Self::SENTENCE_TYPE, &field_refs)
+    }
 }
 
 /// Convert an NMEA `DDMM.MMMM` coordinate to decimal degrees.
