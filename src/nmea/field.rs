@@ -92,7 +92,6 @@ impl<'a> FieldReader<'a> {
     }
 
     /// Read an optional u16 and advance.
-    #[expect(dead_code, reason = "reserved for future sentence types")]
     pub(crate) fn u16(&mut self) -> Option<u16> {
         let val = self.fields.get(self.idx).and_then(|f| {
             if f.is_empty() { None } else { f.parse::<u16>().ok() }
@@ -221,7 +220,6 @@ impl FieldWriter {
     }
 
     /// Write an optional u16. `None` → empty field.
-    #[expect(dead_code, reason = "reserved for future sentence types")]
     pub(crate) fn u16(&mut self, value: Option<u16>) {
         self.fields.push(match value {
             Some(v) => v.to_string(),

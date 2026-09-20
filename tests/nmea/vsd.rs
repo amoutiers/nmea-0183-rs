@@ -69,3 +69,30 @@ fn vsd_values() {
     assert_eq!(vsd.nav_status, Some(8));
     assert!(vsd.regional.is_none());
 }
+
+#[test]
+fn preserves_full_protocol_person_count_range() {
+    for expected in [0_u32, 255, 256, 300, 8191] {
+        let persons = expected.to_string();
+        let fields = [
+            "60",
+            "4.5",
+            persons.as_str(),
+            "PORT",
+            "220516",
+            "1",
+            "2",
+            "0",
+            "",
+        ];
+        let parsed = Vsd::parse(&fields).expect("parse VSD");
+        assert_eq!(parsed.persons.map(u32::from), Some(expected));
+        let encoded = parsed.encode().expect("encode VSD");
+        assert_eq!(encoded[2], persons);
+    }
+
+    let missing = Vsd::parse(&["60", "4.5", ""]).expect("parse missing persons");
+    assert_eq!(missing.persons, None);
+    let malformed = Vsd::parse(&["60", "4.5", "not-a-number"]).expect("parse malformed persons");
+    assert_eq!(malformed.persons, None);
+}

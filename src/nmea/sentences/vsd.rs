@@ -9,8 +9,8 @@ pub struct Vsd {
     pub type_of_ship: Option<u8>,
     /// Maximum present static draught in metres.
     pub draught: Option<f32>,
-    /// Number of persons on board.
-    pub persons: Option<u8>,
+    /// Number of persons on board (0-8191 in the protocol).
+    pub persons: Option<u16>,
     /// Destination (up to 20 characters).
     pub destination: Option<String>,
     /// Estimated time of arrival (UTC, HHMM or HHMMSS depending on sender).
@@ -33,7 +33,7 @@ impl Vsd {
         Some(Self {
             type_of_ship: r.u8(),
             draught: r.f32(),
-            persons: r.u8(),
+            persons: r.u16(),
             destination: r.string(),
             arrival_time: r.string(),
             arrival_day: r.u8(),
@@ -51,7 +51,7 @@ impl NmeaEncodable for Vsd {
         let mut w = FieldWriter::new();
         w.u8(self.type_of_ship);
         w.f32(self.draught);
-        w.u8(self.persons);
+        w.u16(self.persons);
         w.string(self.destination.as_deref());
         w.string(self.arrival_time.as_deref());
         w.u8(self.arrival_day);
