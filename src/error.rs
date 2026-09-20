@@ -64,6 +64,8 @@ pub enum EncodeError {
     InvalidAddressCharacter(char),
     /// A field contains `,`, `*`, `\r`, `\n`, or a non-ASCII character.
     InvalidFieldCharacter(char),
+    /// A tag contains non-ASCII characters, controls, `\\` or `*`.
+    InvalidTagBlockCharacter(char),
     /// Coordinate magnitude is NaN, infinite, or negative.
     InvalidCoordinate,
     /// A numeric NMEA field is NaN or infinite rather than absent.
@@ -96,6 +98,9 @@ impl core::fmt::Display for EncodeError {
             }
             Self::InvalidFieldCharacter(c) => {
                 write!(f, "field contains invalid character {c:?}")
+            }
+            Self::InvalidTagBlockCharacter(c) => {
+                write!(f, "tag block contains invalid character {c:?}")
             }
             Self::InvalidCoordinate => {
                 write!(f, "coordinate magnitude is NaN, infinite, or negative")

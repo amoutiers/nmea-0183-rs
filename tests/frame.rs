@@ -277,3 +277,72 @@ fn encode_rejects_unparseable_address_lengths() {
         assert!(parse_frame(&line).is_ok());
     }
 }
+
+#[test]
+fn frame_reencoding_preserves_unknown_envelope() {
+    use nmea_0183_rs::NmeaFrame;
+    for fields in [vec![], vec![""], vec!["1", "", "3", ""]] {
+        for tag_block in [None, Some(""), Some("s:receiver,c:123")] {
+            let original = NmeaFrame {
+                prefix: '!',
+                talker: "AI",
+                sentence_type: "XYZ",
+                fields: fields.clone(),
+                tag_block,
+            };
+            let line = original.to_sentence().expect("encode frame");
+            assert_eq!(parse_frame(&line).expect("parse frame"), original);
+            assert!(line.ends_with("\r\n"));
+            if tag_block == Some("s:receiver,c:123") {
+                assert!(line.starts_with("\\s:receiver,c:123*"));
+            }
+        }
+    }
+    let original = parse_frame("\\s:receiver\\$GPXYZ,1,").expect("compatible frame");
+    let line = original.to_sentence().expect("encode");
+    assert!(line.starts_with("\\s:receiver*"));
+    assert_eq!(parse_frame(&line).expect("reparse"), original);
+}
+
+#[test]
+fn frame_reencoding_rejects_injected_tag_characters() {
+    use nmea_0183_rs::{EncodeError, NmeaFrame};
+    for (tag, invalid) in [
+        ("s:a\\b", '\\'),
+        ("s:a*b", '*'),
+        ("s:a\nb", '\n'),
+        ("s:a\rb", '\r'),
+        ("s:a\0b", '\0'),
+        ("s:é", 'é'),
+        ("s:\u{7f}", '\u{7f}'),
+    ] {
+        let original = NmeaFrame {
+            prefix: '$',
+            talker: "GP",
+            sentence_type: "XYZ",
+            fields: vec!["1"],
+            tag_block: Some(tag),
+        };
+        assert_eq!(
+            original.to_sentence(),
+            Err(EncodeError::InvalidTagBlockCharacter(invalid))
+        );
+    }
+}
+
+#[test]
+fn frame_reencoding_validates_fields_and_keeps_proprietary_address() {
+    use nmea_0183_rs::{EncodeError, NmeaFrame};
+    let proprietary = parse_frame("$PASHR,1,").expect("frame");
+    let line = proprietary.to_sentence().expect("encode");
+    assert!(line.starts_with("$PASHR,"));
+    assert_eq!(parse_frame(&line).expect("reparse"), proprietary);
+    let invalid = NmeaFrame {
+        fields: vec!["injected,field"],
+        ..proprietary
+    };
+    assert_eq!(
+        invalid.to_sentence(),
+        Err(EncodeError::InvalidFieldCharacter(','))
+    );
+}

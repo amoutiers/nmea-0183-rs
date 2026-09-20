@@ -32,6 +32,34 @@ pub struct NmeaFrame<'a> {
     pub tag_block: Option<&'a str>,
 }
 
+impl NmeaFrame<'_> {
+    /// Re-encode this frame with its address, fields and optional tag block.
+    ///
+    /// Recomputes checksums (including the tag checksum) and appends CRLF. This
+    /// preserves envelope data for unknown sentences, not the original bytes.
+    /// Keep the original input for byte-for-byte forwarding. Fields accepted by
+    /// the permissive parser may still be rejected by [`encode_frame`].
+    ///
+    /// Tags must exclude their checksum and cannot contain non-ASCII characters,
+    /// controls, `\\` or `*`. Commas separating tag attributes are allowed.
+    pub fn to_sentence(&self) -> Result<String, crate::EncodeError> {
+        let sentence = encode_frame(self.prefix, self.talker, self.sentence_type, &self.fields)?;
+        match self.tag_block {
+            None => Ok(sentence),
+            Some(tag) => {
+                if let Some(c) = tag
+                    .chars()
+                    .find(|c| !c.is_ascii() || c.is_ascii_control() || matches!(c, '\\' | '*'))
+                {
+                    return Err(crate::EncodeError::InvalidTagBlockCharacter(c));
+                }
+                let checksum = tag.bytes().fold(0u8, |acc, byte| acc ^ byte);
+                Ok(format!("\\{tag}*{checksum:02X}\\{sentence}"))
+            }
+        }
+    }
+}
+
 /// Parse a raw NMEA 0183 line using device-compatible framing rules.
 ///
 /// Handles both `$` (instrument) and `!` (AIS) sentences.
