@@ -1,6 +1,7 @@
 //! AIS parser-level tests: frame filtering, fragment reassembly, reset.
 #![cfg(feature = "ais")]
 
+use nmea_0183_rs::ais::transmit::{AisChannel, AisEncodable, AisTransmitOptions, SafetyBroadcast};
 use nmea_0183_rs::ais::{AisMessage, AisParser};
 use nmea_0183_rs::parse_frame;
 
@@ -40,4 +41,87 @@ fn truncated_payloads_return_none_no_panic() {
         // Must not panic; truncated content yields None or Unknown, never a wrong decode.
         let _ = parser.decode(&frame);
     }
+}
+
+#[test]
+fn separates_interleaved_vdm_and_vdo_fragments() {
+    let vdm = SafetyBroadcast {
+        repeat_indicator: 0,
+        mmsi: 111_111_111,
+        text: "A".repeat(100),
+    }
+    .to_sentences(AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(0))
+    .expect("encode VDM");
+    let vdo = SafetyBroadcast {
+        repeat_indicator: 0,
+        mmsi: 222_222_222,
+        text: "B".repeat(100),
+    }
+    .to_sentences(AisTransmitOptions::vdo(AisChannel::A).with_sequence_id(0))
+    .expect("encode VDO");
+    assert_eq!(vdm.len(), 2);
+    assert_eq!(vdo.len(), 2);
+
+    let mut parser = AisParser::new();
+    assert!(
+        parser
+            .decode(&parse_frame(&vdm[0]).expect("parse VDM fragment one"))
+            .is_none()
+    );
+    assert!(
+        parser
+            .decode(&parse_frame(&vdo[0]).expect("parse VDO fragment one"))
+            .is_none()
+    );
+    assert!(matches!(
+        parser.decode(&parse_frame(&vdm[1]).expect("parse VDM fragment two")),
+        Some(AisMessage::Safety(message))
+            if message.mmsi == 111_111_111 && message.text == "A".repeat(100)
+    ));
+    assert!(matches!(
+        parser.decode(&parse_frame(&vdo[1]).expect("parse VDO fragment two")),
+        Some(AisMessage::Safety(message))
+            if message.mmsi == 222_222_222 && message.text == "B".repeat(100)
+    ));
+}
+
+#[test]
+fn reset_clears_vdm_and_vdo_fragments() {
+    let vdm = SafetyBroadcast {
+        repeat_indicator: 0,
+        mmsi: 111_111_111,
+        text: "A".repeat(100),
+    }
+    .to_sentences(AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(0))
+    .expect("encode VDM");
+    let vdo = SafetyBroadcast {
+        repeat_indicator: 0,
+        mmsi: 222_222_222,
+        text: "B".repeat(100),
+    }
+    .to_sentences(AisTransmitOptions::vdo(AisChannel::A).with_sequence_id(0))
+    .expect("encode VDO");
+
+    let mut parser = AisParser::new();
+    assert!(
+        parser
+            .decode(&parse_frame(&vdm[0]).expect("parse VDM"))
+            .is_none()
+    );
+    assert!(
+        parser
+            .decode(&parse_frame(&vdo[0]).expect("parse VDO"))
+            .is_none()
+    );
+    parser.reset();
+    assert!(
+        parser
+            .decode(&parse_frame(&vdm[1]).expect("parse VDM"))
+            .is_none()
+    );
+    assert!(
+        parser
+            .decode(&parse_frame(&vdo[1]).expect("parse VDO"))
+            .is_none()
+    );
 }

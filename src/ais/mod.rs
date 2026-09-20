@@ -104,18 +104,22 @@ pub enum AisMessage {
 
 /// Stateful AIS parser with multi-fragment reassembly.
 ///
-/// Maintains fragment buffers for concurrent multi-part messages.
-/// Feed it frames from `parse_frame()` — it returns decoded messages.
+/// Maintains separate VDM and VDO fragment buffers for up to 40 concurrent
+/// multi-part messages. Feed it frames from one source via `parse_frame()` —
+/// it returns decoded messages. It does not distinguish separate physical
+/// receivers that share a stream.
 #[cfg(feature = "ais")]
 pub struct AisParser {
-    collector: FragmentCollector,
+    vdm_collector: FragmentCollector,
+    vdo_collector: FragmentCollector,
 }
 
 #[cfg(feature = "ais")]
 impl AisParser {
     pub fn new() -> Self {
         Self {
-            collector: FragmentCollector::new(),
+            vdm_collector: FragmentCollector::new(),
+            vdo_collector: FragmentCollector::new(),
         }
     }
 
@@ -123,7 +127,8 @@ impl AisParser {
     ///
     /// Useful when switching data sources or recovering from a corrupted stream.
     pub fn reset(&mut self) {
-        self.collector = FragmentCollector::new();
+        self.vdm_collector = FragmentCollector::new();
+        self.vdo_collector = FragmentCollector::new();
     }
 
     /// Decode an AIS frame. Returns `Some(AisMessage)` for complete messages,
@@ -135,7 +140,12 @@ impl AisParser {
         }
 
         // Reassemble fragments
-        let payload = self.collector.process(&frame.fields)?;
+        let collector = if frame.sentence_type == "VDM" {
+            &mut self.vdm_collector
+        } else {
+            &mut self.vdo_collector
+        };
+        let payload = collector.process(&frame.fields)?;
 
         // Decode armor
         let bits = decode_armor(&payload.payload, payload.fill_bits)?;
