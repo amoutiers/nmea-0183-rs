@@ -1,11 +1,11 @@
 use crate::EncodeError;
 use crate::ais::encode::{
     BitWriter, encode_cog, encode_epfd, encode_heading, encode_latitude, encode_longitude,
-    encode_rot, encode_sog, encode_timestamp,
+    encode_position_timestamp, encode_rot, encode_sog,
 };
 use crate::ais::messages::NavigationStatus;
 
-use super::{AisEncodable, AisTransmitOptions, encode_payload};
+use super::{AisEncodable, AisTransmitOptions, PositionTimestamp, encode_payload};
 
 /// Class A dynamic position-report type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -40,7 +40,7 @@ pub struct ClassAPosition {
     pub latitude: Option<f64>,
     pub cog: Option<f32>,
     pub heading: Option<u16>,
-    pub timestamp: Option<u8>,
+    pub timestamp: PositionTimestamp,
     pub maneuver_indicator: u8,
     pub raim: bool,
     /// Raw 19-bit SOTDMA communication state.
@@ -90,7 +90,7 @@ impl AisEncodable for ClassAPosition {
         writer.push_i32(encode_latitude(self.latitude)?, 27, "latitude")?;
         writer.push_u32(encode_cog(self.cog)?, 12, "cog")?;
         writer.push_u32(encode_heading(self.heading)?, 9, "heading")?;
-        writer.push_u32(encode_timestamp(self.timestamp)?, 6, "timestamp")?;
+        writer.push_u32(encode_position_timestamp(self.timestamp)?, 6, "timestamp")?;
         writer.push_u32(u32::from(self.maneuver_indicator), 2, "maneuver_indicator")?;
         writer.push_spare(3);
         writer.push_bool(self.raim);

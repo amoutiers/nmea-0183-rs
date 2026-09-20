@@ -85,20 +85,7 @@ pub trait AisEncodable {
     fn to_sentences(&self, options: AisTransmitOptions) -> Result<Vec<String>, EncodeError>;
 }
 
-/// Timestamp status carried by AIS position reports.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PositionTimestamp {
-    /// UTC second at which the report was generated (0-59).
-    Exact(u8),
-    /// UTC time is not available.
-    NotAvailable,
-    /// Position was entered manually.
-    ManualInput,
-    /// Position comes from estimated or dead-reckoning navigation.
-    DeadReckoning,
-    /// The electronic position-fixing system is inoperative.
-    Inoperative,
-}
+pub use crate::ais::messages::common::PositionTimestamp;
 
 fn encode_payload(bits: &[u8], options: AisTransmitOptions) -> Result<Vec<String>, EncodeError> {
     if bits.is_empty() {

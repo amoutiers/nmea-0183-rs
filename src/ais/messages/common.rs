@@ -1,4 +1,32 @@
-//! Common AIS types: NavigationStatus, ShipType.
+//! Common AIS navigation, transceiver class and timestamp types.
+
+/// Timestamp status carried by AIS position reports.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PositionTimestamp {
+    /// UTC second at which the report was generated (0-59).
+    Exact(u8),
+    /// UTC time is not available.
+    NotAvailable,
+    /// Position was entered manually.
+    ManualInput,
+    /// Position comes from estimated or dead-reckoning navigation.
+    DeadReckoning,
+    /// The electronic position-fixing system is inoperative.
+    Inoperative,
+}
+
+impl PositionTimestamp {
+    /// Decode an already-extracted six-bit AIS timestamp.
+    pub(crate) fn from_six_bits(value: u8) -> Self {
+        match value {
+            60 => Self::NotAvailable,
+            61 => Self::ManualInput,
+            62 => Self::DeadReckoning,
+            63 => Self::Inoperative,
+            second => Self::Exact(second),
+        }
+    }
+}
 
 /// AIS Navigation Status (4 bits, 0-15).
 #[non_exhaustive]
@@ -93,6 +121,64 @@ mod tests {
             let status = NavigationStatus::from(val);
             let back: u8 = status.into();
             assert_eq!(val, back);
+        }
+    }
+}
+
+#[cfg(test)]
+mod timestamp_tests {
+    use crate::ais::messages::{
+        AidToNavigation, PositionReport, SarAircraftReport, test_helpers::set_bits,
+    };
+    use crate::ais::transmit::PositionTimestamp;
+
+    #[test]
+    fn position_timestamp_states_survive_all_decoders() {
+        for (raw, expected) in [
+            (0, PositionTimestamp::Exact(0)),
+            (59, PositionTimestamp::Exact(59)),
+            (60, PositionTimestamp::NotAvailable),
+            (61, PositionTimestamp::ManualInput),
+            (62, PositionTimestamp::DeadReckoning),
+            (63, PositionTimestamp::Inoperative),
+        ] {
+            for (kind, length, offset) in [
+                (1, 168, 137),
+                (2, 168, 137),
+                (3, 168, 137),
+                (9, 168, 128),
+                (18, 168, 133),
+                (19, 312, 133),
+                (21, 272, 253),
+            ] {
+                let mut bits = vec![0; length];
+                set_bits(&mut bits, 0, 6, kind);
+                set_bits(&mut bits, offset, 6, raw);
+                let actual = match kind {
+                    1..=3 => {
+                        PositionReport::decode_class_a(&bits)
+                            .expect("class A")
+                            .timestamp
+                    }
+                    9 => {
+                        SarAircraftReport::decode(&bits)
+                            .expect("aircraft")
+                            .timestamp
+                    }
+                    18 => {
+                        PositionReport::decode_class_b(&bits)
+                            .expect("class B")
+                            .timestamp
+                    }
+                    19 => {
+                        PositionReport::decode_class_b_extended(&bits)
+                            .expect("extended B")
+                            .timestamp
+                    }
+                    _ => AidToNavigation::decode(&bits).expect("aid").timestamp,
+                };
+                assert_eq!(actual, expected, "type {kind}, wire timestamp {raw}");
+            }
         }
     }
 }

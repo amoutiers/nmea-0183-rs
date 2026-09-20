@@ -3,6 +3,7 @@
 //! Transmitted by AIS-equipped buoys, lighthouses, and beacons. Provides real-time
 //! position and identity for navigational aids. Always single-frame.
 
+use super::common::PositionTimestamp;
 use crate::ais::armor::{extract_i32, extract_string, extract_u32};
 
 use super::utils::{decode_latitude, decode_longitude};
@@ -38,7 +39,7 @@ pub struct AidToNavigation {
     pub dimension_to_port: u8,
     pub dimension_to_starboard: u8,
     pub position_fixing_device: u8,
-    pub timestamp: Option<u8>,
+    pub timestamp: PositionTimestamp,
     pub off_position: bool,
     pub regional_application: u8,
     pub raim: bool,
@@ -82,11 +83,7 @@ impl AidToNavigation {
             dimension_to_port: extract_u32(bits, 237, 6)? as u8,
             dimension_to_starboard: extract_u32(bits, 243, 6)? as u8,
             position_fixing_device: extract_u32(bits, 249, 4)? as u8,
-            timestamp: if timestamp_raw < 60 {
-                Some(timestamp_raw)
-            } else {
-                None
-            },
+            timestamp: PositionTimestamp::from_six_bits(timestamp_raw),
             off_position: extract_u32(bits, 259, 1)? == 1,
             regional_application: extract_u32(bits, 260, 8)? as u8,
             raim: extract_u32(bits, 268, 1)? == 1,

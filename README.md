@@ -150,7 +150,7 @@ reports. Migrating those public field types is separate work.
 ```rust
 use nmea_0183_rs::ais::messages::NavigationStatus;
 use nmea_0183_rs::ais::transmit::{
-    AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition, ClassAPositionType,
+    AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition, ClassAPositionType, PositionTimestamp,
 };
 
 let report = ClassAPosition {
@@ -165,7 +165,7 @@ let report = ClassAPosition {
     latitude: Some(51.894_750),
     cog: Some(70.6),
     heading: Some(71),
-    timestamp: Some(5),
+    timestamp: PositionTimestamp::Exact(5),
     maneuver_indicator: 0,
     raim: false,
     communication_state: 0,

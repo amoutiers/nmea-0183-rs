@@ -1,5 +1,5 @@
 use crate::EncodeError;
-use crate::ais::transmit::PositionTimestamp;
+use crate::ais::messages::PositionTimestamp;
 
 pub(crate) struct BitWriter {
     bits: Vec<u8>,
@@ -122,14 +122,6 @@ pub(crate) fn encode_heading(value: Option<u16>) -> Result<u32, EncodeError> {
         None => Ok(511),
         Some(value) if value <= 359 => Ok(u32::from(value)),
         Some(_) => Err(EncodeError::InvalidAisField("heading")),
-    }
-}
-
-pub(crate) fn encode_timestamp(value: Option<u8>) -> Result<u32, EncodeError> {
-    match value {
-        None => Ok(60),
-        Some(value) if value <= 59 => Ok(u32::from(value)),
-        Some(_) => Err(EncodeError::InvalidAisField("timestamp")),
     }
 }
 

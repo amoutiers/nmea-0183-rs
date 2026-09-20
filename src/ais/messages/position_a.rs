@@ -1,5 +1,6 @@
 //! AIS position report — Types 1, 2, 3 (Class A).
 
+use super::common::PositionTimestamp;
 use crate::ais::armor::{extract_i32, extract_u32};
 
 use super::common::{AisClass, NavigationStatus};
@@ -24,7 +25,7 @@ pub struct PositionReport {
     pub cog: Option<f32>,
     /// True heading in degrees (integer, 0-359). AIS has no fractional resolution for heading.
     pub heading: Option<u16>,
-    pub timestamp: Option<u8>,
+    pub timestamp: PositionTimestamp,
     /// Manoeuvre indicator, present only in Types 1/2/3.
     pub maneuver_indicator: Option<u8>,
     /// Receiver autonomous integrity monitoring flag.
@@ -100,7 +101,7 @@ impl PositionReport {
             latitude: decode_latitude(lat_raw),
             cog: decode_cog(cog_raw),
             heading: decode_heading(hdg_raw),
-            timestamp: if ts_raw < 60 { Some(ts_raw) } else { None },
+            timestamp: PositionTimestamp::from_six_bits(ts_raw),
             maneuver_indicator: Some(maneuver_indicator),
             raim,
             communication_state: Some(communication_state),

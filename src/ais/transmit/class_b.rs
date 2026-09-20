@@ -1,7 +1,7 @@
 use crate::EncodeError;
 use crate::ais::encode::{
     BitWriter, encode_cog, encode_epfd, encode_heading, encode_latitude, encode_longitude,
-    encode_position_timestamp, encode_sog, encode_timestamp,
+    encode_position_timestamp, encode_sog,
 };
 
 use super::{AisEncodable, AisTransmitOptions, PositionTimestamp, encode_payload};
@@ -36,7 +36,7 @@ pub struct ClassBPosition {
     pub latitude: Option<f64>,
     pub cog: Option<f32>,
     pub heading: Option<u16>,
-    pub timestamp: Option<u8>,
+    pub timestamp: PositionTimestamp,
     pub transmit_power_low: bool,
     pub class_b_cs: bool,
     pub display_available: bool,
@@ -114,7 +114,7 @@ impl AisEncodable for ClassBPosition {
         writer.push_i32(encode_latitude(self.latitude)?, 27, "latitude")?;
         writer.push_u32(encode_cog(self.cog)?, 12, "cog")?;
         writer.push_u32(encode_heading(self.heading)?, 9, "heading")?;
-        writer.push_u32(encode_timestamp(self.timestamp)?, 6, "timestamp")?;
+        writer.push_u32(encode_position_timestamp(self.timestamp)?, 6, "timestamp")?;
         writer.push_bool(self.transmit_power_low);
         writer.push_spare(1);
         writer.push_bool(self.class_b_cs);

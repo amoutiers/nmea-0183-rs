@@ -25,6 +25,35 @@ fn payload_bits(line: &str) -> Vec<u8> {
     decode_armor(payload, fill_bits).expect("decode emitted armor")
 }
 
+fn check_timestamp_roundtrip(
+    report: &impl AisEncodable,
+    raw: u32,
+    expected: PositionTimestamp,
+    offset: usize,
+) {
+    let lines = report
+        .to_sentences(AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1))
+        .expect("timestamp encode");
+    assert_eq!(extract_u32(&payload_bits(&lines[0]), offset, 6), Some(raw));
+    let actual = match decode_lines(&lines) {
+        AisMessage::Position(value) => value.timestamp,
+        AisMessage::SarAircraft(value) => value.timestamp,
+        AisMessage::AidToNavigation(value) => value.timestamp,
+        other => panic!("unexpected timestamp message: {other:?}"),
+    };
+    let expected: nmea_0183_rs::ais::messages::common::PositionTimestamp = expected;
+    assert_eq!(actual, expected);
+}
+
+const TIMESTAMP_CASES: [(u32, PositionTimestamp); 6] = [
+    (0, PositionTimestamp::Exact(0)),
+    (59, PositionTimestamp::Exact(59)),
+    (60, PositionTimestamp::NotAvailable),
+    (61, PositionTimestamp::ManualInput),
+    (62, PositionTimestamp::DeadReckoning),
+    (63, PositionTimestamp::Inoperative),
+];
+
 #[test]
 fn safety_messages_encode_to_decodable_sentences() {
     let addressed = SafetyAddressed {
@@ -133,6 +162,20 @@ fn specialized_station_reports_encode_to_decodable_sentences() {
         raim: false,
         communication_state: ClassBCommunicationState::Sotdma(0),
     };
+    for (raw, timestamp) in TIMESTAMP_CASES {
+        let mut candidate = sar.clone();
+        candidate.timestamp = timestamp;
+        check_timestamp_roundtrip(&candidate, raw, timestamp, 128);
+    }
+    for invalid in [60, 255] {
+        let mut candidate = sar.clone();
+        candidate.timestamp = PositionTimestamp::Exact(invalid);
+        assert_eq!(
+            candidate.to_sentences(AisTransmitOptions::vdm(AisChannel::A)),
+            Err(EncodeError::InvalidAisField("timestamp"))
+        );
+    }
+
     let aton = AidToNavigation {
         repeat_indicator: 0,
         mmsi: 992_001_001,
@@ -154,6 +197,19 @@ fn specialized_station_reports_encode_to_decodable_sentences() {
         assigned_mode: false,
         name_extension: Some("WEST".to_string()),
     };
+    for (raw, timestamp) in TIMESTAMP_CASES {
+        let mut candidate = aton.clone();
+        candidate.timestamp = timestamp;
+        check_timestamp_roundtrip(&candidate, raw, timestamp, 253);
+    }
+    for invalid in [60, 255] {
+        let mut candidate = aton.clone();
+        candidate.timestamp = PositionTimestamp::Exact(invalid);
+        assert_eq!(
+            candidate.to_sentences(AisTransmitOptions::vdm(AisChannel::A)),
+            Err(EncodeError::InvalidAisField("timestamp"))
+        );
+    }
 
     for report in [
         base.to_sentences(AisTransmitOptions::vdm(AisChannel::A)),
@@ -243,6 +299,20 @@ fn class_b_extended_and_long_range_reports_encode_to_decodable_sentences() {
         assigned_mode: false,
         raim: true,
     };
+    for (raw, timestamp) in TIMESTAMP_CASES {
+        let mut candidate = extended.clone();
+        candidate.timestamp = timestamp;
+        check_timestamp_roundtrip(&candidate, raw, timestamp, 133);
+    }
+    for invalid in [60, 255] {
+        let mut candidate = extended.clone();
+        candidate.timestamp = PositionTimestamp::Exact(invalid);
+        assert_eq!(
+            candidate.to_sentences(AisTransmitOptions::vdm(AisChannel::A)),
+            Err(EncodeError::InvalidAisField("timestamp"))
+        );
+    }
+
     let long_range = LongRangePosition {
         mmsi: extended.mmsi,
         position_accuracy: true,
@@ -292,11 +362,31 @@ fn class_a_position_encodes_to_a_decodable_vdm_sentence() {
         latitude: Some(51.894_75),
         cog: Some(70.6),
         heading: Some(71),
-        timestamp: Some(5),
+        timestamp: PositionTimestamp::Exact(5),
         maneuver_indicator: 1,
         raim: false,
         communication_state: 0,
     };
+    for message_type in [
+        ClassAPositionType::PositionReport,
+        ClassAPositionType::AssignedPositionReport,
+        ClassAPositionType::SpecialPositionReport,
+    ] {
+        for (raw, timestamp) in TIMESTAMP_CASES {
+            let mut candidate = report.clone();
+            candidate.message_type = message_type;
+            candidate.timestamp = timestamp;
+            check_timestamp_roundtrip(&candidate, raw, timestamp, 137);
+        }
+    }
+    for invalid in [60, 255] {
+        let mut candidate = report.clone();
+        candidate.timestamp = PositionTimestamp::Exact(invalid);
+        assert_eq!(
+            candidate.to_sentences(AisTransmitOptions::vdm(AisChannel::A)),
+            Err(EncodeError::InvalidAisField("timestamp"))
+        );
+    }
 
     let lines = report
         .to_sentences(AisTransmitOptions::vdm(AisChannel::A))
@@ -438,7 +528,7 @@ fn class_b_position_encodes_to_a_decodable_vdm_sentence() {
         latitude: Some(48.856_6),
         cog: Some(91.2),
         heading: Some(91),
-        timestamp: Some(15),
+        timestamp: PositionTimestamp::Exact(15),
         transmit_power_low: false,
         class_b_cs: true,
         display_available: true,
@@ -449,6 +539,19 @@ fn class_b_position_encodes_to_a_decodable_vdm_sentence() {
         raim: false,
         communication_state: ClassBCommunicationState::Itdma(0),
     };
+    for (raw, timestamp) in TIMESTAMP_CASES {
+        let mut candidate = report.clone();
+        candidate.timestamp = timestamp;
+        check_timestamp_roundtrip(&candidate, raw, timestamp, 133);
+    }
+    for invalid in [60, 255] {
+        let mut candidate = report.clone();
+        candidate.timestamp = PositionTimestamp::Exact(invalid);
+        assert_eq!(
+            candidate.to_sentences(AisTransmitOptions::vdm(AisChannel::A)),
+            Err(EncodeError::InvalidAisField("timestamp"))
+        );
+    }
 
     let mut invalid_heading = report.clone();
     invalid_heading.heading = Some(360);
@@ -458,7 +561,7 @@ fn class_b_position_encodes_to_a_decodable_vdm_sentence() {
     );
 
     let mut invalid_timestamp = report.clone();
-    invalid_timestamp.timestamp = Some(61);
+    invalid_timestamp.timestamp = PositionTimestamp::Exact(61);
     assert_eq!(
         invalid_timestamp.to_sentences(AisTransmitOptions::vdm(AisChannel::B)),
         Err(EncodeError::InvalidAisField("timestamp"))
