@@ -56,3 +56,13 @@ fn dse_values() {
         }
     );
 }
+
+#[test]
+fn retains_datasets_after_missing_code() {
+    let dse =
+        Dse::parse(&["1", "1", "A", "123", "", "first", "01", "second", "02"]).expect("parse");
+    assert_eq!(dse.datasets.len(), 3);
+    assert_eq!(dse.datasets[0].code, None);
+    assert_eq!(dse.datasets[1].code.as_deref(), Some("01"));
+    assert_eq!(dse.datasets[2].data, None);
+}

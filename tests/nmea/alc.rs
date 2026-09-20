@@ -48,3 +48,13 @@ fn roundtrip() {
     let frame = parse_frame(sentence.trim()).expect("re-parse");
     assert_eq!(Alc::parse(&frame.fields).expect("parse"), original);
 }
+
+#[test]
+fn retains_entries_after_missing_or_partial_group_fields() {
+    let alc =
+        Alc::parse(&["1", "1", "0", "3", "", "bad", "x", "", "FEB", "01", "2"]).expect("parse");
+    assert_eq!(alc.entries.len(), 2);
+    assert_eq!(alc.entries[0].manufacturer, None);
+    assert_eq!(alc.entries[1].manufacturer.as_deref(), Some("FEB"));
+    assert_eq!(alc.entries[1].revision, None);
+}

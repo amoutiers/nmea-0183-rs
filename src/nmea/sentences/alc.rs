@@ -39,19 +39,20 @@ impl Alc {
         let frag_num = r.u8();
         let msg_id = r.u8();
         let entries_num = r.u8();
-        let mut entries = Vec::new();
-        loop {
-            let manufacturer = r.string();
-            if manufacturer.is_none() {
-                break;
-            }
-            entries.push(AlcEntry {
-                manufacturer,
-                alert_id: r.string(),
-                instance: r.u8(),
-                revision: r.u8(),
-            });
-        }
+        let entries = fields
+            .get(4..)
+            .unwrap_or(&[])
+            .chunks(4)
+            .map(|group| {
+                let mut r = FieldReader::new(group);
+                AlcEntry {
+                    manufacturer: r.string(),
+                    alert_id: r.string(),
+                    instance: r.u8(),
+                    revision: r.u8(),
+                }
+            })
+            .collect();
         Some(Self {
             num_frags,
             frag_num,

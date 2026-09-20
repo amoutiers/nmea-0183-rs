@@ -39,3 +39,12 @@ fn roundtrip() {
     let parsed = Tlb::parse(&frame.fields).expect("parse");
     assert_eq!(original, parsed);
 }
+
+#[test]
+fn retains_targets_after_missing_number() {
+    let tlb = Tlb::parse(&["", "unknown", "2", "BETA", "3"]).expect("parse");
+    assert_eq!(tlb.targets.len(), 3);
+    assert_eq!(tlb.targets[0].number, None);
+    assert_eq!(tlb.targets[1].label.as_deref(), Some("BETA"));
+    assert_eq!(tlb.targets[2].label, None);
+}

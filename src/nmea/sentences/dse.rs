@@ -37,17 +37,18 @@ impl Dse {
         let number = r.u8();
         let ack = r.char();
         let mmsi = r.string();
-        let mut datasets = Vec::new();
-        loop {
-            let code = r.string();
-            if code.is_none() {
-                break;
-            }
-            datasets.push(DseDataSet {
-                code,
-                data: r.string(),
-            });
-        }
+        let datasets = fields
+            .get(4..)
+            .unwrap_or(&[])
+            .chunks(2)
+            .map(|group| {
+                let mut r = FieldReader::new(group);
+                DseDataSet {
+                    code: r.string(),
+                    data: r.string(),
+                }
+            })
+            .collect();
         Some(Self {
             total,
             number,

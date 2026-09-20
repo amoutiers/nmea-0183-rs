@@ -22,18 +22,16 @@ impl Tlb {
     /// Parse fields from a decoded NMEA frame.
     /// Always returns `Some`; missing or malformed fields become `None`.
     pub fn parse(fields: &[&str]) -> Option<Self> {
-        let mut r = FieldReader::new(fields);
-        let mut targets = Vec::new();
-        loop {
-            let number = r.u8();
-            if number.is_none() {
-                break;
-            }
-            targets.push(TlbTarget {
-                number,
-                label: r.string(),
-            });
-        }
+        let targets = fields
+            .chunks(2)
+            .map(|group| {
+                let mut r = FieldReader::new(group);
+                TlbTarget {
+                    number: r.u8(),
+                    label: r.string(),
+                }
+            })
+            .collect();
         Some(Self { targets })
     }
 }
