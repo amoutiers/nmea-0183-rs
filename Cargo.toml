@@ -17,21 +17,34 @@ exclude = ["/tests/"]
 [dependencies]
 
 [features]
-default = ["nmea", "ais"]
+default = ["nmea", "nmea_proprietary", "ais"]
 
-# Semantic groups
-positioning = ["gga", "gll", "rmc", "gns"]
-speed       = ["vtg", "vhw", "vbw", "rmc", "rpm", "vdr"]
-heading     = ["hdg", "hdm", "hdt", "ths"]
-wind        = ["mwd", "mwv"]
-depth       = ["dbt", "dbs", "dbk", "dpt"]
+# Standard NMEA sentence categories
+position         = ["dtm", "gga", "gll", "gns", "rmb", "rmc"]
+satellites       = ["gbs", "gsa", "gst", "gsv"]
+heading          = ["hdg", "hdm", "hdt", "hsc", "ths"]
+course_speed     = ["osd", "rot", "vbw", "vdr", "vhw", "vlw", "vpw", "vtg", "wcv"]
+wind             = ["mwd", "mwv", "vwr", "vwt"]
+depth            = ["dbk", "dbs", "dbt", "dpt"]
+steering         = ["apb", "rpm", "rsa"]
+waypoints_routes = ["aam", "bec", "bod", "bwc", "bwr", "bww", "rte", "wpl", "xte"]
+environment      = ["mda", "mta", "mtw", "xdr"]
+time             = ["zda"]
+targets          = ["rsd", "tlb", "tll", "ttd", "ttm"]
+safety_alarms    = ["ack", "acn", "ala", "alc", "alf", "alr", "arc", "dor", "dsc", "dse", "eve", "fir", "hbt"]
+communication    = ["txt"]
 
-# Umbrella — all sentence types
+# Umbrella features
 nmea = [
-    "positioning", "speed", "heading", "wind", "depth",
-    "aam", "ack", "acn", "ala", "alc", "alf", "alr", "arc", "apb", "bec", "bod", "bwc", "bwr", "bww", "dor", "dsc", "dse", "dtm", "eve", "fir", "gbs", "gsa", "gsv", "gst", "hbt", "hsc", "mda", "mta", "mtw", "osd", "pashr", "pcdin", "pgrme", "pgrmt", "phtro", "pklid", "pklds", "pklsh", "pknds", "pknid", "pknsh", "pkwdwpl", "pmtk", "prdid", "psoncms", "pskpdpt", "rmb", "rot", "rpm", "rsa", "rsd", "rte", "tlb", "tll", "ttd", "ttm", "txt", "vdr", "vlw", "vpw", "vwr", "vwt", "vsd", "wcv", "wpl", "xdr", "xte", "zda",
+    "position", "satellites", "heading", "course_speed", "wind", "depth",
+    "steering", "waypoints_routes", "environment", "time", "targets",
+    "safety_alarms", "communication", "vsd",
 ]
-ais = ["abm", "bbm"]
+nmea_proprietary = [
+    "pashr", "pcdin", "pgrme", "pgrmt", "phtro", "pklid", "pklds", "pklsh",
+    "pknds", "pknid", "pknsh", "pkwdwpl", "pmtk", "prdid", "psoncms", "pskpdpt",
+]
+ais = ["abm", "bbm", "vsd"]
 
 # Individual NMEA sentence types
 aam = []

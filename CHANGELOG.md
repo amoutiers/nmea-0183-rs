@@ -11,6 +11,7 @@ All notable changes to nmea-0183-rs are documented here.
 - Added `Default` for NMEA and ABM/BBM sentence structs and their field groups, compatible/strict encoding on `NmeaSentence` and `AisSentence`, and strict encoding on ABM/BBM.
 
 ### Changed
+- **Breaking:** `nmea` now enables only the 69 standard NMEA formatters. Enable the new `nmea_proprietary` feature for all 16 proprietary formatters. The former `positioning` and `speed` groups are replaced by category-aligned features documented in `SENTENCES.md`.
 - **Breaking:** removed historical API adapters. `AisParser::decode()` returns `Result<AisDecodeOutcome, AisDecodeError>`; `FragmentCollector::process()` returns `Result<Option<AisPayload>, AisDecodeError>`. The `decode_detailed()` and `process_checked()` names are removed. Match explicit outcomes and errors instead of relying on a silent `Option` projection.
 - Removed the unused `EncodeError::MissingFrameContext` variant.
 - **Breaking:** NMEA and ABM/BBM sentence parsers return `Self` instead of `Option<Self>`. Remove outer `expect`, `?`, or `Some` matches; optional field values and lenient parsing are unchanged.

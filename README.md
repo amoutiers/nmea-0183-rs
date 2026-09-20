@@ -375,23 +375,35 @@ such as RTE, TXT, ALC, ALF, TUT, and SMV.
 nmea-0183-rs = "0.8"
 ```
 
-| Feature                                                                                                                                                                                                                                | Default    | Enables                    |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------------------------- |
-| `nmea`                                                                                                                                                                                                         | yes        | All 85 NMEA sentence types |
-| `ais`                                                                                                                                                                                                                                  | yes        | 24 AIS message decoders, transponder encoding, and ABM/BBM application sentences |
-| `positioning`                                                                                                                                                                                                                          | via `nmea` | GGA, GLL, RMC, GNS         |
-| `speed`                                                                                                                                                                                                                                | via `nmea` | VTG, VHW, VBW, RMC, RPM, VDR |
-| `heading`                                                                                                                                                                                                                              | via `nmea` | HDG, HDM, HDT, THS         |
-| `wind`                                                                                                                                                                                                                                 | via `nmea` | MWD, MWV                   |
-| `depth`                                                                                                                                                                                                                                | via `nmea` | DBT, DBS, DBK, DPT         |
-| `aam`, `ack`, `acn`, `ala`, `alc`, `alf`, `alr`, `arc`, `apb`, `bec`, `bod`, `bwc`, `bwr`, `bww`, `dbk`, `dbs`, `dbt`, `dor`, `dpt`, `dsc`, `dse`, `dtm`, `eve`, `fir`, `gbs`, `gga`, `gll`, `gns`, `gsa`, `gsv`, `gst`, `hbt`, `hdg`, `hdm`, `hdt`, `hsc`, `mda`, `mta`, `mtw`, `mwd`, `mwv`, `osd`, `pashr`, `pcdin`, `pgrme`, `pgrmt`, `phtro`, `pklid`, `pklds`, `pklsh`, `pknds`, `pknid`, `pknsh`, `pkwdwpl`, `pmtk`, `prdid`, `psoncms`, `pskpdpt`, `rmb`, `rmc`, `rot`, `rpm`, `rsa`, `rsd`, `rte`, `tlb`, `tll`, `ttd`, `ttm`, `txt`, `vbw`, `vdr`, `vhw`, `vlw`, `vpw`, `vsd`, `vtg`, `vwr`, `vwt`, `wcv`, `wpl`, `xdr`, `xte`, `zda` | via `nmea` | Individual NMEA sentence types |
-| `abm`, `bbm` | via `ais` | Individual AIS application-layer sentence types |
+| Feature | Default | Enables |
+| --- | --- | --- |
+| `nmea` | yes | All 69 standard NMEA sentence types |
+| `nmea_proprietary` | yes | All 16 proprietary NMEA sentence types |
+| `ais` | yes | 24 AIS message decoders, transponder encoding, ABM/BBM, and VSD |
+| `position` | via `nmea` | DTM, GGA, GLL, GNS, RMB, RMC |
+| `satellites` | via `nmea` | GBS, GSA, GST, GSV |
+| `heading` | via `nmea` | HDG, HDM, HDT, HSC, THS |
+| `course_speed` | via `nmea` | OSD, ROT, VBW, VDR, VHW, VLW, VPW, VTG, WCV |
+| `wind` | via `nmea` | MWD, MWV, VWR, VWT |
+| `depth` | via `nmea` | DBK, DBS, DBT, DPT |
+| `steering` | via `nmea` | APB, RPM, RSA |
+| `waypoints_routes` | via `nmea` | AAM, BEC, BOD, BWC, BWR, BWW, RTE, WPL, XTE |
+| `environment` | via `nmea` | MDA, MTA, MTW, XDR |
+| `time` | via `nmea` | ZDA |
+| `targets` | via `nmea` | RSD, TLB, TLL, TTD, TTM |
+| `safety_alarms` | via `nmea` | ACK, ACN, ALA, ALC, ALF, ALR, ARC, DOR, DSC, DSE, EVE, FIR, HBT |
+| `communication` | via `nmea` | TXT |
+
+Every supported formatter also has an individual lowercase feature. The complete
+mapping is listed in [`SENTENCES.md`](SENTENCES.md). `abm` and `bbm` are enabled
+through `ais`; proprietary formatter features are enabled through
+`nmea_proprietary`.
 
 Use a group feature for common use cases:
 
 ```toml
-# Only positioning sentences (GGA, GLL, RMC, GNS), no AIS
-nmea-0183-rs = { version = "0.8", default-features = false, features = ["positioning"] }
+# Only position sentences, no AIS or proprietary formatters
+nmea-0183-rs = { version = "0.8", default-features = false, features = ["position"] }
 ```
 
 Cherry-pick individual sentences you need:
@@ -400,10 +412,16 @@ Cherry-pick individual sentences you need:
 nmea-0183-rs = { version = "0.8", default-features = false, features = ["rmc", "mwd"] }
 ```
 
-NMEA-only (no AIS, all sentences):
+Standard NMEA only, without AIS or proprietary formatters:
 
 ```toml
 nmea-0183-rs = { version = "0.8", default-features = false, features = ["nmea"] }
+```
+
+Add all proprietary NMEA formatters explicitly when needed:
+
+```toml
+nmea-0183-rs = { version = "0.8", default-features = false, features = ["nmea", "nmea_proprietary"] }
 ```
 
 ## Coordinate conversion
