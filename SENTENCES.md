@@ -4,6 +4,8 @@ Cette liste distingue les sentence formatters approuvés par l’[IEC 61162-1:20
 
 Les cases indiquent un support actuellement présent dans nmea-kit. La liste IEC reprend les 133 formatters de la section 8.3 de l’édition 6.0. `HTC` et `HTD` sont deux formatters regroupés dans une même rubrique de la norme.
 
+Version de la couverture : `nmea-kit` 0.8.7, avec 80 sentences NMEA bidirectionnelles et 2 sentences AIS d’application.
+
 Sources : [IEC 61162-1:2024](https://webstore.iec.ch/en/publication/72729), [go-nmea](https://github.com/adrianmo/go-nmea), [gpsd](https://gitlab.com/gpsd/gpsd), [SignalK](https://github.com/SignalK/signalk-parser-nmea0183) et [pynmeagps](https://github.com/semuconsulting/pynmeagps).
 
 ## Current status

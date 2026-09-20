@@ -4,13 +4,13 @@ Bidirectional NMEA 0183 parser/encoder + AIS decoder and transponder-message enc
 
 | Key | Value |
 |---|---|
-| Crate | `nmea-kit` v0.8.6 |
+| Crate | `nmea-kit` v0.8.7 |
 | Edition | 2024, MSRV 1.85.0 |
 | Dependencies | 0 |
-| NMEA sentences | 78 (bidirectional) |
+| NMEA sentences | 80 (bidirectional) |
 | AIS application sentences | 2 (bidirectional) |
 | AIS message types | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
-| Tests | 845, 0 failures |
+| Tests | 858, 0 failures |
 | Unsafe blocks | 0 |
 
 For contribution workflow, test rules, and the sentence-type checklist see [CONTRIBUTING.md](CONTRIBUTING.md).
