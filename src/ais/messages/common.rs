@@ -96,9 +96,10 @@ impl From<NavigationStatus> for u8 {
 pub enum AisClass {
     /// Class A — SOLAS vessels (Types 1/2/3/5)
     A,
-    /// Class B "SO" — leisure/small craft (Type 18/24)
+    /// Class B position reports (Type 18).
+    /// The `class_b_cs` flag distinguishes CS from SO equipment.
     B,
-    /// Class B+ "CS" — enhanced Class B (Type 19)
+    /// Extended Class B position reports (Type 19, SO equipment).
     BPlus,
 }
 

@@ -1,7 +1,7 @@
 //! AIS safety-related broadcast message — Type 14.
 //!
 //! Transmitted by vessels and shore stations (coast guard, port authority) to broadcast
-//! safety-critical text messages. Always single-frame.
+//! safety-critical text messages. Long text payloads may span multiple AIVDM/AIVDO sentences.
 
 use crate::ais::armor::{extract_string, extract_u32};
 

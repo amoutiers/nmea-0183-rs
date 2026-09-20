@@ -24,6 +24,10 @@ All notable changes to nmea-0183-rs are documented here.
 - Multi-character indicator fields, including ABM/BBM channels, now decode to `None` instead of using only their first character.
 
 ### Fixed
+- Align complete AIS Types 12/14/21 messages to byte boundaries before armoring. Variable-length text payloads and checksums may change; public method signatures are unchanged.
+- Preserve empty waypoint positions and all following identifiers when parsing RTE routes.
+- Reject multi-character DSC and XDR indicators instead of truncating them, while retaining the existing tolerance for surrounding spaces in DSC indicators.
+- Correct AIS course units, aid-to-navigation codes, Class B descriptions, safety-message fragmentation, and GSA/GSV indicator parsing documentation.
 - Strict frame validation rejects invalid tag-block characters with `ComplianceError::InvalidTagBlockCharacter`, matching frame re-encoding.
 - Reject duplicate AIS fragments with a conflicting fragment total and discard only the affected assembly.
 - Reject non-alphanumeric address characters during encoding to prevent NMEA sentence injection through `talker` or `sentence_type`; preserve the `!**TTD` address.

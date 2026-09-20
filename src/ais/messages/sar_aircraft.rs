@@ -19,7 +19,8 @@ pub struct SarAircraftReport {
     pub position_accuracy: bool,
     pub longitude: Option<f64>,
     pub latitude: Option<f64>,
-    /// Course over ground in 1/10 degree. None if not available (3600).
+    /// Course over ground in degrees, with 0.1-degree resolution.
+    /// None if unavailable or reserved.
     pub cog: Option<f32>,
     /// UTC second or explicit position timestamp status.
     pub timestamp: PositionTimestamp,

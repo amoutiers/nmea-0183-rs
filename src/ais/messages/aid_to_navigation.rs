@@ -14,7 +14,7 @@ use super::utils::{decode_latitude, decode_longitude};
 /// - bits   0–5:   message type (= 21)
 /// - bits   6–7:   repeat indicator
 /// - bits   8–37:  MMSI (30 bits)
-/// - bits  38–42:  type of AID (5 bits, 1–31)
+/// - bits  38–42:  type of AID (5 bits, 0–31)
 /// - bits  43–162: name (20 × 6-bit ASCII chars)
 /// - bit   163:    position accuracy
 /// - bits 164–191: longitude (28 bits, 1/10000 min, same encoding as Type 1)
@@ -24,8 +24,9 @@ pub struct AidToNavigation {
     pub repeat_indicator: u8,
     /// MMSI of the aid-to-navigation transponder.
     pub mmsi: u32,
-    /// Type of navigational aid (ITU-R M.1371 Table 67).
-    /// E.g. 1=default/unspecified, 16=buoy, 20=LANBY, 31=IALA special mark.
+    /// Type of navigational aid (ITU-R M.1371-6 Table 72).
+    /// E.g. 0=unspecified, 1=reference point, 20=north cardinal mark,
+    /// 30=special mark, 31=light vessel/LANBY/rig.
     pub aid_type: u8,
     /// Name of the aid (e.g. "PORTLAND BILL LT"), trimmed of padding.
     pub name: String,

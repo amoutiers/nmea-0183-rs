@@ -10,7 +10,7 @@ Bidirectional NMEA 0183 parser/encoder + AIS decoder and transponder-message enc
 | NMEA sentences | 85 (bidirectional) |
 | AIS application sentences | 2 (bidirectional) |
 | AIS message types | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
-| Tests | 948 unit/integration + 9 doctests, 0 failures (all features) |
+| Tests | 953 unit/integration + 9 doctests, 0 failures (all features) |
 | Unsafe blocks | 0 |
 
 For contribution workflow, test rules, and the sentence-type checklist see [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -236,7 +236,7 @@ AIS types use bit-level extraction from decoded 6-bit armor. The transponder enc
 
 `ais::transmit` is stateless: callers select `AisChannel` and `AisSentenceKind` through `AisTransmitOptions`, then call `AisEncodable::to_sentences()`. It emits Types 1/2/3 (`ClassAPosition`), 4 (`BaseStation`), 5 (`ClassAStaticVoyage`), 9 (`SarAircraft`), 11 (`UtcDateResponse`), 12 (`SafetyAddressed`), 14 (`SafetyBroadcast`), 18 (`ClassBPosition`), 19 (`ClassBExtendedPosition`), 21 (`AidToNavigation`), 24 parts A/B (`ClassBStaticPartA` / `ClassBStaticPartB`), and 27 (`LongRangePosition`). It splits armor at 60 characters, requires a sequence ID for multi-fragment output, and never schedules transmission cycles.
 
-Helper functions in `position_a.rs` are `pub(crate)` — shared by `position_b.rs` and `position_b_ext.rs`.
+Shared decode helpers live in `src/ais/messages/utils.rs` and are `pub(crate)`.
 
 ### AIS application-layer sentences
 
