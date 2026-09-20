@@ -8,6 +8,14 @@ Sources des TOC et deltas : [IEC 61162-1:1995](https://webstore.iec.ch/en/public
 
 Chronologie NMEA secondaire : 2.00 (1992), 2.01 (1994), 2.10 (1995), 2.20 (1997), 2.30 (1998), 3.00 (2000), 3.01 (2002), 4.00 (2008), 4.10 (2012) et 4.11 (2018) sont recensées par [GPSD, NMEA Revealed](https://gpsd.io/NMEA.html), qui précise ne pas avoir consulté les normes NMEA. La publication de 4.11 (2018) et 4.30 (2023) est confirmée par [NMEA](https://www.nmea.org/nmea-0183.html). Les contenus sentence par sentence de ces versions NMEA ne sont pas publiés librement, elles restent donc des bornes observées dans les TOC IEC.
 
+## Références de validation du protocole
+
+- La copie publique de [NMEA 0183 version 3.01](https://www.plaisance-pratique.com/IMG/pdf/NMEA0183-2.pdf), sections 5.1 à 5.4, documente l’enveloppe commune utilisée pour la validation stricte. Le PDF n’est pas inclus dans ce dépôt.
+- [IEC 61162-1:2024](https://webstore.iec.ch/en/publication/72729) est l’édition IEC courante citée pour la couverture des formatters.
+- Le document de travail local `docs/nmea-missing-sentences-research.md`, lorsqu’il est présent, sert uniquement d’inventaire de recherche. Ce n’est pas une source normative.
+
+La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certifie pas la sémantique propre à chaque formatter, les caractéristiques électriques ou le débit série, la cadence, les délais d’expiration, ni le réassemblage multipart des formatters non AIS tels que RTE, TXT, ALC, ALF, TUT et SMV. Les tag blocks relèvent de l’IEC 61162-450 et conservent leur validation existante.
+
 ## Current status
 
 - **66** des **133** formatters IEC 61162-1:2024 sont supportés.

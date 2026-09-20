@@ -32,11 +32,16 @@ pub struct NmeaFrame<'a> {
     pub tag_block: Option<&'a str>,
 }
 
-/// Parse a raw NMEA 0183 line into a validated frame.
+/// Parse a raw NMEA 0183 line using device-compatible framing rules.
 ///
 /// Handles both `$` (instrument) and `!` (AIS) sentences.
 /// Strips optional IEC 61162-450 tag blocks (`\...\` prefix).
 /// Validates XOR checksum when present.
+///
+/// This compatibility API accepts a missing checksum, missing CRLF terminator,
+/// lowercase checksum digits, and non-canonical addresses. Use
+/// [`crate::parse_frame_strict`] when the complete wire sentence must satisfy
+/// the strict frame envelope.
 ///
 /// Proprietary sentences (address starting with `P`) are detected
 /// automatically: `talker` will be `""` and `sentence_type` will

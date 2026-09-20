@@ -36,6 +36,21 @@ match sentence {
 }
 ```
 
+`parse_frame()` is the compatibility API for real-world device input: it accepts
+common deviations such as a missing checksum or terminator. Use
+`parse_frame_strict()` when the complete wire sentence must satisfy the strict
+frame envelope:
+
+```rust
+use nmea_0183_rs::{parse_frame, parse_frame_strict};
+
+let observed = parse_frame("$GPRMC,120000.00,A").expect("compatible device frame");
+let certified = parse_frame_strict("$GPRMC,120000.00,A*27\r\n")
+    .expect("strict wire frame");
+
+assert_eq!(observed.fields, certified.fields);
+```
+
 ### Encode and send an NMEA sentence
 
 ```rust
@@ -48,9 +63,16 @@ let dbt = Dbt {
     depth_fathoms: Some(1.3),
 };
 
-let sentence = dbt.to_sentence("SD").expect("valid depth sentence");
+let sentence = dbt
+    .to_sentence_strict("SD")
+    .expect("strict depth sentence");
 // "$SDDBT,7.7,f,2.3,M,1.3,F*05\r\n"
 ```
+
+`encode_frame_strict()` and `to_sentence_strict()` are recommended for conforming
+production output. The compatibility APIs `encode_frame()` and `to_sentence()`
+remain available for reproducing device frames, including frames longer than 82
+bytes.
 
 ### Decode AIS messages
 
@@ -139,7 +161,16 @@ flowchart TD
     ais_sentence --> ais_typed["AIS sentence struct\nAbm, Bbm"]
 ```
 
-**Frame layer** validates checksum, strips tag blocks, extracts talker ID and sentence type. Shared by both NMEA and AIS.
+**Frame layer** strips and validates IEC 61162-450 tag blocks, validates a checksum
+when present, and extracts the talker ID and sentence type. `parse_frame()` keeps
+device-compatible framing behavior. `validate_sentence()` and
+`parse_frame_strict()` additionally require the canonical address, checksum,
+terminator, character set, escape grammar, and 82-byte sentence limit.
+
+Strict validation covers the shared frame envelope only. It does not add
+formatter-specific semantic validation, serial baud or electrical checks,
+transmission cadence, timeouts, or multipart reassembly for non-AIS formatters
+such as RTE, TXT, ALC, ALF, TUT, and SMV.
 
 **NMEA content** uses `FieldReader`/`FieldWriter` for sequential field parsing and encoding. Each sentence type is a standalone struct with `parse()`, `encode()`, and `to_sentence()`. Parsing is lenient: `parse()` always returns `Some` for known types, mapping missing or malformed fields to `None`. This is intentional for marine instruments that often produce partial data.
 

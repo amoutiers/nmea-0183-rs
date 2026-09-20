@@ -27,10 +27,15 @@
 //!
 //! ## Public API
 //!
-//! - [`parse_frame`] / [`encode_frame`] — frame layer (always available)
+//! - [`parse_frame`] / [`encode_frame`] — device-compatible frame APIs (always available)
+//! - [`parse_frame_strict`] / [`validate_sentence`] / [`encode_frame_strict`] — strict frame-envelope APIs (always available)
 //! - `NmeaSentence` — dispatch enum for all typed NMEA sentences (requires an NMEA feature)
-//! - `NmeaEncodable` — trait for encoding NMEA sentences to wire format (requires an NMEA feature)
+//! - `NmeaEncodable` — trait providing compatible and strict wire encoding (requires an NMEA feature)
 //! - `ais` — AIS decoder, transponder-message encoder, and `!`-prefixed AIS application sentences (requires `ais`, `abm`, or `bbm`)
+//!
+//! Strict validation covers the shared frame envelope. It does not validate every
+//! formatter's field semantics, serial transport settings, transmission timing,
+//! or multipart reassembly outside the AIS parser.
 //!
 //! ## Features
 //!
