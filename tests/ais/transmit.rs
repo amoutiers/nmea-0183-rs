@@ -822,3 +822,91 @@ fn ais_transmitter_rejects_invalid_field_values() {
         Err(EncodeError::InvalidAisField("repeat_indicator"))
     );
 }
+
+fn assert_byte_aligned_message(report: &impl AisEncodable, unpadded_len: usize) {
+    let lines = report
+        .to_sentences(AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1))
+        .expect("encode aligned message");
+    let bits: Vec<u8> = lines.iter().flat_map(|line| payload_bits(line)).collect();
+    assert_eq!(bits.len(), unpadded_len.div_ceil(8) * 8);
+    assert!(bits[unpadded_len..].iter().all(|&bit| bit == 0));
+    for (index, line) in lines.iter().enumerate() {
+        nmea_0183_rs::validate_sentence(line).expect("strict AIS envelope");
+        let frame = parse_frame(line).expect("frame");
+        if index + 1 < lines.len() {
+            assert_eq!(frame.fields[5], "0");
+        }
+    }
+}
+
+#[test]
+fn safety_text_is_byte_aligned_at_all_lengths() {
+    for count in 0..=161 {
+        let text = "A".repeat(count);
+        let broadcast = SafetyBroadcast {
+            repeat_indicator: 0,
+            mmsi: 244_670_316,
+            text: text.clone(),
+        };
+        assert_byte_aligned_message(&broadcast, 40 + 6 * count);
+        let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+        assert!(matches!(
+            decode_lines(&broadcast.to_sentences(options).expect("encode")),
+            AisMessage::Safety(value) if value.text == text
+        ));
+        if count <= 156 {
+            let addressed = SafetyAddressed {
+                repeat_indicator: 0,
+                mmsi: 244_670_316,
+                sequence: 0,
+                destination_mmsi: 235_009_217,
+                retransmit: false,
+                text: text.clone(),
+            };
+            assert_byte_aligned_message(&addressed, 72 + 6 * count);
+            assert!(matches!(
+                decode_lines(&addressed.to_sentences(options).expect("encode")),
+                AisMessage::SafetyAddressed(value) if value.text == text
+            ));
+        }
+    }
+}
+
+#[test]
+fn aton_extension_is_byte_aligned_at_all_lengths() {
+    let mut report = AidToNavigation {
+        repeat_indicator: 0,
+        mmsi: 992_001_001,
+        aid_type: 1,
+        name: "TEST".to_string(),
+        longitude: None,
+        latitude: None,
+        position_accuracy: false,
+        dimension_to_bow: 0,
+        dimension_to_stern: 0,
+        dimension_to_port: 0,
+        dimension_to_starboard: 0,
+        position_fixing_device: 0,
+        timestamp: PositionTimestamp::NotAvailable,
+        off_position: false,
+        regional_application: 0,
+        raim: false,
+        virtual_aid: false,
+        assigned_mode: false,
+        name_extension: None,
+    };
+    assert_byte_aligned_message(&report, 272);
+    for count in 1..=14 {
+        let extension = "A".repeat(count);
+        report.name_extension = Some(extension.clone());
+        assert_byte_aligned_message(&report, 272 + 6 * count);
+        let lines = report
+            .to_sentences(AisTransmitOptions::vdm(AisChannel::A))
+            .expect("encode AtoN");
+        assert!(matches!(
+            decode_lines(&lines),
+            AisMessage::AidToNavigation(value)
+                if value.name_extension.as_deref() == Some(extension.as_str())
+        ));
+    }
+}

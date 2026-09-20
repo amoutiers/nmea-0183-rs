@@ -79,7 +79,9 @@ impl BitWriter {
         Ok(())
     }
 
-    pub(crate) fn finish(self) -> Vec<u8> {
+    /// Finish a complete AIS message, adding zero spare bits to a byte boundary.
+    pub(crate) fn finish(mut self) -> Vec<u8> {
+        self.push_spare((8 - self.bits.len() % 8) % 8);
         self.bits
     }
 }
