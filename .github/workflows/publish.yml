@@ -38,7 +38,10 @@ jobs:
       - name: Extract validated CHANGELOG section
         run: |
           version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "nmea-0183-rs") | .version')
-          bash .github/scripts/release-notes.sh "$GITHUB_REF_NAME" "$version" CHANGELOG.md > release-notes.md
+          {
+            bash .github/scripts/release-notes.sh "$GITHUB_REF_NAME" "$version" CHANGELOG.md
+            printf '\n\n---\n\n📜 [Full changelog](https://github.com/amoutiers/nmea-0183-rs/blob/master/CHANGELOG.md)\n📦 [crates.io](https://crates.io/crates/nmea-0183-rs/%s)\n' "$version"
+          } > release-notes.md
       - name: Create GitHub Release
         run: |
           gh release create "$GITHUB_REF_NAME" \
