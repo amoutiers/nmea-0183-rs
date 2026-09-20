@@ -38,6 +38,7 @@
 //! - `ais` (default) — decoding for all numeric AIS Types 1-27, encoder support for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27, plus ABM/BBM application sentences
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
 
+mod compliance;
 mod error;
 mod frame;
 
@@ -142,6 +143,7 @@ nmea_item! { pub mod nmea; }
 #[cfg(any(feature = "ais", feature = "abm", feature = "bbm"))]
 pub mod ais;
 
+pub use compliance::*;
 pub use error::*;
 pub use frame::*;
 
