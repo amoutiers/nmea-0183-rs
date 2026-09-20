@@ -122,10 +122,11 @@ impl<'a> FieldReader<'a> {
 
     /// Read an optional single character and advance.
     pub(crate) fn char(&mut self) -> Option<char> {
-        let val = self
-            .fields
-            .get(self.idx)
-            .and_then(|f| f.chars().next().filter(|_| !f.is_empty()));
+        let val = self.fields.get(self.idx).and_then(|field| {
+            let mut chars = field.chars();
+            let first = chars.next()?;
+            chars.next().is_none().then_some(first)
+        });
         self.idx += 1;
         val
     }
@@ -437,12 +438,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn reader_char() {
-        let fields = &["T", "", "AB"];
+    fn reader_char_requires_exactly_one_character() {
+        let fields = &["T", "", "AB", "é"];
         let mut r = FieldReader::new(fields);
         assert_eq!(r.char(), Some('T'));
         assert_eq!(r.char(), None);
-        assert_eq!(r.char(), Some('A')); // takes first char
+        assert_eq!(r.char(), None);
+        assert_eq!(r.char(), Some('é'));
     }
 
     #[test]

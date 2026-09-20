@@ -4,6 +4,11 @@ use nmea_0183_rs::nmea::NmeaEncodable;
 use nmea_0183_rs::nmea::sentences::Rmc;
 use nmea_0183_rs::{NmeaSentence, parse_frame};
 
+fn sentence(body: &str) -> String {
+    let checksum = body[1..].bytes().fold(0u8, |acc, byte| acc ^ byte);
+    format!("{body}*{checksum:02X}")
+}
+
 #[test]
 fn decode_encode() {
     let frame =
@@ -74,4 +79,17 @@ fn roundtrip() {
     let frame = parse_frame(sentence.trim()).expect("re-parse");
     let parsed = Rmc::parse(&frame.fields).expect("parse");
     assert_eq!(original, parsed);
+}
+
+#[test]
+fn rmc_rejects_multi_character_status() {
+    let malformed = sentence("$GPRMC,120000.00,ACTIVE");
+    let frame = parse_frame(&malformed).expect("valid frame");
+    let parsed = Rmc::parse(&frame.fields).expect("typed parse");
+    assert_eq!(parsed.status, None);
+
+    let valid = sentence("$GPRMC,120000.00,A");
+    let frame = parse_frame(&valid).expect("valid frame");
+    let parsed = Rmc::parse(&frame.fields).expect("typed parse");
+    assert_eq!(parsed.status, Some('A'));
 }
