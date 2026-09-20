@@ -84,9 +84,9 @@ impl NmeaEncodable for Pknds {
         let mut w = FieldWriter::new();
         w.string(self.time.as_deref());
         w.char(self.validity);
-        w.f64(self.lat);
+        w.lat(self.lat);
         w.char(self.ns);
-        w.f64(self.lon);
+        w.lon(self.lon);
         w.char(self.ew);
         w.f32(self.speed);
         w.f32(self.course);

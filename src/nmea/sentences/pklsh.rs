@@ -58,9 +58,9 @@ impl NmeaEncodable for Pklsh {
 
     fn encode(&self) -> Result<Vec<String>, crate::EncodeError> {
         let mut w = FieldWriter::new();
-        w.f64(self.lat);
+        w.lat(self.lat);
         w.char(self.ns);
-        w.f64(self.lon);
+        w.lon(self.lon);
         w.char(self.ew);
         w.string(self.time.as_deref());
         w.char(self.validity);

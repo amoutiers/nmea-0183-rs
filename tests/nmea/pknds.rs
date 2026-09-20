@@ -2,7 +2,7 @@
 use nmea_0183_rs::nmea::NmeaEncodable;
 
 use nmea_0183_rs::nmea::sentences::Pknds;
-use nmea_0183_rs::{NmeaSentence, parse_frame};
+use nmea_0183_rs::{EncodeError, NmeaSentence, parse_frame};
 
 #[test]
 fn decode_encode() {
@@ -51,4 +51,15 @@ fn roundtrip() {
     let frame = parse_frame(sentence.trim()).expect("re-parse");
     let parsed = Pknds::parse(&frame.fields).expect("parse");
     assert_eq!(original, parsed);
+}
+
+#[test]
+fn encodes_coordinates_with_nmea_padding_and_validation() {
+    let mut value = Pknds::parse(&[]).expect("parse empty");
+    value.lat = Some(133.82);
+    value.lon = Some(42.24);
+    assert_eq!(value.encode().expect("encode")[2], "0133.82");
+    assert_eq!(value.encode().expect("encode")[4], "00042.24");
+    value.lon = Some(f64::NAN);
+    assert_eq!(value.encode(), Err(EncodeError::InvalidCoordinate));
 }

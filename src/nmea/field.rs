@@ -190,11 +190,6 @@ impl FieldWriter {
         push_optional_float!(self.fields, value);
     }
 
-    /// Write an optional f64. `None` → empty field. Non-finite → empty field. `-0.0` → `"0"`.
-    pub(crate) fn f64(&mut self, value: Option<f64>) {
-        push_optional_float!(self.fields, value);
-    }
-
     /// Write an optional u8. `None` → empty field.
     pub(crate) fn u8(&mut self, value: Option<u8>) {
         self.fields.push(match value {
@@ -518,9 +513,9 @@ mod tests {
     #[test]
     fn writer_non_finite_and_neg_zero() {
         let mut w = FieldWriter::new();
-        w.f32(Some(f32::NAN));        // -> "" (not "NaN")
-        w.f64(Some(f64::INFINITY));   // -> "" (not "inf")
-        w.f64(Some(-0.0));            // -> "0" (not "-0")
+        w.f32(Some(f32::NAN)); // -> "" (not "NaN")
+        w.f32(Some(f32::INFINITY)); // -> "" (not "inf")
+        w.f32(Some(-0.0)); // -> "0" (not "-0")
         assert_eq!(w.finish().expect("encode"), vec!["", "", "0"]);
     }
 
