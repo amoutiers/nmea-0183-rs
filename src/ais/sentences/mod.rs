@@ -22,8 +22,11 @@ pub enum AisSentence {
     #[cfg(feature = "bbm")]
     Bbm(Bbm),
     Unknown {
+        prefix: char,
+        talker: String,
         sentence_type: String,
         fields: Vec<String>,
+        tag_block: Option<String>,
     },
 }
 
@@ -43,15 +46,29 @@ impl AisSentence {
 
     /// Encode a typed ABM/BBM variant with the given talker.
     ///
-    /// `Unknown` returns [`crate::EncodeError::MissingFrameContext`]. Retain the
-    /// original [`NmeaFrame`] and use its `to_sentence()` method for that case.
+    /// `Unknown` preserves its captured envelope and ignores the given talker.
+    /// Typed variants do not retain tags: keep the original [`NmeaFrame`]
+    /// to re-emit their full envelope.
     pub fn to_sentence(&self, talker: &str) -> Result<String, crate::EncodeError> {
         match self {
             #[cfg(feature = "abm")]
             Self::Abm(value) => value.to_sentence(talker),
             #[cfg(feature = "bbm")]
             Self::Bbm(value) => value.to_sentence(talker),
-            Self::Unknown { .. } => Err(crate::EncodeError::MissingFrameContext),
+            Self::Unknown {
+                prefix,
+                talker,
+                sentence_type,
+                fields,
+                tag_block,
+            } => NmeaFrame {
+                prefix: *prefix,
+                talker,
+                sentence_type,
+                fields: fields.iter().map(String::as_str).collect(),
+                tag_block: tag_block.as_deref(),
+            }
+            .to_sentence(),
         }
     }
 
@@ -65,8 +82,33 @@ impl AisSentence {
 
     fn from_frame(frame: &NmeaFrame<'_>) -> Self {
         Self::Unknown {
+            prefix: frame.prefix,
+            talker: frame.talker.to_string(),
             sentence_type: frame.sentence_type.to_string(),
             fields: frame.fields.iter().map(|f| f.to_string()).collect(),
+            tag_block: frame.tag_block.map(str::to_owned),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn disabled_sentences_preserve_envelope() {
+        for (enabled, input) in [
+            (cfg!(feature = "abm"), "!AIABM,,"),
+            (cfg!(feature = "bbm"), "!AIBBM,,"),
+        ] {
+            if enabled {
+                continue;
+            }
+            let frame = crate::parse_frame(input).expect("frame");
+            let value = AisSentence::parse(&frame);
+            assert!(matches!(value, AisSentence::Unknown { .. }));
+            let line = value.to_sentence("ignored").expect("encode");
+            assert_eq!(crate::parse_frame(&line).expect("reparse"), frame);
         }
     }
 }

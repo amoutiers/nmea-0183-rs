@@ -37,21 +37,34 @@ fn partial_construction_and_enum_encoding() {
 }
 
 #[test]
-fn unknown_requires_its_original_frame() {
-    for input in ["!AIXYZ,1", "$GPXYZ,1"] {
-        let frame = parse_frame(input).expect("frame");
-        let value = NmeaSentence::parse(&frame);
+fn unknown_preserves_its_owned_envelope() {
+    for input in [
+        "!AIXYZ,1,,",
+        "$GPXYZ,1,,",
+        "$PTEST,1,,",
+        "\\s:receiver\\!AIXYZ,1,,",
+        "\\\\$GPXYZ,1,,",
+    ] {
+        let value = {
+            let owned = input.to_owned();
+            NmeaSentence::parse(&parse_frame(&owned).expect("frame"))
+        };
+        let line = value.to_sentence("ignored").expect("unknown encode");
         assert_eq!(
-            value.to_sentence("GP"),
-            Err(EncodeError::MissingFrameContext)
+            parse_frame(&line).expect("reparse"),
+            parse_frame(input).expect("original")
         );
         assert_eq!(
-            value.to_sentence_strict("GP"),
-            Err(StrictEncodeError::Encode(EncodeError::MissingFrameContext))
+            value.to_sentence_strict("ignored").expect("strict unknown"),
+            line
         );
-        let line = frame.to_sentence().expect("frame encode");
-        assert_eq!(parse_frame(&line).expect("reparse"), frame);
     }
+    let value = NmeaSentence::parse(&parse_frame("$gpXYZ,1").expect("compatible"));
+    assert!(value.to_sentence("GP").is_ok());
+    assert!(matches!(
+        value.to_sentence_strict("GP"),
+        Err(StrictEncodeError::Compliance(_))
+    ));
 }
 
 #[test]
@@ -76,4 +89,19 @@ fn sentence_parsers_are_infallible_and_lenient() {
     assert_eq!(empty, Dbt::default());
     let malformed: Dbt = Dbt::parse(&["bad", "f", "", "M", "", "F"]);
     assert_eq!(malformed, Dbt::default());
+}
+
+#[test]
+fn unknown_rejects_invalid_tag() {
+    let value = NmeaSentence::Unknown {
+        prefix: '!',
+        talker: "AI".to_owned(),
+        sentence_type: "XYZ".to_owned(),
+        fields: vec!["1".to_owned()],
+        tag_block: Some("s:bad*tag".to_owned()),
+    };
+    assert_eq!(
+        value.to_sentence("ignored"),
+        Err(nmea_0183_rs::EncodeError::InvalidTagBlockCharacter('*'))
+    );
 }

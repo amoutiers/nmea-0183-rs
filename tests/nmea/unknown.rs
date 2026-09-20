@@ -9,6 +9,7 @@ fn dispatch_unknown() {
         NmeaSentence::Unknown {
             sentence_type,
             fields,
+            ..
         } => {
             assert_eq!(sentence_type, "XYZ");
             assert_eq!(fields, vec!["1", "2", "3"]);

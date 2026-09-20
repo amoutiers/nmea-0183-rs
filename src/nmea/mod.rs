@@ -34,8 +34,11 @@ macro_rules! nmea_sentences {
                 $pvariant(sentences::$pvariant),
             )*
             Unknown {
+                prefix: char,
+                talker: String,
                 sentence_type: String,
                 fields: Vec<String>,
+                tag_block: Option<String>,
             },
         }
 
@@ -85,9 +88,9 @@ macro_rules! nmea_sentences {
             /// Encode a typed variant with the given talker.
             ///
             /// Proprietary variants ignore the talker; TTD requires `"**"`.
-            /// `Unknown` returns [`crate::EncodeError::MissingFrameContext`]:
-            /// retain the original [`NmeaFrame`] and use its `to_sentence()`
-            /// method to preserve the envelope of unrecognized sentences.
+            /// `Unknown` preserves its captured envelope and ignores the given talker.
+            /// Typed variants do not retain tags: keep the original [`NmeaFrame`]
+            /// to re-emit their full envelope.
             pub fn to_sentence(&self, talker: &str) -> Result<String, crate::EncodeError> {
                 match self {
                     $(
@@ -98,7 +101,15 @@ macro_rules! nmea_sentences {
                         #[cfg(feature = $pfeat)]
                         Self::$pvariant(value) => NmeaEncodable::to_sentence(value, talker),
                     )*
-                    Self::Unknown { .. } => Err(crate::EncodeError::MissingFrameContext),
+                    Self::Unknown { prefix, talker, sentence_type, fields, tag_block } => {
+                        NmeaFrame {
+                            prefix: *prefix,
+                            talker,
+                            sentence_type,
+                            fields: fields.iter().map(String::as_str).collect(),
+                            tag_block: tag_block.as_deref(),
+                        }.to_sentence()
+                    },
                 }
             }
 
@@ -110,11 +121,14 @@ macro_rules! nmea_sentences {
                 Ok(sentence)
             }
 
-            /// Build an `Unknown` variant preserving the frame's sentence type and fields.
+            /// Build an owned `Unknown` variant preserving the frame's envelope and fields.
             fn from_frame(frame: &NmeaFrame<'_>) -> Self {
                 Self::Unknown {
+                    prefix: frame.prefix,
+                    talker: frame.talker.to_string(),
                     sentence_type: frame.sentence_type.to_string(),
                     fields: frame.fields.iter().map(|f| f.to_string()).collect(),
+                    tag_block: frame.tag_block.map(str::to_owned),
                 }
             }
         }
@@ -294,4 +308,14 @@ mod tests {
             NmeaSentence::Pskpdpt(_)
         ));
     }
+}
+
+#[cfg(all(test, not(feature = "rmc")))]
+#[test]
+fn disabled_sentence_preserves_envelope() {
+    let frame = crate::parse_frame("$GPRMC,,").expect("frame");
+    let value = NmeaSentence::parse(&frame);
+    assert!(matches!(value, NmeaSentence::Unknown { .. }));
+    let line = value.to_sentence("ignored").expect("encode");
+    assert_eq!(crate::parse_frame(&line).expect("reparse"), frame);
 }

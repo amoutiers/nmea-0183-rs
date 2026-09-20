@@ -72,7 +72,7 @@ fn roundtrip() {
 
 #[test]
 fn abm_default_and_strict_encoding() {
-    use nmea_0183_rs::{ComplianceError, EncodeError, StrictEncodeError, parse_frame_strict};
+    use nmea_0183_rs::{ComplianceError, StrictEncodeError, parse_frame_strict};
     let value = Abm::default();
     let line = value.to_sentence_strict("AI").expect("strict envelope");
     assert!(parse_frame_strict(&line).is_ok());
@@ -88,15 +88,6 @@ fn abm_default_and_strict_encoding() {
             ComplianceError::InvalidAddressCharacter('a')
         ))
     ));
-    let unknown = AisSentence::parse(&parse_frame("!AIXYZ,1").expect("unknown"));
-    assert_eq!(
-        unknown.to_sentence("AI"),
-        Err(EncodeError::MissingFrameContext)
-    );
-    assert_eq!(
-        unknown.to_sentence_strict("AI"),
-        Err(StrictEncodeError::Encode(EncodeError::MissingFrameContext))
-    );
 }
 
 #[test]
@@ -105,4 +96,50 @@ fn parser_is_infallible_and_lenient() {
     assert_eq!(empty, Abm::default());
     let malformed: Abm = Abm::parse(&["bad"]);
     assert_eq!(malformed, Abm::default());
+}
+
+#[test]
+fn unknown_preserves_its_owned_envelope() {
+    for input in [
+        "!AIXYZ,1,,",
+        "$GPXYZ,1,,",
+        "$PTEST,1,,",
+        "\\s:receiver\\!AIXYZ,1,,",
+        "\\\\!AIXYZ,1,,",
+    ] {
+        let value = {
+            let owned = input.to_owned();
+            AisSentence::parse(&parse_frame(&owned).expect("frame"))
+        };
+        let line = value.to_sentence("ignored").expect("unknown encode");
+        assert_eq!(
+            parse_frame(&line).expect("reparse"),
+            parse_frame(input).expect("original")
+        );
+        assert_eq!(
+            value.to_sentence_strict("ignored").expect("strict unknown"),
+            line
+        );
+    }
+    let value = AisSentence::parse(&parse_frame("!aiXYZ,1").expect("compatible"));
+    assert!(value.to_sentence("AI").is_ok());
+    assert!(matches!(
+        value.to_sentence_strict("AI"),
+        Err(nmea_0183_rs::StrictEncodeError::Compliance(_))
+    ));
+}
+
+#[test]
+fn unknown_rejects_invalid_tag() {
+    let value = AisSentence::Unknown {
+        prefix: '!',
+        talker: "AI".to_owned(),
+        sentence_type: "XYZ".to_owned(),
+        fields: vec!["1".to_owned()],
+        tag_block: Some("s:bad*tag".to_owned()),
+    };
+    assert_eq!(
+        value.to_sentence("ignored"),
+        Err(nmea_0183_rs::EncodeError::InvalidTagBlockCharacter('*'))
+    );
 }
