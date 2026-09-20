@@ -143,3 +143,23 @@ fn unknown_rejects_invalid_tag() {
         Err(nmea_0183_rs::EncodeError::InvalidTagBlockCharacter('*'))
     );
 }
+
+#[test]
+fn audit_channel_requires_exactly_one_character() {
+    for (channel, expected) in [
+        ("", None),
+        ("12", None),
+        ("AB", None),
+        ("é1", None),
+        ("1", Some('1')),
+        ("3", Some('3')),
+        ("A", Some('A')),
+    ] {
+        let value = Abm::parse(&["1", "1", "0", "123456789", channel, "6", "payload", "0"]);
+        assert_eq!(value.channel, expected, "channel {channel:?}");
+        assert_eq!(value.vdl_msg_num, Some(6));
+        let encoded = value.to_sentence("AI").expect("encode");
+        let frame = parse_frame(&encoded).expect("frame");
+        assert_eq!(Abm::parse(&frame.fields), value);
+    }
+}

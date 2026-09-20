@@ -30,6 +30,8 @@ pub enum ComplianceError {
     InvalidAddressCharacter(char),
     /// A data field contains a character that is not permitted on the wire.
     InvalidDataCharacter(char),
+    /// A tag block contains a non-ASCII character, control, `\\` or `*`.
+    InvalidTagBlockCharacter(char),
     /// A `^HH` escaped character is incomplete or is not uppercase hexadecimal.
     MalformedEscape { offset: usize },
 }
@@ -57,6 +59,9 @@ impl core::fmt::Display for ComplianceError {
             }
             Self::InvalidDataCharacter(character) => {
                 write!(f, "data contains invalid character {character:?}")
+            }
+            Self::InvalidTagBlockCharacter(character) => {
+                write!(f, "tag block contains invalid character {character:?}")
             }
             Self::MalformedEscape { offset } => {
                 write!(f, "malformed ^HH escape at byte offset {offset}")
@@ -142,7 +147,14 @@ pub fn encode_frame_strict(
 pub fn parse_frame_strict(input: &str) -> Result<NmeaFrame<'_>, ComplianceError> {
     let sentence = sentence_part(input)?;
     validate_envelope(sentence)?;
-    parse_frame(input).map_err(ComplianceError::Frame)
+    let frame = parse_frame(input)?;
+    if let Some(character) = frame
+        .tag_block
+        .and_then(crate::frame::invalid_tag_character)
+    {
+        return Err(ComplianceError::InvalidTagBlockCharacter(character));
+    }
+    Ok(frame)
 }
 
 fn sentence_part(input: &str) -> Result<&str, ComplianceError> {

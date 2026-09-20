@@ -55,10 +55,7 @@ impl NmeaFrame<'_> {
         match self.tag_block {
             None => Ok(sentence),
             Some(tag) => {
-                if let Some(c) = tag
-                    .chars()
-                    .find(|c| !c.is_ascii() || c.is_ascii_control() || matches!(c, '\\' | '*'))
-                {
+                if let Some(c) = invalid_tag_character(tag) {
                     return Err(crate::EncodeError::InvalidTagBlockCharacter(c));
                 }
                 let checksum = tag.bytes().fold(0u8, |acc, byte| acc ^ byte);
@@ -66,6 +63,11 @@ impl NmeaFrame<'_> {
             }
         }
     }
+}
+
+pub(crate) fn invalid_tag_character(tag: &str) -> Option<char> {
+    tag.chars()
+        .find(|c| !c.is_ascii() || c.is_ascii_control() || matches!(c, '\\' | '*'))
 }
 
 /// Parse a raw NMEA 0183 line using device-compatible framing rules.

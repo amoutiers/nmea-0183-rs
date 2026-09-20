@@ -31,9 +31,11 @@ pub(super) fn read_u32(fields: &[&str], idx: &mut usize) -> Option<u32> {
     expect(dead_code, reason = "used only by AIS ABM/BBM sentence parsing")
 )]
 pub(super) fn read_char(fields: &[&str], idx: &mut usize) -> Option<char> {
-    let val = fields
-        .get(*idx)
-        .and_then(|f| f.chars().next().filter(|_| !f.is_empty()));
+    let val = fields.get(*idx).and_then(|field| {
+        let mut chars = field.chars();
+        let first = chars.next()?;
+        chars.next().is_none().then_some(first)
+    });
     *idx += 1;
     val
 }

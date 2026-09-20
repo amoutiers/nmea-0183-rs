@@ -20,9 +20,11 @@ All notable changes to nmea-0183-rs are documented here.
 - `encode_frame()` now rejects combined addresses shorter than the frame parser accepts (three bytes, or four for proprietary addresses) with `EncodeError::InvalidAddressLength`. These are behavioral changes without changes to existing signatures.
 - Renamed the crate from `nmea-kit` to `nmea-0183-rs`; Rust imports now use `nmea_0183_rs`.
 - `Vsd.persons` is now `Option<u16>` so valid counts through 8191 are preserved. This is a source-breaking API change: callers with existing `Option<u8>` values can migrate with `.map(u16::from)`.
-- Multi-character indicator fields now decode to `None` instead of using only their first character.
+- Multi-character indicator fields, including ABM/BBM channels, now decode to `None` instead of using only their first character.
 
 ### Fixed
+- Strict frame validation rejects invalid tag-block characters with `ComplianceError::InvalidTagBlockCharacter`, matching frame re-encoding.
+- Reject duplicate AIS fragments with a conflicting fragment total and discard only the affected assembly.
 - Reject non-alphanumeric address characters during encoding to prevent NMEA sentence injection through `talker` or `sentence_type`; preserve the `!**TTD` address.
 - Keep interleaved AIS VDM and VDO fragment assemblies separate, reject reserved AIS course values, preserve partial ALC/DSE/TLB groups, and format Kenwood coordinates through the common NMEA coordinate writers.
 - Reject DDMM coordinates with invalid degree or minute components during encoding.

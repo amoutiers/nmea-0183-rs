@@ -173,15 +173,15 @@ impl FragmentCollector {
             let slot = self.slots[ch][msg_id]
                 .as_mut()
                 .ok_or(AisDecodeError::UnexpectedFragment)?;
-            // A re-sent fragment (same number as the last received) is idempotent:
-            // ignore it without discarding the in-progress assembly.
-            if frag_num == slot.received {
-                return Ok(None);
-            }
-            if slot.total != total || slot.received + 1 != frag_num {
+            if slot.total != total || (frag_num != slot.received && slot.received + 1 != frag_num) {
                 // Out of sequence — discard
                 self.slots[ch][msg_id] = None;
                 return Err(AisDecodeError::UnexpectedFragment);
+            }
+            // A re-sent fragment with the same total and last received number
+            // is idempotent: keep the in-progress assembly.
+            if frag_num == slot.received {
+                return Ok(None);
             }
 
             let actual = slot.payload.len() + payload.len();
@@ -221,6 +221,37 @@ impl Default for FragmentCollector {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn audit_conflicting_duplicate_total_discards_only_its_slot() {
+        for conflicting_total in ["2", "4"] {
+            let mut c = FragmentCollector::new();
+            for fields in [
+                ["3", "1", "0", "A", "AAAA", "0"],
+                ["3", "2", "0", "A", "BBBB", "0"],
+                ["2", "1", "0", "B", "BBBB", "0"],
+                ["2", "1", "1", "A", "DDDD", "0"],
+            ] {
+                assert!(c.process(&fields).expect("valid fragment").is_none());
+            }
+            assert_eq!(
+                c.process(&[conflicting_total, "2", "0", "A", "BBBB", "0"])
+                    .err(),
+                Some(AisDecodeError::UnexpectedFragment)
+            );
+            assert_eq!(
+                c.process(&["3", "3", "0", "A", "CCCC", "0"]).err(),
+                Some(AisDecodeError::UnexpectedFragment)
+            );
+            for (id, channel, expected) in [("0", "B", "BBBBCCCC"), ("1", "A", "DDDDCCCC")] {
+                let complete = c
+                    .process(&["2", "2", id, channel, "CCCC", "0"])
+                    .expect("other slot valid")
+                    .expect("other slot completes");
+                assert_eq!(complete.payload, expected);
+            }
+        }
+    }
 
     #[test]
     fn checked_fragment_errors_and_pending_are_distinct() {

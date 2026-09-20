@@ -174,3 +174,37 @@ fn strict_encoder_rejects_reserved_raw_data_but_accepts_escape() {
     assert!(encode_frame_strict('$', "GP", "TXT", &["raw$payload"]).is_err());
     encode_frame_strict('$', "GP", "TXT", &["raw^24payload"]).expect("escaped dollar");
 }
+
+#[test]
+fn audit_strict_rejects_invalid_tag_characters() {
+    let line = sentence("$GPXYZ,1");
+    for bad in (0u8..=31).map(char::from).chain(['\u{7f}', 'é']) {
+        let input = tagged(&format!("s:source{bad}injected"), &line);
+        let frame = parse_frame(&input).expect("permissive frame");
+        assert_eq!(
+            frame.to_sentence(),
+            Err(nmea_0183_rs::EncodeError::InvalidTagBlockCharacter(bad))
+        );
+        assert_eq!(
+            parse_frame_strict(&input),
+            Err(ComplianceError::InvalidTagBlockCharacter(bad))
+        );
+        assert_eq!(
+            validate_sentence(&input),
+            Err(ComplianceError::InvalidTagBlockCharacter(bad))
+        );
+    }
+}
+
+#[test]
+fn audit_strict_preserves_valid_tag_content() {
+    let line = sentence("$GPXYZ,1");
+    for content in ["", "s:receiver", "s:receiver,c:123"] {
+        for input in [tagged(content, &line), format!("\\{content}\\{line}")] {
+            let frame = parse_frame_strict(&input).expect("valid tagged sentence");
+            assert_eq!(frame.tag_block, Some(content));
+            let encoded = frame.to_sentence().expect("encode tag");
+            assert_eq!(parse_frame_strict(&encoded).expect("strict reparse"), frame);
+        }
+    }
+}
