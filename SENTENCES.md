@@ -28,11 +28,11 @@ Sources des TOC et deltas : [IEC 61162-1:1995](https://webstore.iec.ch/en/public
 
 ## NMEA Sentences
 
-Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne la version NMEA alignée et l’année IEC. L’édition 6 est la plus récente.
+Le support reflète `nmea-kit` aujourd’hui. Chaque colonne donne la version NMEA et l’année IEC entre parenthèses. La dernière colonne est la version actuelle.
 
 ### Position
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `DTM` | Datum reference | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `GGA` | Global positioning system (GPS) fix data | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -40,32 +40,32 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 | `GNS` | GNSS fix data | ✓ |  | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `RMB` | Recommended minimum navigation information | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `RMC` | Recommended minimum specific GNSS data | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `POS` | Device position and ship dimensions report or configuration command |  |  |  |  | ✓ | ✓ | ✓ |
+| `RMA` | Recommended minimum specific LORAN-C data |  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `DCN` | Decca position |  | ✓ | ✓ | ✓ |  |  |  |
 | `GLC` | Geographic position, LORAN-C |  | ✓ | ✓ | ✓ |  |  |  |
 | `GMP` | GNSS map projection fix data |  |  |  | ✓ |  |  |  |
 | `GXA` | TRANSIT position |  | ✓ |  |  |  |  |  |
 | `OLN` | OMEGA lane numbers |  | ✓ |  |  |  |  |  |
-| `POS` | Device position and ship dimensions report or configuration command |  |  |  |  | ✓ | ✓ | ✓ |
-| `RMA` | Recommended minimum specific LORAN-C data |  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `TRF` | TRANSIT fix data |  | ✓ |  |  |  |  |  |
 
 ### Satellites
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `GBS` | GNSS satellite fault detection | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `GSA` | GNSS DOP and active satellites | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `GST` | GNSS pseudorange error statistics | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `GSV` | GNSS satellites in view | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `ALM` | GPS almanac data |  | ✓ | ✓ | ✓ |  |  |  |
 | `GDC` | GNSS differential correction |  |  |  |  |  |  | ✓ |
 | `GFA` | GNSS fix accuracy and integrity |  |  |  |  | ✓ | ✓ | ✓ |
 | `GRS` | GNSS range residuals |  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `ALM` | GPS almanac data |  | ✓ | ✓ | ✓ |  |  |  |
 | `MLA` | GLONASS almanac data |  |  | ✓ | ✓ |  |  |  |
 
 ### Heading
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `HDG` | Heading, deviation and variation | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `HDT` | Heading true | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -78,7 +78,7 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 
 ### Course & Speed
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `OSD` | Own ship data | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `ROT` | Rate of turn | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -93,26 +93,25 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 
 ### Wind
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `MWD` | Wind direction and speed | ✓ |  | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `MWV` | Wind speed and angle | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 ### Depth
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `DBT` | Depth below transducer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `DPT` | Depth | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 ### Steering
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `APB` | Heading/track controller (autopilot) sentence B | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `RPM` | Revolutions | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `RSA` | Rudder sensor angle | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `ASD` | Autopilot system data |  | ✓ |  |  |  |  |  |
 | `EPM` | Command or report long equipment property value |  |  |  |  |  |  | ✓ |
 | `EPV` | Command or report equipment property value |  |  |  |  |  | ✓ | ✓ |
 | `ETL` | Engine telegraph operation status |  |  |  | ✓ | ✓ | ✓ | ✓ |
@@ -122,10 +121,11 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 | `ROR` | Rudder order status |  |  |  | ✓ | ✓ | ✓ | ✓ |
 | `TRC` | Thruster control data |  |  |  | ✓ | ✓ | ✓ | ✓ |
 | `TRD` | Thruster response data |  |  |  | ✓ | ✓ | ✓ | ✓ |
+| `ASD` | Autopilot system data |  | ✓ |  |  |  |  |  |
 
 ### Waypoints & Routes
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `AAM` | Waypoint arrival alarm | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `BEC` | Bearing and distance to waypoint, dead reckoning | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -145,7 +145,7 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 
 ### Environment
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `MTW` | Water temperature | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `XDR` | Transducer measurements | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -154,13 +154,13 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 
 ### Time
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `ZDA` | Time and date | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 ### AIS Interface
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `ABM` | AIS addressed binary and safety-related message | ✓ |  |  | ✓ | ✓ | ✓ | ✓ |
 | `BBM` | AIS broadcast binary message | ✓ |  |  | ✓ | ✓ | ✓ | ✓ |
@@ -181,7 +181,7 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 
 ### Targets
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `RSD` | Radar system data | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `TLB` | Target label | ✓ |  | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -191,7 +191,7 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 
 ### Safety & Alarms
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `ACK` | Acknowledge alarm | ✓ |  | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `ACN` | Alert command | ✓ |  |  |  |  | ✓ | ✓ |
@@ -208,8 +208,6 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 | `HBT` | Heartbeat supervision sentence | ✓ |  |  |  | ✓ | ✓ | ✓ |
 | `AGL` | Alert group list |  |  |  |  |  |  | ✓ |
 | `AKD` | Acknowledge detail alarm condition |  |  |  | ✓ | ✓ | ✓ | ✓ |
-| `DSI` | DSC transponder initiate |  |  | ✓ | ✓ |  |  |  |
-| `DSR` | DSC transponder response |  |  | ✓ | ✓ |  |  |  |
 | `MOB` | Man over board notification |  |  |  |  |  | ✓ | ✓ |
 | `NAK` | Negative acknowledgement |  |  |  |  | ✓ | ✓ | ✓ |
 | `NSR` | Navigation status report |  |  |  |  |  | ✓ | ✓ |
@@ -219,10 +217,12 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 | `SM4` | SafetyNET message, rectangular area address |  |  |  |  |  | ✓ | ✓ |
 | `SMB` | IMO SafetyNET message body |  |  |  |  |  | ✓ | ✓ |
 | `SMV` | SafetyNET message, vessel in distress information |  |  |  |  |  |  | ✓ |
+| `DSI` | DSC transponder initiate |  |  | ✓ | ✓ |  |  |  |
+| `DSR` | DSC transponder response |  |  | ✓ | ✓ |  |  |  |
 
 ### Vessel Systems
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `DDC` | Display dimming control |  |  |  | ✓ | ✓ | ✓ | ✓ |
 | `GEN` | Generic binary information |  |  |  | ✓ | ✓ | ✓ | ✓ |
@@ -234,11 +234,10 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 
 ### Communication
 
-| Formatter | Description | Support | Éd. 1<br>NMEA 2.1<br>(1995) | Éd. 2<br>NMEA 2.30<br>(2000) | Éd. 3<br>NMEA 3.01<br>(2007) | Éd. 4<br>NMEA 4.00<br>(2010) | Éd. 5<br>NMEA 4.10<br>(2016) | Éd. 6<br>NMEA 4.10<br>(2024) |
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `TXT` | Text transmission | ✓ |  | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `FSI` | Frequency set information |  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `LCD` | LORAN-C signal data |  | ✓ | ✓ | ✓ |  |  |  |
 | `MSK` | MSK receiver interface |  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `MSS` | MSK receiver signal status |  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `NRM` | NAVTEX receiver mask |  |  |  | ✓ | ✓ | ✓ | ✓ |
@@ -249,6 +248,7 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne d’édition donne 
 | `TUT` | Transmission of multi-language text |  |  |  | ✓ | ✓ | ✓ | ✓ |
 | `UID` | User identification code transmission |  |  |  | ✓ | ✓ | ✓ | ✓ |
 | `VER` | Version |  |  |  |  | ✓ | ✓ | ✓ |
+| `LCD` | LORAN-C signal data |  | ✓ | ✓ | ✓ |  |  |  |
 
 ### Trawl / Fishing
 
