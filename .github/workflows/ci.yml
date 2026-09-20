@@ -71,3 +71,9 @@ jobs:
           done
         env:
           RUSTDOCFLAGS: -D warnings
+
+  release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: bash .github/scripts/test-release-notes.sh

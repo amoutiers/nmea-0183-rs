@@ -17,6 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Validate release metadata
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "nmea-0183-rs") | .version')
+          bash .github/scripts/release-notes.sh "$GITHUB_REF_NAME" "$version" CHANGELOG.md > release-notes.md
       - uses: rust-lang/crates-io-auth-action@v1.0.4
         id: auth
       - run: cargo publish
@@ -30,22 +34,11 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
-      - name: Extract CHANGELOG section
-        id: changelog
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Extract validated CHANGELOG section
         run: |
-          version="${GITHUB_REF_NAME#v}"
-          body=$(awk "/^## \[$version\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md \
-            | sed '/^[[:space:]]*$/{ /./!d }' \
-            | sed '${/^[[:space:]]*$/d}')
-          heading=$(grep "^## \[$version\]" CHANGELOG.md | head -1)
-          anchor=$(echo "$heading" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 -]//g' | tr -s ' ' | tr ' ' '-' | sed 's/^-//;s/-$//')
-          body="${body}
-
-          ---
-
-          📜 [Full changelog](https://github.com/amoutiers/nmea-0183-rs/blob/master/CHANGELOG.md#${anchor})
-          📦 [crates.io](https://crates.io/crates/nmea-0183-rs/${version})"
-          echo "$body" > release-notes.md
+          version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "nmea-0183-rs") | .version')
+          bash .github/scripts/release-notes.sh "$GITHUB_REF_NAME" "$version" CHANGELOG.md > release-notes.md
       - name: Create GitHub Release
         run: |
           gh release create "$GITHUB_REF_NAME" \

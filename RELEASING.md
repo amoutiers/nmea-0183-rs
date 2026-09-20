@@ -10,8 +10,7 @@ Templates for CHANGELOG entries and GitHub release descriptions. Keep them in sy
    - Rename `[Unreleased]` → `[X.Y.Z] — YYYY-MM-DD` (date = day you actually publish, not when you wrote the bullets).
    - Add the version link footnote at the bottom.
    - Commit, tag `vX.Y.Z`, push tag.
-   - `gh release create vX.Y.Z` with the body filled from the template below (paste the entry, drop the date heading).
-3. **Do not run `cargo publish` locally.** The crate is published to crates.io automatically via [GitHub Trusted Publishing](https://crates.io/docs/trusted-publishing) when the tag is pushed. Monitor the GitHub Actions workflow after pushing the tag.
+3. **Do not run `cargo publish` locally.** The tag validates its version and dated CHANGELOG section, then the workflow publishes to crates.io and creates the GitHub Release. Monitor the GitHub Actions workflow after pushing the tag. Recover manually only after inspecting whether publication or release creation already completed.
 
 ## CHANGELOG entry template
 
