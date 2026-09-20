@@ -13,13 +13,13 @@ pub struct Mta {
 
 impl Mta {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             temperature: r.f32(),
             units: r.char(),
-        })
+        }
     }
 }
 
@@ -47,7 +47,7 @@ mod tests {
         }
         .to_sentence("II").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let m = Mta::parse(&frame.fields).expect("parse");
+        let m = Mta::parse(&frame.fields);
         assert!(m.temperature.is_none());
         assert!(m.units.is_none());
     }
@@ -60,14 +60,14 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Mta::parse(&frame.fields).expect("re-parse MTA");
+        let parsed = Mta::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn mta_signalk() {
         let frame = parse_frame("$IIMTA,17.2,C*01").expect("valid signalk MTA frame");
-        let mta = Mta::parse(&frame.fields).expect("parse MTA");
+        let mta = Mta::parse(&frame.fields);
         assert!((mta.temperature.expect("temp") - 17.2).abs() < 0.01);
         assert_eq!(mta.units, Some('C'));
     }

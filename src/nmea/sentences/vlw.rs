@@ -25,10 +25,10 @@ pub struct Vlw {
 
 impl Vlw {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             total_water_dist: r.f32(),
             total_water_dist_unit: r.char(),
             water_dist: r.f32(),
@@ -37,7 +37,7 @@ impl Vlw {
             total_ground_dist_unit: r.char(),
             ground_dist: r.f32(),
             ground_dist_unit: r.char(),
-        })
+        }
     }
 }
 
@@ -77,7 +77,7 @@ mod tests {
         }
         .to_sentence("II").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let v = Vlw::parse(&frame.fields).expect("parse");
+        let v = Vlw::parse(&frame.fields);
         assert!(v.total_water_dist.is_none());
         assert!(v.water_dist.is_none());
         assert!(v.total_ground_dist.is_none());
@@ -98,7 +98,7 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Vlw::parse(&frame.fields).expect("re-parse VLW");
+        let parsed = Vlw::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -106,7 +106,7 @@ mod tests {
     fn vlw_pynmeagps() {
         let frame =
             parse_frame("$GNVLW,,N,,N,0.000,N,0.000,N*44").expect("valid pynmeagps VLW frame");
-        let vlw = Vlw::parse(&frame.fields).expect("parse VLW");
+        let vlw = Vlw::parse(&frame.fields);
         assert!(vlw.total_water_dist.is_none());
         assert_eq!(vlw.total_water_dist_unit, Some('N'));
         assert!(vlw.water_dist.is_none());
@@ -121,7 +121,7 @@ mod tests {
     fn vlw_with_ground_gonmea() {
         let frame =
             parse_frame("$IIVLW,10.1,N,3.2,N,1,N,0.1,N*62").expect("valid go-nmea VLW frame");
-        let vlw = Vlw::parse(&frame.fields).expect("parse VLW");
+        let vlw = Vlw::parse(&frame.fields);
         assert!((vlw.total_water_dist.expect("twd") - 10.1).abs() < 0.01);
         assert_eq!(vlw.total_water_dist_unit, Some('N'));
         assert!((vlw.water_dist.expect("wd") - 3.2).abs() < 0.01);

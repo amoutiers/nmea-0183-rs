@@ -14,11 +14,11 @@ fn dispatch() {
 #[test]
 fn decode_encode() {
     let frame = parse_frame(RAW_VSD).expect("valid VSD frame");
-    let vsd = Vsd::parse(&frame.fields).expect("parse VSD");
+    let vsd = Vsd::parse(&frame.fields);
     let encoded = vsd.to_sentence("RA").expect("encode VSD");
     assert!(encoded.starts_with("$RAVSD,"));
     let reparsed = parse_frame(encoded.trim()).expect("re-parse VSD");
-    assert_eq!(Vsd::parse(&reparsed.fields), Some(vsd));
+    assert_eq!(Vsd::parse(&reparsed.fields), vsd);
 }
 
 #[test]
@@ -52,13 +52,13 @@ fn roundtrip() {
     let wire = original.to_sentence("AI").expect("encode VSD");
     assert!(wire.starts_with("$AIVSD,"));
     let frame = parse_frame(wire.trim()).expect("re-parse VSD");
-    assert_eq!(Vsd::parse(&frame.fields), Some(original));
+    assert_eq!(Vsd::parse(&frame.fields), original);
 }
 
 #[test]
 fn vsd_values() {
     let frame = parse_frame(RAW_VSD).expect("valid VSD frame");
-    let vsd = Vsd::parse(&frame.fields).expect("parse VSD");
+    let vsd = Vsd::parse(&frame.fields);
     assert_eq!(vsd.type_of_ship, Some(0));
     assert!((vsd.draught.expect("draught") - 4.5).abs() < 0.0001);
     assert_eq!(vsd.persons, Some(6));
@@ -85,14 +85,14 @@ fn preserves_full_protocol_person_count_range() {
             "0",
             "",
         ];
-        let parsed = Vsd::parse(&fields).expect("parse VSD");
+        let parsed = Vsd::parse(&fields);
         assert_eq!(parsed.persons.map(u32::from), Some(expected));
         let encoded = parsed.encode().expect("encode VSD");
         assert_eq!(encoded[2], persons);
     }
 
-    let missing = Vsd::parse(&["60", "4.5", ""]).expect("parse missing persons");
+    let missing = Vsd::parse(&["60", "4.5", ""]);
     assert_eq!(missing.persons, None);
-    let malformed = Vsd::parse(&["60", "4.5", "not-a-number"]).expect("parse malformed persons");
+    let malformed = Vsd::parse(&["60", "4.5", "not-a-number"]);
     assert_eq!(malformed.persons, None);
 }

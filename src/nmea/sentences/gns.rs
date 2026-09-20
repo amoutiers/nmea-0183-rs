@@ -35,10 +35,10 @@ pub struct Gns {
 
 impl Gns {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             time: r.string(),
             lat: r.f64(),
             ns: r.char(),
@@ -52,7 +52,7 @@ impl Gns {
             dgps_age: r.f32(),
             dgps_station: r.string(),
             nav_status: r.char(),
-        })
+        }
     }
 }
 
@@ -87,7 +87,7 @@ mod tests {
     fn gns_empty() {
         // SignalK fixture: all fields empty except nav_status
         let frame = parse_frame("$GPGNS,,,,,,,,,,,,,S*32").expect("valid empty GNS frame");
-        let gns = Gns::parse(&frame.fields).expect("parse empty GNS");
+        let gns = Gns::parse(&frame.fields);
         assert!(gns.time.is_none());
         assert!(gns.lat.is_none());
         assert!(gns.mode.is_none());
@@ -100,7 +100,7 @@ mod tests {
         let frame =
             parse_frame("$GPGNS,111648.00,0235.0379,S,04422.1450,W,ANN,12,0.8,8.5,-22.3,,,S*5D")
                 .expect("valid GNS frame");
-        let gns = Gns::parse(&frame.fields).expect("parse GNS");
+        let gns = Gns::parse(&frame.fields);
         assert_eq!(gns.time, Some("111648.00".to_string()));
         assert!((gns.lat.expect("lat") - 235.0379).abs() < 0.001);
         assert_eq!(gns.ns, Some('S'));
@@ -117,7 +117,7 @@ mod tests {
             "$GNGNS,103607.00,5327.03942,N,00214.42462,W,AANN,06,5.88,56.0,48.5,,,V*34",
         )
         .expect("valid GN GNS frame");
-        let gns = Gns::parse(&frame.fields).expect("parse GN GNS");
+        let gns = Gns::parse(&frame.fields);
         assert_eq!(gns.mode, Some("AANN".to_string()));
         assert_eq!(gns.num_sats, Some(6));
         assert!((gns.hdop.expect("hdop") - 5.88).abs() < 0.01);
@@ -144,7 +144,7 @@ mod tests {
         };
         let sentence = gns.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse GNS");
-        let gns2 = Gns::parse(&frame.fields).expect("parse roundtrip GNS");
+        let gns2 = Gns::parse(&frame.fields);
         assert_eq!(gns, gns2);
     }
 }

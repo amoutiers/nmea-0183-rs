@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPAPB,A,A,0.10,R,N,V,V,011,M,DEST,011,M,011,M*3C").expect("valid");
-    let apb = Apb::parse(&frame.fields).expect("parse");
+    let apb = Apb::parse(&frame.fields);
     let sentence = apb.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let apb2 = Apb::parse(&frame2.fields).expect("parse");
+    let apb2 = Apb::parse(&frame2.fields);
     assert_eq!(apb, apb2);
 }
 
@@ -41,14 +41,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Apb::parse(&frame.fields).expect("parse");
+    let parsed = Apb::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn apb_values() {
     let frame = parse_frame("$GPAPB,A,A,0.10,R,N,V,V,011,M,DEST,011,M,011,M*3C").expect("valid");
-    let a = Apb::parse(&frame.fields).expect("parse");
+    let a = Apb::parse(&frame.fields);
     assert_eq!(a.lcgwarn, Some('A'));
     assert_eq!(a.lccwarn, Some('A'));
     assert!((a.ctrkerr.expect("ctrkerr") - 0.10).abs() < 1e-4);

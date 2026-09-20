@@ -15,19 +15,19 @@ pub struct Hsc {
 
 impl Hsc {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let cmd_heading_true = r.f32();
         r.skip(); // T
         let cmd_heading_mag = r.f32();
         r.skip(); // M
         let status = r.char();
-        Some(Self {
+        Self {
             cmd_heading_true,
             cmd_heading_mag,
             status,
-        })
+        }
     }
 }
 
@@ -62,7 +62,7 @@ mod tests {
         }
         .to_sentence("FT").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let h = Hsc::parse(&frame.fields).expect("parse");
+        let h = Hsc::parse(&frame.fields);
         assert!(h.cmd_heading_true.is_none());
         assert!(h.cmd_heading_mag.is_none());
         assert!(h.status.is_none());
@@ -77,14 +77,14 @@ mod tests {
         };
         let sentence = original.to_sentence("FT").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Hsc::parse(&frame.fields).expect("re-parse HSC");
+        let parsed = Hsc::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn hsc_no_status_signalk() {
         let frame = parse_frame("$FTHSC,40.12,T,39.11,M*5E").expect("valid signalk HSC frame");
-        let hsc = Hsc::parse(&frame.fields).expect("parse HSC");
+        let hsc = Hsc::parse(&frame.fields);
         assert!((hsc.cmd_heading_true.expect("true") - 40.12).abs() < 0.01);
         assert!((hsc.cmd_heading_mag.expect("mag") - 39.11).abs() < 0.01);
         assert!(hsc.status.is_none());

@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$PKNSH,3926.7952,N,12000.5947,W,022732,A,U00001*63").expect("valid");
-    let p = Pknsh::parse(&frame.fields).expect("parse");
+    let p = Pknsh::parse(&frame.fields);
     let sentence = p.to_sentence("").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let p2 = Pknsh::parse(&frame2.fields).expect("parse");
+    let p2 = Pknsh::parse(&frame2.fields);
     assert_eq!(p, p2);
 }
 
@@ -36,6 +36,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Pknsh::parse(&frame.fields).expect("parse");
+    let parsed = Pknsh::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

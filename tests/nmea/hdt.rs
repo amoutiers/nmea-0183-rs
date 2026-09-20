@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$HEHDT,4.0,T*2B").expect("valid");
-    let hdt = Hdt::parse(&frame.fields).expect("parse");
+    let hdt = Hdt::parse(&frame.fields);
     let sentence = hdt.to_sentence("HE").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let hdt2 = Hdt::parse(&frame2.fields).expect("parse");
+    let hdt2 = Hdt::parse(&frame2.fields);
     assert_eq!(hdt, hdt2);
 }
 
@@ -27,7 +27,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Hdt::parse(&frame.fields).expect("parse");
+    let parsed = Hdt::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -35,7 +35,7 @@ fn roundtrip() {
 fn hdt_values() {
     // (a) value half
     let frame = parse_frame("$HEHDT,4.0,T*2B").expect("valid");
-    let x = Hdt::parse(&frame.fields).expect("parse");
+    let x = Hdt::parse(&frame.fields);
     assert!((x.heading_true.expect("heading_true") - 4.0).abs() < 1e-2);
 
     // (b) wire half — 4.0 normalises to "4" via format!("{}", v)

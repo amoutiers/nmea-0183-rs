@@ -21,8 +21,8 @@ pub struct Bww {
 
 impl Bww {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let bear_true = r.f32();
         let bear_true_type = r.char();
@@ -30,14 +30,14 @@ impl Bww {
         let bear_mag_type = r.char();
         let wpt_dest = r.string();
         let wpt_origin = r.string();
-        Some(Self {
+        Self {
             bear_true,
             bear_true_type,
             bear_mag,
             bear_mag_type,
             wpt_dest,
             wpt_origin,
-        })
+        }
     }
 }
 
@@ -73,7 +73,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let b = Bww::parse(&f.fields).expect("parse");
+        let b = Bww::parse(&f.fields);
         assert!(b.bear_true.is_none());
         assert!(b.wpt_dest.is_none());
     }
@@ -90,14 +90,14 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Bww::parse(&frame.fields).expect("parse");
+        let parsed = Bww::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn bww_gpbww_gonmea() {
         let frame = parse_frame("$GPBWW,097.0,T,103.2,M,POINTB,POINTA*41").expect("valid");
-        let b = Bww::parse(&frame.fields).expect("parse");
+        let b = Bww::parse(&frame.fields);
         assert!((b.bear_true.expect("bear_true") - 97.0).abs() < 0.1);
         assert_eq!(b.bear_true_type, Some('T'));
         assert!((b.bear_mag.expect("bear_mag") - 103.2).abs() < 0.1);

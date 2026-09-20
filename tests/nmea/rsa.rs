@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIRSA,10.5,A,,V*4D").expect("valid");
-    let rsa = Rsa::parse(&frame.fields).expect("parse");
+    let rsa = Rsa::parse(&frame.fields);
     let sentence = rsa.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let rsa2 = Rsa::parse(&frame2.fields).expect("parse");
+    let rsa2 = Rsa::parse(&frame2.fields);
     assert_eq!(rsa, rsa2);
 }
 
@@ -30,14 +30,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Rsa::parse(&frame.fields).expect("parse");
+    let parsed = Rsa::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn rsa_values() {
     let frame = parse_frame("$IIRSA,10.5,A,,V*4D").expect("valid RSA frame");
-    let x = Rsa::parse(&frame.fields).expect("parse RSA");
+    let x = Rsa::parse(&frame.fields);
     assert!((x.starboard_angle.expect("starboard_angle") - 10.5).abs() < 1e-2);
     assert_eq!(x.starboard_status, Some('A'));
     assert!(x.port_angle.is_none());

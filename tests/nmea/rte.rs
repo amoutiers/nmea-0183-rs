@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIRTE,4,1,c,Rte 1,411,412,413,414,415*6F").expect("valid");
-    let rte = Rte::parse(&frame.fields).expect("parse");
+    let rte = Rte::parse(&frame.fields);
     let sentence = rte.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let rte2 = Rte::parse(&frame2.fields).expect("parse");
+    let rte2 = Rte::parse(&frame2.fields);
     assert_eq!(rte, rte2);
 }
 
@@ -37,14 +37,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Rte::parse(&frame.fields).expect("parse");
+    let parsed = Rte::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn rte_values() {
     let frame = parse_frame("$IIRTE,4,1,c,Rte 1,411,412,413,414,415*6F").expect("valid RTE frame");
-    let x = Rte::parse(&frame.fields).expect("parse RTE");
+    let x = Rte::parse(&frame.fields);
     assert_eq!(x.num_sentences, Some(4));
     assert_eq!(x.sentence_num, Some(1));
     assert_eq!(x.mode, Some('c'));

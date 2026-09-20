@@ -8,10 +8,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 fn decode_encode() {
     let frame = parse_frame("$GPGSV,3,1,09,09,73,246,35,02,51,060,40,06,16,058,37,07,16,291,25*78")
         .expect("valid");
-    let gsv = Gsv::parse(&frame.fields).expect("parse");
+    let gsv = Gsv::parse(&frame.fields);
     let sentence = gsv.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let gsv2 = Gsv::parse(&frame2.fields).expect("parse");
+    let gsv2 = Gsv::parse(&frame2.fields);
     assert_eq!(gsv, gsv2);
 }
 
@@ -58,7 +58,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Gsv::parse(&frame.fields).expect("parse");
+    let parsed = Gsv::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -66,7 +66,7 @@ fn roundtrip() {
 fn gsv_values() {
     let frame = parse_frame("$GPGSV,3,1,09,09,73,246,35,02,51,060,40,06,16,058,37,07,16,291,25*78")
         .expect("valid GSV fixture");
-    let gsv = Gsv::parse(&frame.fields).expect("parse GSV");
+    let gsv = Gsv::parse(&frame.fields);
     assert_eq!(gsv.total_msgs, Some(3));
     assert_eq!(gsv.msg_num, Some(1));
     assert_eq!(gsv.sats_in_view, Some(9));

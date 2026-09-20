@@ -13,17 +13,17 @@ pub struct Vpw {
 
 impl Vpw {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let speed_knots = r.f32();
         r.skip(); // N
         let speed_ms = r.f32();
         r.skip(); // M
-        Some(Self {
+        Self {
             speed_knots,
             speed_ms,
-        })
+        }
     }
 }
 
@@ -53,7 +53,7 @@ mod tests {
         }
         .to_sentence("II").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let v = Vpw::parse(&frame.fields).expect("parse");
+        let v = Vpw::parse(&frame.fields);
         assert!(v.speed_knots.is_none());
         assert!(v.speed_ms.is_none());
     }
@@ -66,14 +66,14 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Vpw::parse(&frame.fields).expect("re-parse VPW");
+        let parsed = Vpw::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn vpw_full_gonmea() {
         let frame = parse_frame("$IIVPW,4.5,N,6.7,M*52").expect("valid VPW frame");
-        let vpw = Vpw::parse(&frame.fields).expect("parse VPW");
+        let vpw = Vpw::parse(&frame.fields);
         assert!((vpw.speed_knots.expect("kts") - 4.5).abs() < 0.1);
         assert!((vpw.speed_ms.expect("ms") - 6.7).abs() < 0.1);
     }
@@ -81,7 +81,7 @@ mod tests {
     #[test]
     fn vpw_missing_ms_signalk() {
         let frame = parse_frame("$IIVPW,4.5,N,,*30").expect("valid SignalK VPW frame");
-        let vpw = Vpw::parse(&frame.fields).expect("parse VPW");
+        let vpw = Vpw::parse(&frame.fields);
         assert!((vpw.speed_knots.expect("kts") - 4.5).abs() < 0.1);
         assert!(vpw.speed_ms.is_none());
     }

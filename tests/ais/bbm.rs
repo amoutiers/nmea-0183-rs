@@ -5,7 +5,7 @@ use nmea_0183_rs::parse_frame;
 #[test]
 fn bbm_values() {
     let frame = parse_frame("!AIBBM,26,2,1,3,8,177KQJ5000G?tO`K>RA1wUbN0TKH,0*2C").expect("valid");
-    let bbm = Bbm::parse(&frame.fields).expect("parse");
+    let bbm = Bbm::parse(&frame.fields);
 
     assert_eq!(bbm.num_frags, Some(26));
     assert_eq!(bbm.frag_num, Some(2));
@@ -19,11 +19,11 @@ fn bbm_values() {
 #[test]
 fn decode_encode() {
     let frame = parse_frame("!AIBBM,26,2,1,3,8,H77nSfPh4U=<E`H4U8G;:222220,2*6C").expect("valid");
-    let bbm = Bbm::parse(&frame.fields).expect("parse");
+    let bbm = Bbm::parse(&frame.fields);
     let sentence2 = bbm.to_sentence("AI").expect("encode");
     assert!(sentence2.starts_with("!AIBBM,"));
     let frame2 = parse_frame(sentence2.trim()).expect("re-parse");
-    let bbm2 = Bbm::parse(&frame2.fields).expect("parse");
+    let bbm2 = Bbm::parse(&frame2.fields);
     assert_eq!(bbm, bbm2);
 }
 
@@ -46,7 +46,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("AI").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Bbm::parse(&frame.fields).expect("parse");
+    let parsed = Bbm::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -77,4 +77,12 @@ fn bbm_default_and_strict_encoding() {
         unknown.to_sentence_strict("AI"),
         Err(StrictEncodeError::Encode(EncodeError::MissingFrameContext))
     );
+}
+
+#[test]
+fn parser_is_infallible_and_lenient() {
+    let empty: Bbm = Bbm::parse(&[]);
+    assert_eq!(empty, Bbm::default());
+    let malformed: Bbm = Bbm::parse(&["bad"]);
+    assert_eq!(malformed, Bbm::default());
 }

@@ -26,8 +26,8 @@ pub struct Pknsh {
 
 impl Pknsh {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let lat = r.f64();
         let ns = r.char();
@@ -36,7 +36,7 @@ impl Pknsh {
         let time = r.string();
         let validity = r.char();
         let unit_id = r.string();
-        Some(Self {
+        Self {
             lat,
             ns,
             lon,
@@ -44,7 +44,7 @@ impl Pknsh {
             time,
             validity,
             unit_id,
-        })
+        }
     }
 }
 
@@ -83,7 +83,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pknsh::parse(&f.fields).expect("parse");
+        let p = Pknsh::parse(&f.fields);
         assert!(p.lat.is_none());
         assert!(p.unit_id.is_none());
     }
@@ -101,7 +101,7 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pknsh::parse(&frame.fields).expect("parse");
+        let parsed = Pknsh::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -109,7 +109,7 @@ mod tests {
     fn pknsh_values() {
         let f =
             parse_frame("$PKNSH,3926.7952,N,12000.5947,W,022732,A,U00001*63").expect("valid PKNSH");
-        let p = Pknsh::parse(&f.fields).expect("parse PKNSH");
+        let p = Pknsh::parse(&f.fields);
         assert!((p.lat.expect("lat") - 3926.7952).abs() < 0.0001);
         assert_eq!(p.ns, Some('N'));
         assert!((p.lon.expect("lon") - 12000.5947).abs() < 0.0001);

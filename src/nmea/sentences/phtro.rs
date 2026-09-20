@@ -20,19 +20,19 @@ pub struct Phtro {
 
 impl Phtro {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let pitch = r.f32();
         let bow = r.char();
         let roll = r.f32();
         let port = r.char();
-        Some(Self {
+        Self {
             pitch,
             bow,
             roll,
             port,
-        })
+        }
     }
 }
 
@@ -65,7 +65,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Phtro::parse(&f.fields).expect("parse");
+        let p = Phtro::parse(&f.fields);
         assert!(p.pitch.is_none());
         assert!(p.roll.is_none());
     }
@@ -80,14 +80,14 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Phtro::parse(&frame.fields).expect("parse");
+        let parsed = Phtro::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn phtro_phtro_gonmea() {
         let frame = parse_frame("$PHTRO,10.37,P,177.62,T*65").expect("valid");
-        let p = Phtro::parse(&frame.fields).expect("parse");
+        let p = Phtro::parse(&frame.fields);
         assert!((p.pitch.expect("pitch") - 10.37).abs() < 0.01);
         assert_eq!(p.bow, Some('P'));
         assert!((p.roll.expect("roll") - 177.62).abs() < 0.01);

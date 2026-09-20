@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GNVLW,,N,,N,0.000,N,0.000,N*44").expect("valid");
-    let vlw = Vlw::parse(&frame.fields).expect("parse");
+    let vlw = Vlw::parse(&frame.fields);
     let sentence = vlw.to_sentence("GN").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let vlw2 = Vlw::parse(&frame2.fields).expect("parse");
+    let vlw2 = Vlw::parse(&frame2.fields);
     assert_eq!(vlw, vlw2);
 }
 
@@ -34,14 +34,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Vlw::parse(&frame.fields).expect("parse");
+    let parsed = Vlw::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn vlw_values() {
     let frame = parse_frame("$GNVLW,,N,,N,0.000,N,0.000,N*44").expect("valid");
-    let vlw = Vlw::parse(&frame.fields).expect("parse");
+    let vlw = Vlw::parse(&frame.fields);
     assert!(vlw.total_water_dist.is_none());
     assert_eq!(vlw.total_water_dist_unit, Some('N'));
     assert!(vlw.water_dist.is_none());

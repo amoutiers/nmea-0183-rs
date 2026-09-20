@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIRPM,E,1,2418.2,10.5,A*5F").expect("valid");
-    let rpm = Rpm::parse(&frame.fields).expect("parse");
+    let rpm = Rpm::parse(&frame.fields);
     let sentence = rpm.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let rpm2 = Rpm::parse(&frame2.fields).expect("parse");
+    let rpm2 = Rpm::parse(&frame2.fields);
     assert_eq!(rpm, rpm2);
 }
 
@@ -31,14 +31,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Rpm::parse(&frame.fields).expect("parse");
+    let parsed = Rpm::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn rpm_values() {
     let frame = parse_frame("$IIRPM,E,1,2418.2,10.5,A*5F").expect("valid");
-    let r = Rpm::parse(&frame.fields).expect("parse");
+    let r = Rpm::parse(&frame.fields);
     assert_eq!(r.source, Some('E'));
     assert_eq!(r.engine_shaft_num, Some(1));
     assert!((r.rpm.expect("rpm") - 2418.2).abs() < 1e-2);

@@ -12,10 +12,10 @@ fn dispatch() {
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIWPL,5503.4530,N,01037.2742,E,411*6F").expect("valid");
-    let wpl = Wpl::parse(&frame.fields).expect("parse");
+    let wpl = Wpl::parse(&frame.fields);
     let sentence = wpl.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let wpl2 = Wpl::parse(&frame2.fields).expect("parse");
+    let wpl2 = Wpl::parse(&frame2.fields);
     assert_eq!(wpl, wpl2);
 }
 
@@ -30,14 +30,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Wpl::parse(&frame.fields).expect("parse");
+    let parsed = Wpl::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn wpl_values() {
     let frame = parse_frame("$IIWPL,5503.4530,N,01037.2742,E,411*6F").expect("valid");
-    let wpl = Wpl::parse(&frame.fields).expect("parse");
+    let wpl = Wpl::parse(&frame.fields);
     assert!((wpl.lat.expect("lat") - 5503.453_f64).abs() < 1e-2);
     assert_eq!(wpl.ns, Some('N'));
     assert!((wpl.lon.expect("lon") - 1037.2742_f64).abs() < 1e-2);

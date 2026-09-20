@@ -9,10 +9,10 @@ fn decode_encode() {
     let frame =
         parse_frame("$WIMDA,,I,+0.985,B,+03.1,C,+5.6,C,40.0,3.0,+3.4,C,90.0,T,85.0,M,10.0,N,,M*1A")
             .expect("valid");
-    let mda = Mda::parse(&frame.fields).expect("parse");
+    let mda = Mda::parse(&frame.fields);
     let sentence = mda.to_sentence("WI").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let mda2 = Mda::parse(&frame2.fields).expect("parse");
+    let mda2 = Mda::parse(&frame2.fields);
     assert_eq!(mda, mda2);
 }
 
@@ -50,7 +50,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("WI").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Mda::parse(&frame.fields).expect("parse");
+    let parsed = Mda::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -59,7 +59,7 @@ fn mda_values() {
     let frame =
         parse_frame("$WIMDA,,I,+0.985,B,+03.1,C,+5.6,C,40.0,3.0,+3.4,C,90.0,T,85.0,M,10.0,N,,M*1A")
             .expect("valid");
-    let m = Mda::parse(&frame.fields).expect("parse");
+    let m = Mda::parse(&frame.fields);
     assert!(m.baro_inches.is_none());
     assert_eq!(m.baro_inches_unit, Some('I'));
     assert!((m.baro_bars.expect("baro_bars") - 0.985).abs() < 1e-4);

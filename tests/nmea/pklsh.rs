@@ -7,10 +7,10 @@ use nmea_0183_rs::{EncodeError, NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$PKLSH,3926.7952,N,12000.5947,W,022732,A,100,2000*1A").expect("valid");
-    let p = Pklsh::parse(&frame.fields).expect("parse");
+    let p = Pklsh::parse(&frame.fields);
     let sentence = p.to_sentence("").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let p2 = Pklsh::parse(&frame2.fields).expect("parse");
+    let p2 = Pklsh::parse(&frame2.fields);
     assert_eq!(p, p2);
 }
 
@@ -37,13 +37,13 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Pklsh::parse(&frame.fields).expect("parse");
+    let parsed = Pklsh::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn encodes_coordinates_with_nmea_padding_and_validation() {
-    let mut value = Pklsh::parse(&[]).expect("parse empty");
+    let mut value = Pklsh::parse(&[]);
     value.lat = Some(133.82);
     value.lon = Some(42.24);
     assert_eq!(value.encode().expect("encode")[0], "0133.82");

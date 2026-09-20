@@ -37,10 +37,10 @@ pub struct Rmb {
 
 impl Rmb {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             status: r.char(),
             ctrkerr: r.f32(),
             dirs: r.char(),
@@ -55,7 +55,7 @@ impl Rmb {
             velclos: r.f32(),
             arrstatus: r.char(),
             valstatus: r.char(),
-        })
+        }
     }
 }
 
@@ -90,7 +90,7 @@ mod tests {
     #[test]
     fn rmb_empty() {
         let f = parse_frame("$GPRMB,,,,,,,,,,,,,,*4A").expect("valid");
-        let r = Rmb::parse(&f.fields).expect("parse");
+        let r = Rmb::parse(&f.fields);
         assert!(r.status.is_none());
         assert!(r.ctrkerr.is_none());
         assert!(r.dirs.is_none());
@@ -125,7 +125,7 @@ mod tests {
         let sentence = rmb.to_sentence("EC").expect("encode");
         assert!(sentence.starts_with("$ECRMB,"));
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let rmb2 = Rmb::parse(&frame.fields).expect("re-parse RMB");
+        let rmb2 = Rmb::parse(&frame.fields);
         assert_eq!(rmb.status, rmb2.status);
         assert_eq!(rmb.wpt_dest, rmb2.wpt_dest);
         assert_eq!(rmb.valstatus, rmb2.valstatus);
@@ -136,7 +136,7 @@ mod tests {
         let frame =
             parse_frame("$ECRMB,A,0.000,L,001,002,4653.550,N,07115.984,W,2.505,334.205,0.000,V*04")
                 .expect("valid");
-        let rmb = Rmb::parse(&frame.fields).expect("parse RMB");
+        let rmb = Rmb::parse(&frame.fields);
         assert_eq!(rmb.status, Some('A'));
         assert!((rmb.ctrkerr.expect("ctrkerr") - 0.0).abs() < 0.001);
         assert_eq!(rmb.dirs, Some('L'));
@@ -158,7 +158,7 @@ mod tests {
         let frame =
             parse_frame("$GPRMB,A,0.66,L,003,004,4917.24,N,12309.57,W,001.3,052.5,000.5,V*20")
                 .expect("valid pynmeagps RMB frame");
-        let rmb = Rmb::parse(&frame.fields).expect("parse RMB");
+        let rmb = Rmb::parse(&frame.fields);
         assert_eq!(rmb.status, Some('A'));
         assert!((rmb.ctrkerr.expect("ctrkerr") - 0.66).abs() < 0.01);
         assert_eq!(rmb.wpt_dest, Some("004".to_string()));

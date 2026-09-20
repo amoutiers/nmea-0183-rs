@@ -6,10 +6,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$PCDIN,01F112,000C72EA,09,28C36A0000B40AFD*56").expect("valid");
-    let pcdin = Pcdin::parse(&frame.fields).expect("parse");
+    let pcdin = Pcdin::parse(&frame.fields);
     let sentence = pcdin.to_sentence("").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let pcdin2 = Pcdin::parse(&frame2.fields).expect("parse");
+    let pcdin2 = Pcdin::parse(&frame2.fields);
     assert_eq!(pcdin, pcdin2);
 }
 
@@ -23,7 +23,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Pcdin::parse(&frame.fields).expect("parse");
+    let parsed = Pcdin::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -39,7 +39,7 @@ fn dispatch() {
 #[test]
 fn pcdin_values() {
     let frame = parse_frame("$PCDIN,01F112,000C72EA,09,28C36A0000B40AFD*56").expect("valid");
-    let p = Pcdin::parse(&frame.fields).expect("parse");
+    let p = Pcdin::parse(&frame.fields);
     assert_eq!(p.pgn.as_deref(), Some("01F112"));
     assert_eq!(p.timestamp.as_deref(), Some("000C72EA"));
     assert_eq!(p.source.as_deref(), Some("09"));

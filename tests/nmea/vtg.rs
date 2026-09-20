@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPVTG,0.0,T,359.3,M,0.0,N,0.0,K,A*2F").expect("valid");
-    let vtg = Vtg::parse(&frame.fields).expect("parse");
+    let vtg = Vtg::parse(&frame.fields);
     let sentence = vtg.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let vtg2 = Vtg::parse(&frame2.fields).expect("parse");
+    let vtg2 = Vtg::parse(&frame2.fields);
     assert_eq!(vtg, vtg2);
 }
 
@@ -23,7 +23,7 @@ fn dispatch() {
 #[test]
 fn vtg_values() {
     let frame = parse_frame("$GPVTG,0.0,T,359.3,M,0.0,N,0.0,K,A*2F").expect("valid");
-    let vtg = Vtg::parse(&frame.fields).expect("parse");
+    let vtg = Vtg::parse(&frame.fields);
     assert!((vtg.course_true.expect("course_true") - 0.0).abs() < 1e-4);
     assert!((vtg.course_mag.expect("course_mag") - 359.3).abs() < 1e-3);
     assert!((vtg.speed_kts.expect("speed_kts") - 0.0).abs() < 1e-4);
@@ -47,6 +47,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Vtg::parse(&frame.fields).expect("parse");
+    let parsed = Vtg::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

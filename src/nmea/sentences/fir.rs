@@ -27,8 +27,8 @@ pub struct Fir {
 
 impl Fir {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let fire_type = r.char();
         let time = r.string();
@@ -39,7 +39,7 @@ impl Fir {
         let condition = r.char();
         let ack_state = r.char();
         let message = r.string();
-        Some(Self {
+        Self {
             fire_type,
             time,
             system,
@@ -49,7 +49,7 @@ impl Fir {
             condition,
             ack_state,
             message,
-        })
+        }
     }
 }
 
@@ -91,7 +91,7 @@ mod tests {
         }
         .to_sentence("FR").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let fir = Fir::parse(&f.fields).expect("parse");
+        let fir = Fir::parse(&f.fields);
         assert!(fir.fire_type.is_none());
         assert!(fir.time.is_none());
         assert!(fir.message.is_none());
@@ -112,7 +112,7 @@ mod tests {
         };
         let sentence = original.to_sentence("FR").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Fir::parse(&frame.fields).expect("parse");
+        let parsed = Fir::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -122,7 +122,7 @@ mod tests {
             "$FRFIR,E,103000,FD,PT,000,007,A,V,Fire Alarm : TEST PT7 Name TEST DZ2 Name*7A",
         )
         .expect("valid FIR");
-        let fir = Fir::parse(&f.fields).expect("parse FIR");
+        let fir = Fir::parse(&f.fields);
         assert_eq!(fir.fire_type, Some('E'));
         assert_eq!(fir.time, Some("103000".to_string()));
         assert_eq!(fir.system, Some("FD".to_string()));

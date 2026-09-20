@@ -40,8 +40,8 @@ pub struct Psoncms {
 
 impl Psoncms {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let quaternion_0 = r.f32();
         let quaternion_1 = r.f32();
@@ -57,7 +57,7 @@ impl Psoncms {
         let mag_y = r.f32();
         let mag_z = r.f32();
         let temperature = r.f32();
-        Some(Self {
+        Self {
             quaternion_0,
             quaternion_1,
             quaternion_2,
@@ -72,7 +72,7 @@ impl Psoncms {
             mag_y,
             mag_z,
             temperature,
-        })
+        }
     }
 }
 
@@ -125,7 +125,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Psoncms::parse(&f.fields).expect("parse");
+        let p = Psoncms::parse(&f.fields);
         assert!(p.quaternion_0.is_none());
         assert!(p.temperature.is_none());
     }
@@ -150,7 +150,7 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Psoncms::parse(&frame.fields).expect("parse");
+        let parsed = Psoncms::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -160,7 +160,7 @@ mod tests {
             "$PSONCMS,0.0905,0.4217,0.9020,-0.0196,-1.7685,0.3861,-9.6648,-0.0116,0.0065,-0.0080,0.0581,0.3846,0.7421,33.1*76",
         )
         .expect("valid PSONCMS");
-        let p = Psoncms::parse(&f.fields).expect("parse PSONCMS");
+        let p = Psoncms::parse(&f.fields);
         assert!((p.quaternion_0.expect("q0") - 0.0905).abs() < 0.0001);
         assert!((p.quaternion_1.expect("q1") - 0.4217).abs() < 0.0001);
         assert!((p.quaternion_2.expect("q2") - 0.9020).abs() < 0.0001);

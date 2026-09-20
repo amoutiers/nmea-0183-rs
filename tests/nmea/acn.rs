@@ -6,7 +6,7 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn acn_values() {
     let frame = parse_frame("$RAACN,220516,TCK,002,1,A,C*00").expect("valid");
-    let acn = Acn::parse(&frame.fields).expect("parse");
+    let acn = Acn::parse(&frame.fields);
 
     assert_eq!(acn.time.as_deref(), Some("220516"));
     assert_eq!(acn.manufacturer.as_deref(), Some("TCK"));
@@ -19,10 +19,10 @@ fn acn_values() {
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$RAACN,220516,TCK,002,1,A,C*00").expect("valid");
-    let acn = Acn::parse(&frame.fields).expect("parse");
+    let acn = Acn::parse(&frame.fields);
     let sentence = acn.to_sentence("RA").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let acn2 = Acn::parse(&frame2.fields).expect("parse");
+    let acn2 = Acn::parse(&frame2.fields);
     assert_eq!(acn, acn2);
 }
 
@@ -44,6 +44,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("RA").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Acn::parse(&frame.fields).expect("parse");
+    let parsed = Acn::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

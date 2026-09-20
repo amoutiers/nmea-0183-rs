@@ -17,15 +17,15 @@ pub struct Rsa {
 
 impl Rsa {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             starboard_angle: r.f32(),
             starboard_status: r.char(),
             port_angle: r.f32(),
             port_status: r.char(),
-        })
+        }
     }
 }
 
@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn rsa_dual_rudder_gonmea() {
         let frame = parse_frame("$IIRSA,10.5,A,0.4,A*70").expect("valid go-nmea RSA frame");
-        let rsa = Rsa::parse(&frame.fields).expect("parse RSA");
+        let rsa = Rsa::parse(&frame.fields);
         assert!((rsa.starboard_angle.expect("stbd") - 10.5).abs() < 0.1);
         assert_eq!(rsa.starboard_status, Some('A'));
         assert!((rsa.port_angle.expect("port") - 0.4).abs() < 0.1);
@@ -67,7 +67,7 @@ mod tests {
         }
         .to_sentence("II").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let r = Rsa::parse(&frame.fields).expect("parse");
+        let r = Rsa::parse(&frame.fields);
         assert!(r.starboard_angle.is_none());
         assert!(r.starboard_status.is_none());
         assert!(r.port_angle.is_none());
@@ -84,14 +84,14 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Rsa::parse(&frame.fields).expect("re-parse RSA");
+        let parsed = Rsa::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn rsa_starboard_only() {
         let frame = parse_frame("$IIRSA,10.5,A,,V*4D").expect("valid RSA frame");
-        let rsa = Rsa::parse(&frame.fields).expect("parse RSA");
+        let rsa = Rsa::parse(&frame.fields);
         assert!((rsa.starboard_angle.expect("stbd") - 10.5).abs() < 0.1);
         assert_eq!(rsa.starboard_status, Some('A'));
         assert!(rsa.port_angle.is_none());

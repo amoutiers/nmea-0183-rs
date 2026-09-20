@@ -39,10 +39,10 @@ pub struct Apb {
 
 impl Apb {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             lcgwarn: r.char(),
             lccwarn: r.char(),
             ctrkerr: r.f32(),
@@ -58,7 +58,7 @@ impl Apb {
             bear_steer: r.f32(),
             bear_steer_type: r.char(),
             mode: r.char(),
-        })
+        }
     }
 }
 
@@ -112,7 +112,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let a = Apb::parse(&frame.fields).expect("parse");
+        let a = Apb::parse(&frame.fields);
         assert!(a.lcgwarn.is_none());
         assert!(a.wpt.is_none());
         assert!(a.mode.is_none());
@@ -139,7 +139,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Apb::parse(&frame.fields).expect("re-parse APB");
+        let parsed = Apb::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -147,7 +147,7 @@ mod tests {
     fn apb_signalk_full() {
         let frame =
             parse_frame("$GPAPB,A,A,0.10,R,N,V,V,011,M,DEST,011,M,011,M*3C").expect("valid");
-        let apb = Apb::parse(&frame.fields).expect("parse APB");
+        let apb = Apb::parse(&frame.fields);
         assert_eq!(apb.lcgwarn, Some('A'));
         assert_eq!(apb.lccwarn, Some('A'));
         assert!((apb.ctrkerr.expect("ctrkerr") - 0.10).abs() < 0.01);

@@ -21,21 +21,21 @@ pub struct Alr {
 
 impl Alr {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let alarm_id = r.string();
         let condition = r.char();
         let state = r.char();
         let description = r.string();
-        Some(Self {
+        Self {
             time,
             alarm_id,
             condition,
             state,
             description,
-        })
+        }
     }
 }
 
@@ -69,7 +69,7 @@ mod tests {
         }
         .to_sentence("RA").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let a = Alr::parse(&f.fields).expect("parse");
+        let a = Alr::parse(&f.fields);
         assert!(a.time.is_none());
         assert!(a.description.is_none());
     }
@@ -85,14 +85,14 @@ mod tests {
         };
         let sentence = original.to_sentence("RA").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Alr::parse(&frame.fields).expect("parse");
+        let parsed = Alr::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn alr_raalr_gonmea() {
         let frame = parse_frame("$RAALR,220516,001,A,A,Bilge pump alarm1*4C").expect("valid");
-        let a = Alr::parse(&frame.fields).expect("parse");
+        let a = Alr::parse(&frame.fields);
         assert_eq!(a.time.as_deref(), Some("220516"));
         assert_eq!(a.alarm_id.as_deref(), Some("001"));
         assert_eq!(a.condition, Some('A'));

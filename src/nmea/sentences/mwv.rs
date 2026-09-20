@@ -19,16 +19,16 @@ pub struct Mwv {
 
 impl Mwv {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             wind_angle: r.f32(),
             reference: r.char(),
             wind_speed: r.f32(),
             speed_units: r.char(),
             status: r.char(),
-        })
+        }
     }
 }
 
@@ -54,7 +54,7 @@ mod tests {
     #[test]
     fn mwv_empty() {
         let frame = parse_frame("$IIMWV,,,,*4C").expect("valid");
-        let mwv = Mwv::parse(&frame.fields).expect("parse MWV");
+        let mwv = Mwv::parse(&frame.fields);
         assert!(mwv.wind_angle.is_none());
         assert!(mwv.reference.is_none());
     }
@@ -62,7 +62,7 @@ mod tests {
     #[test]
     fn mwv_relative_signalk() {
         let frame = parse_frame("$IIMWV,336,R,13.41,N,A*22").expect("valid");
-        let mwv = Mwv::parse(&frame.fields).expect("parse MWV");
+        let mwv = Mwv::parse(&frame.fields);
         assert!((mwv.wind_angle.expect("angle") - 336.0).abs() < 0.1);
         assert_eq!(mwv.reference, Some('R'));
         assert!((mwv.wind_speed.expect("speed") - 13.41).abs() < 0.01);
@@ -81,7 +81,7 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse MWV sentence");
-        let parsed = Mwv::parse(&frame.fields).expect("parse MWV from re-encoded frame");
+        let parsed = Mwv::parse(&frame.fields);
 
         assert_eq!(original, parsed);
     }
@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn mwv_true_signalk() {
         let frame = parse_frame("$IIMWV,074,T,05.85,N,A*2E").expect("valid");
-        let mwv = Mwv::parse(&frame.fields).expect("parse MWV");
+        let mwv = Mwv::parse(&frame.fields);
         assert_eq!(mwv.reference, Some('T'));
     }
 }

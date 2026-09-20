@@ -25,10 +25,10 @@ pub struct Dtm {
 
 impl Dtm {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             datum: r.string(),
             sub_datum: r.string(),
             lat_offset: r.f32(),
@@ -37,7 +37,7 @@ impl Dtm {
             ew: r.char(),
             alt_offset: r.f32(),
             ref_datum: r.string(),
-        })
+        }
     }
 }
 
@@ -77,7 +77,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let d = Dtm::parse(&frame.fields).expect("parse");
+        let d = Dtm::parse(&frame.fields);
         assert!(d.datum.is_none());
         assert!(d.ref_datum.is_none());
     }
@@ -96,7 +96,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Dtm::parse(&frame.fields).expect("re-parse DTM");
+        let parsed = Dtm::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -104,7 +104,7 @@ mod tests {
     fn dtm_pynmeagps() {
         let frame =
             parse_frame("$GPDTM,W84,,0.0,N,0.0,E,0.0,W84*6F").expect("valid pynmeagps DTM frame");
-        let dtm = Dtm::parse(&frame.fields).expect("parse DTM");
+        let dtm = Dtm::parse(&frame.fields);
         assert_eq!(dtm.datum, Some("W84".to_string()));
         assert!(dtm.sub_datum.is_none());
         assert!((dtm.lat_offset.expect("lat_offset") - 0.0).abs() < 0.001);
@@ -119,7 +119,7 @@ mod tests {
     fn dtm_subdivision_gonmea() {
         let frame = parse_frame("$GPDTM,W84,X,00.1200,S,12.0000,W,100,W84*27")
             .expect("valid go-nmea DTM frame");
-        let dtm = Dtm::parse(&frame.fields).expect("parse DTM");
+        let dtm = Dtm::parse(&frame.fields);
         assert_eq!(dtm.datum, Some("W84".to_string()));
         assert_eq!(dtm.sub_datum, Some("X".to_string()));
         assert!((dtm.lat_offset.expect("lat_offset") - 0.12).abs() < 0.001);

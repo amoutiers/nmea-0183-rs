@@ -8,10 +8,10 @@ fn decode_encode() {
     let frame =
         parse_frame("$PASHR,085335.000,224.19,T,-01.26,+00.83,+00.10,0.101,0.113,0.267,1,0*07")
             .expect("valid");
-    let pashr = Pashr::parse(&frame.fields).expect("parse");
+    let pashr = Pashr::parse(&frame.fields);
     let sentence = pashr.to_sentence("").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let pashr2 = Pashr::parse(&frame2.fields).expect("parse");
+    let pashr2 = Pashr::parse(&frame2.fields);
     assert_eq!(pashr, pashr2);
 }
 
@@ -31,7 +31,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Pashr::parse(&frame.fields).expect("parse");
+    let parsed = Pashr::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -41,7 +41,7 @@ fn pashr_values() {
     let frame =
         parse_frame("$PASHR,085335.000,224.19,T,-01.26,+00.83,+00.10,0.101,0.113,0.267,1,0*07")
             .expect("valid");
-    let x = Pashr::parse(&frame.fields).expect("parse");
+    let x = Pashr::parse(&frame.fields);
     assert_eq!(x.time.as_deref(), Some("085335.000"));
     assert!((x.heading.expect("heading") - 224.19).abs() < 1e-2);
     assert!((x.roll.expect("roll") - (-1.26)).abs() < 1e-2);

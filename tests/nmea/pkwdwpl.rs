@@ -9,10 +9,10 @@ fn decode_encode() {
     let frame =
         parse_frame("$PKWDWPL,150803,A,4237.14,N,07120.83,W,173.8,231.8,190316,1120,test,/'*39")
             .expect("valid");
-    let p = Pkwdwpl::parse(&frame.fields).expect("parse");
+    let p = Pkwdwpl::parse(&frame.fields);
     let sentence = p.to_sentence("").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let p2 = Pkwdwpl::parse(&frame2.fields).expect("parse");
+    let p2 = Pkwdwpl::parse(&frame2.fields);
     assert_eq!(p, p2);
 }
 
@@ -45,6 +45,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Pkwdwpl::parse(&frame.fields).expect("parse");
+    let parsed = Pkwdwpl::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIVDR,10.1,T,12.3,M,1.2,N*3A").expect("valid");
-    let vdr = Vdr::parse(&frame.fields).expect("parse");
+    let vdr = Vdr::parse(&frame.fields);
     let sentence = vdr.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let vdr2 = Vdr::parse(&frame2.fields).expect("parse");
+    let vdr2 = Vdr::parse(&frame2.fields);
     assert_eq!(vdr, vdr2);
 }
 
@@ -29,7 +29,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Vdr::parse(&frame.fields).expect("parse");
+    let parsed = Vdr::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -37,7 +37,7 @@ fn roundtrip() {
 fn vdr_values() {
     // (a) value half
     let frame = parse_frame("$IIVDR,10.1,T,12.3,M,1.2,N*3A").expect("valid VDR frame");
-    let x = Vdr::parse(&frame.fields).expect("parse VDR");
+    let x = Vdr::parse(&frame.fields);
     assert!((x.direction_true.expect("direction_true") - 10.1).abs() < 1e-2);
     assert!((x.direction_mag.expect("direction_mag") - 12.3).abs() < 1e-2);
     assert!((x.speed_knots.expect("speed_knots") - 1.2).abs() < 1e-2);

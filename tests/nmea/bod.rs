@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPBOD,097.0,T,103.2,M,POINTB,POINTA*4A").expect("valid");
-    let bod = Bod::parse(&frame.fields).expect("parse");
+    let bod = Bod::parse(&frame.fields);
     let sentence = bod.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let bod2 = Bod::parse(&frame2.fields).expect("parse");
+    let bod2 = Bod::parse(&frame2.fields);
     assert_eq!(bod, bod2);
 }
 
@@ -32,14 +32,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Bod::parse(&frame.fields).expect("parse");
+    let parsed = Bod::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn bod_values() {
     let frame = parse_frame("$GPBOD,097.0,T,103.2,M,POINTB,POINTA*4A").expect("valid");
-    let b = Bod::parse(&frame.fields).expect("parse");
+    let b = Bod::parse(&frame.fields);
     assert!((b.bear_true.expect("bear_true") - 97.0).abs() < 1e-4);
     assert_eq!(b.bear_true_type, Some('T'));
     assert!((b.bear_mag.expect("bear_mag") - 103.2).abs() < 1e-4);

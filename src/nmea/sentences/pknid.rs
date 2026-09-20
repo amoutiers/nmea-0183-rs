@@ -20,19 +20,19 @@ pub struct Pknid {
 
 impl Pknid {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let version = r.string();
         let unit_id = r.string();
         let status = r.string();
         let extension = r.string();
-        Some(Self {
+        Self {
             version,
             unit_id,
             status,
             extension,
-        })
+        }
     }
 }
 
@@ -65,7 +65,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pknid::parse(&f.fields).expect("parse");
+        let p = Pknid::parse(&f.fields);
         assert!(p.version.is_none());
         assert!(p.extension.is_none());
     }
@@ -80,14 +80,14 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pknid::parse(&frame.fields).expect("parse");
+        let parsed = Pknid::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn pknid_values() {
         let f = parse_frame("$PKNID,00,U00001,015,00,*24").expect("valid PKNID");
-        let p = Pknid::parse(&f.fields).expect("parse PKNID");
+        let p = Pknid::parse(&f.fields);
         assert_eq!(p.version, Some("00".to_string()));
         assert_eq!(p.unit_id, Some("U00001".to_string()));
         assert_eq!(p.status, Some("015".to_string()));

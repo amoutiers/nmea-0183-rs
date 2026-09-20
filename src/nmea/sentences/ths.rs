@@ -14,13 +14,13 @@ pub struct Ths {
 
 impl Ths {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             heading_true: r.f32(),
             mode: r.char(),
-        })
+        }
     }
 }
 
@@ -43,7 +43,7 @@ mod tests {
     #[test]
     fn ths_autonomous_gonmea() {
         let frame = parse_frame("$INTHS,123.456,A*20").expect("valid go-nmea THS frame");
-        let ths = Ths::parse(&frame.fields).expect("parse THS");
+        let ths = Ths::parse(&frame.fields);
         assert!((ths.heading_true.expect("hdg") - 123.456).abs() < 0.001);
         assert_eq!(ths.mode, Some('A'));
     }
@@ -56,7 +56,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let t = Ths::parse(&frame.fields).expect("parse");
+        let t = Ths::parse(&frame.fields);
         assert!(t.heading_true.is_none());
         assert!(t.mode.is_none());
     }
@@ -69,14 +69,14 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Ths::parse(&frame.fields).expect("re-parse THS");
+        let parsed = Ths::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn ths_invalid_gonmea() {
         let frame = parse_frame("$INTHS,,V*1E").expect("valid go-nmea THS void frame");
-        let ths = Ths::parse(&frame.fields).expect("parse THS");
+        let ths = Ths::parse(&frame.fields);
         assert!(ths.heading_true.is_none());
         assert_eq!(ths.mode, Some('V'));
     }
@@ -84,7 +84,7 @@ mod tests {
     #[test]
     fn ths_manual_gonmea() {
         let frame = parse_frame("$INTHS,123.456,M*2C").expect("valid go-nmea THS frame");
-        let ths = Ths::parse(&frame.fields).expect("parse THS");
+        let ths = Ths::parse(&frame.fields);
         assert!((ths.heading_true.expect("hdg") - 123.456).abs() < 0.001);
         assert_eq!(ths.mode, Some('M'));
     }
@@ -92,7 +92,7 @@ mod tests {
     #[test]
     fn ths_pynmeagps() {
         let frame = parse_frame("$GPTHS,77.52,E*34").expect("valid pynmeagps THS frame");
-        let ths = Ths::parse(&frame.fields).expect("parse THS");
+        let ths = Ths::parse(&frame.fields);
         assert!((ths.heading_true.expect("hdg") - 77.52).abs() < 0.01);
         assert_eq!(ths.mode, Some('E'));
     }
@@ -100,7 +100,7 @@ mod tests {
     #[test]
     fn ths_simulator_gonmea() {
         let frame = parse_frame("$INTHS,123.456,S*32").expect("valid go-nmea THS frame");
-        let ths = Ths::parse(&frame.fields).expect("parse THS");
+        let ths = Ths::parse(&frame.fields);
         assert!((ths.heading_true.expect("hdg") - 123.456).abs() < 0.001);
         assert_eq!(ths.mode, Some('S'));
     }

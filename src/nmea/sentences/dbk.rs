@@ -15,19 +15,19 @@ pub struct Dbk {
 
 impl Dbk {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let depth_feet = r.f32();
         r.skip(); // f
         let depth_meters = r.f32();
         r.skip(); // M
         let depth_fathoms = r.f32();
-        Some(Self {
+        Self {
             depth_feet,
             depth_meters,
             depth_fathoms,
-        })
+        }
     }
 }
 
@@ -54,7 +54,7 @@ mod tests {
     #[test]
     fn dbk_empty() {
         let f = parse_frame("$IIDBK,,f,,M,,F*20").expect("valid");
-        let d = Dbk::parse(&f.fields).expect("parse");
+        let d = Dbk::parse(&f.fields);
         assert!(d.depth_feet.is_none());
         assert!(d.depth_meters.is_none());
         assert!(d.depth_fathoms.is_none());
@@ -70,14 +70,14 @@ mod tests {
         let sentence = dbk.to_sentence("II").expect("encode");
         assert!(sentence.starts_with("$IIDBK,"));
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let dbk2 = Dbk::parse(&frame.fields).expect("re-parse DBK");
+        let dbk2 = Dbk::parse(&frame.fields);
         assert_eq!(dbk, dbk2);
     }
 
     #[test]
     fn dbk_full_gonmea() {
         let f = parse_frame("$SDDBK,12.3,f,3.7,M,2.0,F*2F").expect("valid DBK from go-nmea");
-        let d = Dbk::parse(&f.fields).expect("parse DBK");
+        let d = Dbk::parse(&f.fields);
         assert!((d.depth_feet.expect("depth_feet present") - 12.3).abs() < 0.01);
         assert!((d.depth_meters.expect("depth_meters present") - 3.7).abs() < 0.01);
         assert!((d.depth_fathoms.expect("depth_fathoms present") - 2.0).abs() < 0.01);
@@ -87,7 +87,7 @@ mod tests {
     fn dbk_signalk() {
         let f =
             parse_frame("$IIDBK,035.53,f,010.83,M,005.85,F*3C").expect("valid DBK from SignalK");
-        let d = Dbk::parse(&f.fields).expect("parse DBK");
+        let d = Dbk::parse(&f.fields);
         assert!((d.depth_meters.expect("depth_meters present") - 10.83).abs() < 0.01);
     }
 }

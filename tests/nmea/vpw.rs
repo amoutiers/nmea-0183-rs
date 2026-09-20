@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIVPW,4.5,N,6.7,M*52").expect("valid");
-    let vpw = Vpw::parse(&frame.fields).expect("parse");
+    let vpw = Vpw::parse(&frame.fields);
     let sentence = vpw.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let vpw2 = Vpw::parse(&frame2.fields).expect("parse");
+    let vpw2 = Vpw::parse(&frame2.fields);
     assert_eq!(vpw, vpw2);
 }
 
@@ -28,7 +28,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Vpw::parse(&frame.fields).expect("parse");
+    let parsed = Vpw::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -37,7 +37,7 @@ fn vpw_values() {
     // Fixture: VPW with both knots and m/s present (gonmea VPW example).
     // (a) value half
     let frame = parse_frame("$IIVPW,4.5,N,6.7,M*52").expect("valid VPW frame");
-    let x = Vpw::parse(&frame.fields).expect("parse VPW");
+    let x = Vpw::parse(&frame.fields);
     assert!((x.speed_knots.expect("speed_knots") - 4.5).abs() < 1e-4);
     assert!((x.speed_ms.expect("speed_ms") - 6.7).abs() < 1e-4);
 

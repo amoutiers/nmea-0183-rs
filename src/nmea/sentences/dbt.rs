@@ -15,19 +15,19 @@ pub struct Dbt {
 
 impl Dbt {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let depth_feet = r.f32();
         r.skip();
         let depth_meters = r.f32();
         r.skip();
         let depth_fathoms = r.f32();
-        Some(Self {
+        Self {
             depth_feet,
             depth_meters,
             depth_fathoms,
-        })
+        }
     }
 }
 
@@ -54,7 +54,7 @@ mod tests {
     #[test]
     fn dbt_empty() {
         let f = parse_frame("$IIDBT,,,,,,*52").expect("valid");
-        let d = Dbt::parse(&f.fields).expect("parse");
+        let d = Dbt::parse(&f.fields);
         assert!(d.depth_feet.is_none());
         assert!(d.depth_meters.is_none());
         assert!(d.depth_fathoms.is_none());
@@ -63,7 +63,7 @@ mod tests {
     #[test]
     fn dbt_gpsd() {
         let f = parse_frame("$SDDBT,7.7,f,2.3,M,1.3,F*05").expect("valid DBT frame");
-        let d = Dbt::parse(&f.fields).expect("parse DBT");
+        let d = Dbt::parse(&f.fields);
         assert!((d.depth_meters.expect("depth_meters present") - 2.3).abs() < 0.01);
     }
 
@@ -78,7 +78,7 @@ mod tests {
         assert!(sentence.starts_with("$IIDBT,"));
 
         let frame = parse_frame(sentence.trim()).expect("re-parse DBT sentence");
-        let parsed = Dbt::parse(&frame.fields).expect("parse DBT from re-encoded frame");
+        let parsed = Dbt::parse(&frame.fields);
 
         assert_eq!(original, parsed);
     }
@@ -92,7 +92,7 @@ mod tests {
     #[test]
     fn dbt_signalk() {
         let f = parse_frame("$IIDBT,035.53,f,010.83,M,005.85,F*23").expect("valid DBT frame");
-        let d = Dbt::parse(&f.fields).expect("parse DBT");
+        let d = Dbt::parse(&f.fields);
         assert!((d.depth_meters.expect("depth_meters present") - 10.83).abs() < 0.01);
     }
 }

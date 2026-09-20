@@ -32,8 +32,8 @@ pub struct Alc {
 
 impl Alc {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let num_frags = r.u8();
         let frag_num = r.u8();
@@ -53,13 +53,13 @@ impl Alc {
                 }
             })
             .collect();
-        Some(Self {
+        Self {
             num_frags,
             frag_num,
             msg_id,
             entries_num,
             entries,
-        })
+        }
     }
 }
 
@@ -98,7 +98,7 @@ mod tests {
         }
         .to_sentence("FB").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let a = Alc::parse(&f.fields).expect("parse");
+        let a = Alc::parse(&f.fields);
         assert!(a.num_frags.is_none());
         assert!(a.entries.is_empty());
     }
@@ -119,14 +119,14 @@ mod tests {
         };
         let sentence = original.to_sentence("FB").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Alc::parse(&frame.fields).expect("parse");
+        let parsed = Alc::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn alc_fbalc_gonmea() {
         let f = parse_frame("$FBALC,02,01,03,01,FEB,01,02,03*0A").expect("valid ALC");
-        let a = Alc::parse(&f.fields).expect("parse ALC");
+        let a = Alc::parse(&f.fields);
         assert_eq!(a.num_frags, Some(2));
         assert_eq!(a.frag_num, Some(1));
         assert_eq!(a.msg_id, Some(3));
@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn alc_multiple_entries_gonmea() {
         let f = parse_frame("$FBALC,02,01,03,02,FEB,01,02,03,TEB,02,03,04*5F").expect("valid ALC");
-        let a = Alc::parse(&f.fields).expect("parse ALC");
+        let a = Alc::parse(&f.fields);
         assert_eq!(a.entries_num, Some(2));
         assert_eq!(a.entries.len(), 2);
         assert_eq!(a.entries[0].manufacturer, Some("FEB".to_string()));
@@ -157,7 +157,7 @@ mod tests {
     #[test]
     fn alc_no_entries_gonmea() {
         let f = parse_frame("$FBALC,02,01,03,00*4A").expect("valid ALC");
-        let a = Alc::parse(&f.fields).expect("parse ALC");
+        let a = Alc::parse(&f.fields);
         assert_eq!(a.num_frags, Some(2));
         assert_eq!(a.msg_id, Some(3));
         assert_eq!(a.entries_num, Some(0));

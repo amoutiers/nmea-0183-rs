@@ -19,8 +19,8 @@ pub struct Rte {
 
 impl Rte {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let num_sentences = r.u8();
         let sentence_num = r.u8();
@@ -30,13 +30,13 @@ impl Rte {
         while let Some(ident) = r.string() {
             idents.push(ident);
         }
-        Some(Self {
+        Self {
             num_sentences,
             sentence_num,
             mode,
             name,
             idents,
-        })
+        }
     }
 }
 
@@ -72,7 +72,7 @@ mod tests {
         }
         .to_sentence("II").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let r = Rte::parse(&f.fields).expect("parse");
+        let r = Rte::parse(&f.fields);
         assert!(r.num_sentences.is_none());
         assert!(r.name.is_none());
         assert!(r.idents.is_empty());
@@ -95,14 +95,14 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Rte::parse(&frame.fields).expect("parse");
+        let parsed = Rte::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn rte_iirte_gonmea() {
         let f = parse_frame("$IIRTE,4,1,c,Rte 1,411,412,413,414,415*6F").expect("valid RTE");
-        let r = Rte::parse(&f.fields).expect("parse RTE");
+        let r = Rte::parse(&f.fields);
         assert_eq!(r.num_sentences, Some(4));
         assert_eq!(r.sentence_num, Some(1));
         assert_eq!(r.mode, Some('c'));

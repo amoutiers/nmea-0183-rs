@@ -30,8 +30,8 @@ pub struct Dse {
 
 impl Dse {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let total = r.u8();
         let number = r.u8();
@@ -49,13 +49,13 @@ impl Dse {
                 }
             })
             .collect();
-        Some(Self {
+        Self {
             total,
             number,
             ack,
             mmsi,
             datasets,
-        })
+        }
     }
 }
 
@@ -93,7 +93,7 @@ mod tests {
         .to_sentence("CD")
         .expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let d = Dse::parse(&f.fields).expect("parse");
+        let d = Dse::parse(&f.fields);
         assert!(d.total.is_none());
         assert!(d.mmsi.is_none());
         assert!(d.datasets.is_empty());
@@ -113,14 +113,14 @@ mod tests {
         };
         let sentence = original.to_sentence("CD").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Dse::parse(&frame.fields).expect("parse");
+        let parsed = Dse::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn dse_cddse_gonmea() {
         let f = parse_frame("$CDDSE,1,1,A,3380400790,00,46504437*15").expect("valid DSE");
-        let d = Dse::parse(&f.fields).expect("parse DSE");
+        let d = Dse::parse(&f.fields);
         assert_eq!(d.total, Some(1));
         assert_eq!(d.number, Some(1));
         assert_eq!(d.ack, Some('A'));
@@ -134,7 +134,7 @@ mod tests {
     fn dse_multiple_datasets_gonmea() {
         let f =
             parse_frame("$CDDSE,1,1,A,3380400790,00,46504437,01,16501437*17").expect("valid DSE");
-        let d = Dse::parse(&f.fields).expect("parse DSE");
+        let d = Dse::parse(&f.fields);
         assert_eq!(d.mmsi, Some("3380400790".to_string()));
         assert_eq!(d.datasets.len(), 2);
         assert_eq!(d.datasets[0].code, Some("00".to_string()));

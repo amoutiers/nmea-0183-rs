@@ -11,12 +11,12 @@ pub struct Hdm {
 
 impl Hdm {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let heading_mag = r.f32();
         r.skip(); // M
-        Some(Self { heading_mag })
+        Self { heading_mag }
     }
 }
 
@@ -39,28 +39,28 @@ mod tests {
     #[test]
     fn hdm_empty() {
         let f = parse_frame("$IIHDM,,*41").expect("valid");
-        let m = Hdm::parse(&f.fields).expect("parse");
+        let m = Hdm::parse(&f.fields);
         assert!(m.heading_mag.is_none());
     }
 
     #[test]
     fn hdm_full_signalk() {
         let frame = parse_frame("$04HDM,186.5,M*2C").expect("valid");
-        let hdm = Hdm::parse(&frame.fields).expect("parse HDM");
+        let hdm = Hdm::parse(&frame.fields);
         assert!((hdm.heading_mag.expect("hdg") - 186.5).abs() < 0.1);
     }
 
     #[test]
     fn hdm_gp_pynmeagps() {
         let frame = parse_frame("$GPHDM,223.12,M*05").expect("valid pynmeagps GP HDM");
-        let hdm = Hdm::parse(&frame.fields).expect("parse HDM");
+        let hdm = Hdm::parse(&frame.fields);
         assert!((hdm.heading_mag.expect("hdg") - 223.12).abs() < 0.01);
     }
 
     #[test]
     fn hdm_ii_pynmeagps() {
         let frame = parse_frame("$IIHDM,70.6,M*13").expect("valid pynmeagps II HDM");
-        let hdm = Hdm::parse(&frame.fields).expect("parse HDM");
+        let hdm = Hdm::parse(&frame.fields);
         assert!((hdm.heading_mag.expect("hdg") - 70.6).abs() < 0.1);
     }
     #[test]
@@ -70,7 +70,7 @@ mod tests {
         };
         let sentence = hdm.to_sentence("04").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let hdm2 = Hdm::parse(&frame.fields).expect("re-parse HDM");
+        let hdm2 = Hdm::parse(&frame.fields);
         assert_eq!(hdm, hdm2);
     }
 }

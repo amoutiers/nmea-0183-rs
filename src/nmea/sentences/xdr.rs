@@ -73,8 +73,8 @@ pub struct Xdr {
 
 impl Xdr {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut groups = Vec::new();
         let mut i = 0;
         while i + 4 <= fields.len() {
@@ -106,7 +106,7 @@ impl Xdr {
             });
             i += 4;
         }
-        Some(Self { groups })
+        Self { groups }
     }
 
     /// Encode into one or more NMEA sentences, splitting groups across sentences as needed
@@ -171,7 +171,7 @@ mod tests {
     fn xdr_barometer() {
         // Typical barometer output: pressure type (P), bars unit (B), long name
         let f = parse_frame("$IIXDR,P,1.01408,B,Barometer*2B").expect("valid XDR barometer");
-        let xdr = Xdr::parse(&f.fields).expect("parse XDR");
+        let xdr = Xdr::parse(&f.fields);
         assert_eq!(xdr.groups.len(), 1);
         assert_eq!(xdr.groups[0].sensor_type, Some('P'));
         assert!((xdr.groups[0].value.expect("value") - 1.01408).abs() < 0.00001);
@@ -184,7 +184,7 @@ mod tests {
         let xdr = Xdr { groups: vec![] };
         let sentence = xdr.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("valid");
-        let xdr2 = Xdr::parse(&frame.fields).expect("parse");
+        let xdr2 = Xdr::parse(&frame.fields);
         assert!(xdr2.groups.is_empty());
     }
 
@@ -209,7 +209,7 @@ mod tests {
         let sentence = xdr.to_sentence("WI").expect("encode");
         assert!(sentence.starts_with("$WIXDR,"));
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let xdr2 = Xdr::parse(&frame.fields).expect("re-parse XDR");
+        let xdr2 = Xdr::parse(&frame.fields);
         assert_eq!(xdr2.groups.len(), 2);
         assert_eq!(xdr2.groups[0].sensor_type, Some('P'));
         assert!((xdr2.groups[0].value.expect("val") - 1013.25).abs() < 0.01);
@@ -223,7 +223,7 @@ mod tests {
         // Real vessel NMEA bus: temperature + 3× voltage sensors
         let f = parse_frame("$WIXDR,C,9.7,C,2,U,24.1,N,0,U,24.4,V,1,U,3.510,V,2*46")
             .expect("valid XDR from go-nmea");
-        let xdr = Xdr::parse(&f.fields).expect("parse XDR");
+        let xdr = Xdr::parse(&f.fields);
         assert_eq!(xdr.groups.len(), 4);
         assert_eq!(xdr.groups[0].sensor_type, Some('C'));
         assert!((xdr.groups[0].value.expect("temp") - 9.7).abs() < 0.01);
@@ -248,7 +248,7 @@ mod tests {
         let mut fields = xdr.encode().expect("encode");
         fields.push("C".to_string()); // trailing incomplete field
         let field_refs: Vec<&str> = fields.iter().map(|s| s.as_str()).collect();
-        let parsed = Xdr::parse(&field_refs).expect("parse XDR with trailing");
+        let parsed = Xdr::parse(&field_refs);
         assert_eq!(parsed.groups.len(), 1);
         assert_eq!(parsed.groups[0].sensor_type, Some('P'));
     }
@@ -259,7 +259,7 @@ mod tests {
             "$HCXDR,A,171,D,PITCH,A,-37,D,ROLL,G,367,,MAGX,G,2420,,MAGY,G,-8984,,MAGZ*41",
         )
         .expect("valid XDR from go-nmea");
-        let xdr = Xdr::parse(&f.fields).expect("parse XDR");
+        let xdr = Xdr::parse(&f.fields);
         assert_eq!(xdr.groups.len(), 5);
         assert_eq!(xdr.groups[0].sensor_type, Some('A'));
         assert!((xdr.groups[0].value.expect("pitch value") - 171.0).abs() < 0.01);
@@ -285,7 +285,7 @@ mod tests {
         };
         let sentence = xdr.to_sentence("WI").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let xdr2 = Xdr::parse(&frame.fields).expect("re-parse XDR");
+        let xdr2 = Xdr::parse(&frame.fields);
         assert_eq!(xdr2.groups.len(), 1);
         assert!(xdr2.groups[0].value.is_none());
         assert_eq!(xdr2.groups[0].unit, Some('B'));
@@ -293,18 +293,18 @@ mod tests {
 
     #[test]
     fn xdr_rejects_non_finite_values() {
-        let xdr = Xdr::parse(&["P", "NaN", "B", "Sensor"]).expect("parse");
+        let xdr = Xdr::parse(&["P", "NaN", "B", "Sensor"]);
         assert_eq!(xdr.groups[0].value, None);
-        let xdr = Xdr::parse(&["P", "inf", "B", "Sensor"]).expect("parse");
+        let xdr = Xdr::parse(&["P", "inf", "B", "Sensor"]);
         assert_eq!(xdr.groups[0].value, None);
-        let xdr = Xdr::parse(&["P", "1.01408", "B", "Barometer"]).expect("parse");
+        let xdr = Xdr::parse(&["P", "1.01408", "B", "Barometer"]);
         assert_eq!(xdr.groups[0].value, Some(1.01408));
     }
 
     #[test]
     fn xdr_single_gonmea() {
         let f = parse_frame("$SDXDR,C,23.15,C,WTHI*70").expect("valid XDR from go-nmea");
-        let xdr = Xdr::parse(&f.fields).expect("parse XDR");
+        let xdr = Xdr::parse(&f.fields);
         assert_eq!(xdr.groups.len(), 1);
         assert_eq!(xdr.groups[0].sensor_type, Some('C'));
         assert!((xdr.groups[0].value.expect("value") - 23.15).abs() < 0.01);
@@ -381,7 +381,7 @@ mod tests {
             .iter()
             .flat_map(|s| {
                 let frame = crate::parse_frame(s.trim()).expect("re-parse");
-                Xdr::parse(&frame.fields).expect("parse").groups
+                Xdr::parse(&frame.fields).groups
             })
             .collect();
         assert_eq!(recovered.len(), total);

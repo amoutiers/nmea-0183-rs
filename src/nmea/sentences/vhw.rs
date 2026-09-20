@@ -17,8 +17,8 @@ pub struct Vhw {
 
 impl Vhw {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let heading_true = r.f32();
         r.skip();
@@ -28,12 +28,12 @@ impl Vhw {
         r.skip();
         let speed_kmh = r.f32();
         r.skip(); // K
-        Some(Self {
+        Self {
             heading_true,
             heading_mag,
             speed_kts,
             speed_kmh,
-        })
+        }
     }
 }
 
@@ -62,7 +62,7 @@ mod tests {
     #[test]
     fn vhw_empty() {
         let f = parse_frame("$IIVHW,,,,,,,,*49").expect("valid");
-        let v = Vhw::parse(&f.fields).expect("parse");
+        let v = Vhw::parse(&f.fields);
         assert!(v.heading_true.is_none());
         assert!(v.heading_mag.is_none());
         assert!(v.speed_kts.is_none());
@@ -72,14 +72,14 @@ mod tests {
     #[test]
     fn vhw_full_signalk() {
         let f = parse_frame("$SDVHW,182.5,T,181.8,M,0.0,N,0.0,K*4C").expect("valid VHW frame");
-        let v = Vhw::parse(&f.fields).expect("parse VHW");
+        let v = Vhw::parse(&f.fields);
         assert!((v.heading_true.expect("heading_true present") - 182.5).abs() < 0.01);
     }
 
     #[test]
     fn vhw_partial_signalk() {
         let f = parse_frame("$IIVHW,,T,,M,06.12,N,11.33,K*50").expect("valid VHW frame");
-        let v = Vhw::parse(&f.fields).expect("parse VHW");
+        let v = Vhw::parse(&f.fields);
         assert!(v.heading_true.is_none());
         assert!((v.speed_kts.expect("speed_kts present") - 6.12).abs() < 0.01);
     }
@@ -94,7 +94,7 @@ mod tests {
         };
         let sentence = original.to_sentence("SD").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse VHW sentence");
-        let parsed = Vhw::parse(&frame.fields).expect("parse VHW from re-encoded frame");
+        let parsed = Vhw::parse(&frame.fields);
 
         assert_eq!(original, parsed);
     }

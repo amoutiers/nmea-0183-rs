@@ -37,8 +37,8 @@ pub struct Pkwdwpl {
 
 impl Pkwdwpl {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let validity = r.char();
@@ -52,7 +52,7 @@ impl Pkwdwpl {
         let altitude = r.f32();
         let wpt_name = r.string();
         let table_symbol = r.string();
-        Some(Self {
+        Self {
             time,
             validity,
             lat,
@@ -65,7 +65,7 @@ impl Pkwdwpl {
             altitude,
             wpt_name,
             table_symbol,
-        })
+        }
     }
 }
 
@@ -114,7 +114,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pkwdwpl::parse(&f.fields).expect("parse");
+        let p = Pkwdwpl::parse(&f.fields);
         assert!(p.time.is_none());
         assert!(p.wpt_name.is_none());
         assert!(p.table_symbol.is_none());
@@ -138,7 +138,7 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pkwdwpl::parse(&frame.fields).expect("parse");
+        let parsed = Pkwdwpl::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -146,7 +146,7 @@ mod tests {
     fn pkwdwpl_values() {
         let f = parse_frame("$PKWDWPL,150803,A,4237.14,N,07120.83,W,173.8,231.8,190316,1120,test,/'*39")
             .expect("valid PKWDWPL");
-        let p = Pkwdwpl::parse(&f.fields).expect("parse PKWDWPL");
+        let p = Pkwdwpl::parse(&f.fields);
         assert_eq!(p.time, Some("150803".to_string()));
         assert_eq!(p.validity, Some('A'));
         assert!((p.lat.expect("lat") - 4237.14).abs() < 0.001);

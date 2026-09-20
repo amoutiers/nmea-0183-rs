@@ -35,8 +35,8 @@ pub struct Gsv {
 
 impl Gsv {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let total_msgs = r.u8();
         let msg_num = r.u8();
@@ -62,13 +62,13 @@ impl Gsv {
 
         let signal_id = if has_signal_id { r.char() } else { None };
 
-        Some(Self {
+        Self {
             total_msgs,
             msg_num,
             sats_in_view,
             sats,
             signal_id,
-        })
+        }
     }
 }
 
@@ -109,7 +109,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let g = Gsv::parse(&frame.fields).expect("parse");
+        let g = Gsv::parse(&frame.fields);
         assert!(g.total_msgs.is_none());
         assert!(g.msg_num.is_none());
         assert!(g.sats_in_view.is_none());
@@ -152,7 +152,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Gsv::parse(&frame.fields).expect("re-parse GSV");
+        let parsed = Gsv::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -161,7 +161,7 @@ mod tests {
         let frame =
             parse_frame("$GLGSV,3,1,11,03,03,111,00,04,15,270,00,06,01,010,12,13,06,292,00*6B")
                 .expect("valid go-nmea GLONASS GSV frame");
-        let gsv = Gsv::parse(&frame.fields).expect("parse GSV");
+        let gsv = Gsv::parse(&frame.fields);
         assert_eq!(gsv.total_msgs, Some(3));
         assert_eq!(gsv.msg_num, Some(1));
         assert_eq!(gsv.sats_in_view, Some(11));
@@ -180,13 +180,13 @@ mod tests {
         // NMEA 4.11 signal ID is a hex digit; 'B' must survive parse + encode.
         let frame = parse_frame("$GBGSV,2,2,06,14,55,175,46,40,29,043,18,B*06")
             .expect("valid GSV with hex signal id");
-        let gsv = Gsv::parse(&frame.fields).expect("parse GSV");
+        let gsv = Gsv::parse(&frame.fields);
         assert_eq!(gsv.signal_id, Some('B'));
 
         // Round-trip must preserve the 'B' field.
         let sentence = gsv.to_sentence("GB").expect("encode");
         let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-        let gsv2 = Gsv::parse(&frame2.fields).expect("re-parse GSV");
+        let gsv2 = Gsv::parse(&frame2.fields);
         assert_eq!(gsv2.signal_id, Some('B'));
     }
 
@@ -196,7 +196,7 @@ mod tests {
         // (as produced by parse_frame for a sentence with a trailing comma).
         // has_signal_id must NOT fire; signal_id must be None; sat data intact.
         let fields: Vec<&str> = vec!["1", "1", "01", "09", "73", "246", "35", ""];
-        let gsv = Gsv::parse(&fields).expect("parse");
+        let gsv = Gsv::parse(&fields);
         assert!(gsv.signal_id.is_none(), "empty trailing field must not be treated as signal_id");
         assert_eq!(gsv.sats.len(), 1);
         assert_eq!(gsv.sats[0].prn, Some(9));
@@ -210,7 +210,7 @@ mod tests {
         let frame =
             parse_frame("$GPGSV,3,1,09,09,73,246,35,02,51,060,40,06,16,058,37,07,16,291,25*78")
                 .expect("valid gpsd GSV frame");
-        let gsv = Gsv::parse(&frame.fields).expect("parse GSV");
+        let gsv = Gsv::parse(&frame.fields);
         assert_eq!(gsv.total_msgs, Some(3));
         assert_eq!(gsv.msg_num, Some(1));
         assert_eq!(gsv.sats_in_view, Some(9));

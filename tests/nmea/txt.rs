@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPTXT,01,01,02,u-blox ag - www.u-blox.com*50").expect("valid");
-    let txt = Txt::parse(&frame.fields).expect("parse");
+    let txt = Txt::parse(&frame.fields);
     let sentence = txt.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let txt2 = Txt::parse(&frame2.fields).expect("parse");
+    let txt2 = Txt::parse(&frame2.fields);
     assert_eq!(txt, txt2);
 }
 
@@ -30,14 +30,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Txt::parse(&frame.fields).expect("parse");
+    let parsed = Txt::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn txt_values() {
     let frame = parse_frame("$GPTXT,01,01,02,u-blox ag - www.u-blox.com*50").expect("valid");
-    let txt = Txt::parse(&frame.fields).expect("parse");
+    let txt = Txt::parse(&frame.fields);
     assert_eq!(txt.num_msg, Some(1));
     assert_eq!(txt.msg_num, Some(1));
     assert_eq!(txt.msg_type, Some(2));

@@ -28,8 +28,8 @@ pub struct Pklsh {
 
 impl Pklsh {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let lat = r.f64();
         let ns = r.char();
@@ -39,7 +39,7 @@ impl Pklsh {
         let validity = r.char();
         let fleet = r.string();
         let unit_id = r.string();
-        Some(Self {
+        Self {
             lat,
             ns,
             lon,
@@ -48,7 +48,7 @@ impl Pklsh {
             validity,
             fleet,
             unit_id,
-        })
+        }
     }
 }
 
@@ -89,7 +89,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pklsh::parse(&f.fields).expect("parse");
+        let p = Pklsh::parse(&f.fields);
         assert!(p.lat.is_none());
         assert!(p.unit_id.is_none());
     }
@@ -108,7 +108,7 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pklsh::parse(&frame.fields).expect("parse");
+        let parsed = Pklsh::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -116,7 +116,7 @@ mod tests {
     fn pklsh_kenwood_gonmea() {
         let f =
             parse_frame("$PKLSH,3926.7952,N,12000.5947,W,022732,A,100,2000*1A").expect("valid PKLSH");
-        let p = Pklsh::parse(&f.fields).expect("parse PKLSH");
+        let p = Pklsh::parse(&f.fields);
         assert!((p.lat.expect("lat") - 3926.7952).abs() < 0.0001);
         assert_eq!(p.ns, Some('N'));
         assert!((p.lon.expect("lon") - 12000.5947).abs() < 0.0001);

@@ -29,8 +29,8 @@ pub struct Bwc {
 
 impl Bwc {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let lat = r.f64();
@@ -45,7 +45,7 @@ impl Bwc {
         r.skip(); // N
         let wpt = r.string();
         let mode = r.char();
-        Some(Self {
+        Self {
             time,
             lat,
             ns,
@@ -56,7 +56,7 @@ impl Bwc {
             dist,
             wpt,
             mode,
-        })
+        }
     }
 }
 
@@ -103,7 +103,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let b = Bwc::parse(&frame.fields).expect("parse");
+        let b = Bwc::parse(&frame.fields);
         assert!(b.time.is_none());
         assert!(b.lat.is_none());
         assert!(b.wpt.is_none());
@@ -125,7 +125,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Bwc::parse(&frame.fields).expect("re-parse BWC");
+        let parsed = Bwc::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -133,7 +133,7 @@ mod tests {
     fn bwc_no_position_signalk() {
         let frame = parse_frame("$IIBWC,200321,,,,,119.5,T,129.5,M,22.10,N,1*1E")
             .expect("valid SignalK BWC frame");
-        let bwc = Bwc::parse(&frame.fields).expect("parse BWC");
+        let bwc = Bwc::parse(&frame.fields);
         assert_eq!(bwc.time, Some("200321".to_string()));
         assert!(bwc.lat.is_none());
         assert!(bwc.ns.is_none());
@@ -150,7 +150,7 @@ mod tests {
         let frame =
             parse_frame("$GPBWC,220516,5130.02,N,00046.34,W,213.8,T,218.0,M,0004.6,N,EGLM*21")
                 .expect("valid pynmeagps BWC frame");
-        let bwc = Bwc::parse(&frame.fields).expect("parse BWC");
+        let bwc = Bwc::parse(&frame.fields);
         assert_eq!(bwc.time, Some("220516".to_string()));
         assert!((bwc.lat.expect("lat") - 5130.02).abs() < 0.01);
         assert_eq!(bwc.ns, Some('N'));
@@ -165,7 +165,7 @@ mod tests {
         // 9-sig-digit longitude that f32 cannot hold exactly, with a leading-zero degree.
         let frame = parse_frame("$GPBWC,220516,5130.02,N,00046.34678,W,213.8,T,218.0,M,0004.6,N,EGLM*18")
             .expect("valid BWC");
-        let bwc = Bwc::parse(&frame.fields).expect("parse BWC");
+        let bwc = Bwc::parse(&frame.fields);
         let lon = bwc.lon.expect("lon");
         assert!((lon - 46.34678).abs() < 1e-9, "f64 precision lost: {lon}");
         let sentence = bwc.to_sentence("GP").expect("encode");

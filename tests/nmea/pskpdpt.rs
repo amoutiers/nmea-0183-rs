@@ -6,10 +6,10 @@ use nmea_0183_rs::parse_frame;
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$PSKPDPT,0002.5,+00.0,0010,10,03,*77").expect("valid");
-    let pskpdpt = Pskpdpt::parse(&frame.fields).expect("parse");
+    let pskpdpt = Pskpdpt::parse(&frame.fields);
     let sentence = pskpdpt.to_sentence("").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let pskpdpt2 = Pskpdpt::parse(&frame2.fields).expect("parse");
+    let pskpdpt2 = Pskpdpt::parse(&frame2.fields);
     assert_eq!(pskpdpt, pskpdpt2);
 }
 
@@ -25,14 +25,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Pskpdpt::parse(&frame.fields).expect("parse");
+    let parsed = Pskpdpt::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn pskpdpt_values() {
     let frame = parse_frame("$PSKPDPT,0002.5,+00.0,0010,10,03,*77").expect("valid");
-    let p = Pskpdpt::parse(&frame.fields).expect("parse");
+    let p = Pskpdpt::parse(&frame.fields);
     assert!((p.depth.expect("depth") - 2.5).abs() < 1e-4);
     assert!((p.offset.expect("offset") - 0.0).abs() < 1e-4);
     assert!((p.range_scale.expect("range_scale") - 10.0).abs() < 1e-4);

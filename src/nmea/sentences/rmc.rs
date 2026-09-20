@@ -35,10 +35,10 @@ pub struct Rmc {
 
 impl Rmc {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             time: r.string(),
             status: r.char(),
             lat: r.f64(),
@@ -52,7 +52,7 @@ impl Rmc {
             mag_var_ew: r.char(),
             pos_mode: r.char(),
             nav_status: r.char(),
-        })
+        }
     }
 }
 
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn rmc_empty() {
         let f = parse_frame("$IIRMC,,,,,,,,,,,,,*70").expect("valid");
-        let r = Rmc::parse(&f.fields).expect("parse");
+        let r = Rmc::parse(&f.fields);
         assert!(r.time.is_none());
         assert!(r.lat.is_none());
         assert!(r.lon.is_none());
@@ -99,7 +99,7 @@ mod tests {
         let frame =
             parse_frame("$GPRMC,085412.000,A,5222.3198,N,00454.5784,E,0.58,251.34,030414,,,A*65")
                 .expect("valid RMC frame");
-        let rmc = Rmc::parse(&frame.fields).expect("parse RMC");
+        let rmc = Rmc::parse(&frame.fields);
         assert_eq!(rmc.time, Some("085412.000".to_string()));
         assert_eq!(rmc.status, Some('A'));
         assert!((rmc.lat.expect("lat") - 5222.3198).abs() < 0.001);
@@ -117,7 +117,7 @@ mod tests {
         // SignalK fixture: missing SOG/COG, has magnetic variation
         let frame = parse_frame("$GPRMC,085412.000,A,5222.3198,N,00454.5784,E,,,030414,12,E*42")
             .expect("valid RMC missing speed");
-        let rmc = Rmc::parse(&frame.fields).expect("parse RMC");
+        let rmc = Rmc::parse(&frame.fields);
         assert_eq!(rmc.status, Some('A'));
         assert!(rmc.sog.is_none());
         assert!(rmc.cog.is_none());
@@ -131,7 +131,7 @@ mod tests {
         let frame =
             parse_frame("$GNRMC,103607.00,A,5327.03942,N,10214.42462,W,0.046,,060321,,,A,V*0E")
                 .expect("valid GN RMC frame");
-        let rmc = Rmc::parse(&frame.fields).expect("parse GN RMC");
+        let rmc = Rmc::parse(&frame.fields);
         assert_eq!(rmc.time, Some("103607.00".to_string()));
         assert_eq!(rmc.status, Some('A'));
         assert!((rmc.lat.expect("lat") - 5327.03942).abs() < 0.00001);
@@ -147,12 +147,12 @@ mod tests {
         let frame =
             parse_frame("$GNRMC,103607.00,A,5327.03942,N,10214.42462,W,0.046,,060321,,,A,V*0E")
                 .expect("valid GN RMC frame");
-        let rmc = Rmc::parse(&frame.fields).expect("parse RMC");
+        let rmc = Rmc::parse(&frame.fields);
         assert_eq!(rmc.nav_status, Some('V'));
 
         let sentence = rmc.to_sentence("GN").expect("encode");
         let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-        let rmc2 = Rmc::parse(&frame2.fields).expect("re-parse");
+        let rmc2 = Rmc::parse(&frame2.fields);
         assert_eq!(rmc2.nav_status, Some('V'));
     }
 
@@ -175,7 +175,7 @@ mod tests {
         };
         let sentence = rmc.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse RMC");
-        let rmc2 = Rmc::parse(&frame.fields).expect("parse roundtrip RMC");
+        let rmc2 = Rmc::parse(&frame.fields);
         assert_eq!(rmc, rmc2);
     }
 }

@@ -24,8 +24,8 @@ pub struct Pskpdpt {
 
 impl Pskpdpt {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let depth = r.f32();
         let offset = r.f32();
@@ -33,14 +33,14 @@ impl Pskpdpt {
         let echo_strength = r.u8();
         let channel = r.u8();
         let transducer_location = r.string();
-        Some(Self {
+        Self {
             depth,
             offset,
             range_scale,
             echo_strength,
             channel,
             transducer_location,
-        })
+        }
     }
 }
 
@@ -77,7 +77,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pskpdpt::parse(&f.fields).expect("parse");
+        let p = Pskpdpt::parse(&f.fields);
         assert!(p.depth.is_none());
         assert!(p.transducer_location.is_none());
     }
@@ -94,14 +94,14 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pskpdpt::parse(&frame.fields).expect("parse");
+        let parsed = Pskpdpt::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn pskpdpt_pskpdpt_gonmea() {
         let frame = parse_frame("$PSKPDPT,0002.5,+00.0,0010,10,03,*77").expect("valid");
-        let p = Pskpdpt::parse(&frame.fields).expect("parse");
+        let p = Pskpdpt::parse(&frame.fields);
         assert!((p.depth.expect("depth") - 2.5).abs() < 0.01);
         assert!((p.offset.expect("offset") - 0.0).abs() < 0.01);
         assert_eq!(p.range_scale, Some(10.0));
@@ -113,7 +113,7 @@ mod tests {
     #[test]
     fn pskpdpt_with_location_gonmea() {
         let frame = parse_frame("$PSKPDPT,0002.5,-01.1,0010,10,03,AFT*22").expect("valid");
-        let p = Pskpdpt::parse(&frame.fields).expect("parse");
+        let p = Pskpdpt::parse(&frame.fields);
         assert!((p.depth.expect("depth") - 2.5).abs() < 0.01);
         assert!((p.offset.expect("offset") - (-1.1)).abs() < 0.01);
         assert_eq!(p.range_scale, Some(10.0));
@@ -125,7 +125,7 @@ mod tests {
     #[test]
     fn pskpdpt_fractional_range_scale() {
         let f = parse_frame("$PSKPDPT,0002.5,+00.0,0010.5,10,03,*6C").expect("valid");
-        let p = Pskpdpt::parse(&f.fields).expect("parse");
+        let p = Pskpdpt::parse(&f.fields);
         assert_eq!(p.range_scale, Some(10.5));
     }
 

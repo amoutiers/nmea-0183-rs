@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPZDA,172809.456,12,07,1996,00,00*57").expect("valid");
-    let zda = Zda::parse(&frame.fields).expect("parse");
+    let zda = Zda::parse(&frame.fields);
     let sentence = zda.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let zda2 = Zda::parse(&frame2.fields).expect("parse");
+    let zda2 = Zda::parse(&frame2.fields);
     assert_eq!(zda.time, zda2.time);
     assert_eq!(zda.day, zda2.day);
     assert_eq!(zda.month, zda2.month);
@@ -26,7 +26,7 @@ fn dispatch() {
 #[test]
 fn zda_values() {
     let frame = parse_frame("$GPZDA,172809.456,12,07,1996,00,00*57").expect("valid");
-    let z = Zda::parse(&frame.fields).expect("parse");
+    let z = Zda::parse(&frame.fields);
     assert_eq!(z.time.as_deref(), Some("172809.456"));
     assert_eq!(z.day, Some(12));
     assert_eq!(z.month, Some(7));
@@ -47,7 +47,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Zda::parse(&frame.fields).expect("parse");
+    let parsed = Zda::parse(&frame.fields);
     assert_eq!(original.time, parsed.time);
     assert_eq!(original.day, parsed.day);
     assert_eq!(original.month, parsed.month);

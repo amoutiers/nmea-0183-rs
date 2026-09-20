@@ -8,10 +8,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 fn decode_encode() {
     let frame = parse_frame("$GPBWR,225444,4917.24,N,12309.57,W,051.9,T,031.6,M,001.3,N,004*38")
         .expect("valid");
-    let bwr = Bwr::parse(&frame.fields).expect("parse");
+    let bwr = Bwr::parse(&frame.fields);
     let sentence = bwr.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let bwr2 = Bwr::parse(&frame2.fields).expect("parse");
+    let bwr2 = Bwr::parse(&frame2.fields);
     assert_eq!(bwr, bwr2);
 }
 
@@ -38,7 +38,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Bwr::parse(&frame.fields).expect("parse");
+    let parsed = Bwr::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -46,7 +46,7 @@ fn roundtrip() {
 fn bwr_values() {
     let frame = parse_frame("$GPBWR,225444,4917.24,N,12309.57,W,051.9,T,031.6,M,001.3,N,004*38")
         .expect("valid");
-    let x = Bwr::parse(&frame.fields).expect("parse");
+    let x = Bwr::parse(&frame.fields);
     // (a) value half
     assert_eq!(x.time.as_deref(), Some("225444"));
     assert!((x.lat.expect("lat") - 4917.24).abs() < 1e-2);

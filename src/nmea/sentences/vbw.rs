@@ -27,10 +27,10 @@ pub struct Vbw {
 
 impl Vbw {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             long_water_spd: r.f32(),
             trans_water_spd: r.f32(),
             water_spd_status: r.char(),
@@ -41,7 +41,7 @@ impl Vbw {
             stern_water_spd_status: r.char(),
             stern_trans_ground_spd: r.f32(),
             stern_ground_spd_status: r.char(),
-        })
+        }
     }
 }
 
@@ -73,7 +73,7 @@ mod tests {
     fn vbw_12_pynmeagps() {
         let frame =
             parse_frame("$GPVBW,12.3,0.07,A,11.78,0.12,A*6F").expect("valid pynmeagps VBW frame");
-        let vbw = Vbw::parse(&frame.fields).expect("parse VBW");
+        let vbw = Vbw::parse(&frame.fields);
         assert!((vbw.long_water_spd.expect("long_water") - 12.3).abs() < 0.1);
         assert!((vbw.trans_water_spd.expect("trans_water") - 0.07).abs() < 0.01);
         assert_eq!(vbw.water_spd_status, Some('A'));
@@ -85,7 +85,7 @@ mod tests {
     #[test]
     fn vbw_empty() {
         let frame = parse_frame("$IIVBW,,,,,,,,,*6F").expect("valid VBW frame");
-        let vbw = Vbw::parse(&frame.fields).expect("parse VBW");
+        let vbw = Vbw::parse(&frame.fields);
         assert!(vbw.long_water_spd.is_none());
         assert!(vbw.trans_water_spd.is_none());
         assert!(vbw.water_spd_status.is_none());
@@ -101,7 +101,7 @@ mod tests {
     #[test]
     fn vbw_stern_gonmea() {
         let frame = parse_frame("$VMVBW,-7.1,0.1,A,,,V,,V,,V*65").expect("valid go-nmea VBW frame");
-        let vbw = Vbw::parse(&frame.fields).expect("parse VBW");
+        let vbw = Vbw::parse(&frame.fields);
         assert!((vbw.long_water_spd.expect("long_water") - (-7.1)).abs() < 0.01);
         assert!((vbw.trans_water_spd.expect("trans_water") - 0.1).abs() < 0.01);
         assert_eq!(vbw.water_spd_status, Some('A'));
@@ -130,7 +130,7 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let f = parse_frame(sentence.trim()).expect("re-parse VBW frame");
-        let parsed = Vbw::parse(&f.fields).expect("parse VBW from re-encoded frame");
+        let parsed = Vbw::parse(&f.fields);
         assert_eq!(original, parsed);
     }
 }

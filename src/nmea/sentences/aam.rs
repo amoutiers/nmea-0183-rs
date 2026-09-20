@@ -19,16 +19,16 @@ pub struct Aam {
 
 impl Aam {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             arrce: r.char(),
             perp: r.char(),
             crad: r.f32(),
             cunit: r.char(),
             wpt: r.string(),
-        })
+        }
     }
 }
 
@@ -62,7 +62,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let a = Aam::parse(&frame.fields).expect("parse");
+        let a = Aam::parse(&frame.fields);
         assert!(a.arrce.is_none());
         assert!(a.perp.is_none());
         assert!(a.crad.is_none());
@@ -81,7 +81,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Aam::parse(&frame.fields).expect("re-parse AAM");
+        let parsed = Aam::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -89,7 +89,7 @@ mod tests {
     fn aam_pynmeagps() {
         let frame =
             parse_frame("$GPAAM,A,A,0.10,N,WPTNME*32").expect("valid pynmeagps AAM frame");
-        let aam = Aam::parse(&frame.fields).expect("parse AAM");
+        let aam = Aam::parse(&frame.fields);
         assert_eq!(aam.arrce, Some('A'));
         assert_eq!(aam.perp, Some('A'));
         assert!((aam.crad.expect("crad") - 0.10).abs() < 0.01);

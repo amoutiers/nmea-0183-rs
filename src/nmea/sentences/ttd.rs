@@ -22,21 +22,21 @@ pub struct Ttd {
 
 impl Ttd {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let num_frags = r.string();
         let frag_num = r.string();
         let msg_id = r.u8();
         let payload = r.string();
         let fill_bits = r.u8();
-        Some(Self {
+        Self {
             num_frags,
             frag_num,
             msg_id,
             payload,
             fill_bits,
-        })
+        }
     }
 }
 
@@ -71,7 +71,7 @@ mod tests {
         }
         .to_sentence("**").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let t = Ttd::parse(&f.fields).expect("parse");
+        let t = Ttd::parse(&f.fields);
         assert!(t.num_frags.is_none());
         assert!(t.payload.is_none());
         assert!(t.fill_bits.is_none());
@@ -88,7 +88,7 @@ mod tests {
         };
         let sentence = original.to_sentence("**").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Ttd::parse(&frame.fields).expect("parse");
+        let parsed = Ttd::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -103,7 +103,7 @@ mod tests {
         };
         let sentence = original.to_sentence("**").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let t = Ttd::parse(&frame.fields).expect("parse TTD");
+        let t = Ttd::parse(&frame.fields);
         assert_eq!(t.num_frags, Some("1A".to_string()));
         assert_eq!(t.frag_num, Some("01".to_string()));
         assert_eq!(t.msg_id, Some(1));

@@ -19,16 +19,16 @@ pub struct Hdg {
 
 impl Hdg {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             heading_mag: r.f32(),
             deviation: r.f32(),
             deviation_ew: r.char(),
             variation: r.f32(),
             variation_ew: r.char(),
-        })
+        }
     }
 }
 
@@ -54,7 +54,7 @@ mod tests {
     #[test]
     fn hdg_empty() {
         let frame = parse_frame("$SDHDG,,,,,*70").expect("valid");
-        let hdg = Hdg::parse(&frame.fields).expect("parse HDG");
+        let hdg = Hdg::parse(&frame.fields);
         assert!(hdg.heading_mag.is_none());
         assert!(hdg.deviation.is_none());
         assert!(hdg.deviation_ew.is_none());
@@ -65,7 +65,7 @@ mod tests {
     #[test]
     fn hdg_full_deviation_and_variation_signalk() {
         let frame = parse_frame("$INHDG,180,5,W,10,W*6D").expect("valid");
-        let hdg = Hdg::parse(&frame.fields).expect("parse HDG");
+        let hdg = Hdg::parse(&frame.fields);
         assert!((hdg.heading_mag.expect("hdg") - 180.0).abs() < 0.1);
         assert!((hdg.deviation.expect("dev") - 5.0).abs() < 0.1);
         assert_eq!(hdg.deviation_ew, Some('W'));
@@ -76,7 +76,7 @@ mod tests {
     #[test]
     fn hdg_heading_only_signalk() {
         let frame = parse_frame("$HCHDG,51.5,,,,*73").expect("valid");
-        let hdg = Hdg::parse(&frame.fields).expect("parse HDG");
+        let hdg = Hdg::parse(&frame.fields);
         assert!((hdg.heading_mag.expect("hdg") - 51.5).abs() < 0.1);
         assert!(hdg.deviation.is_none());
         assert!(hdg.deviation_ew.is_none());
@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn hdg_pynmeagps() {
         let frame = parse_frame("$IIHDG,70.6,,,,W*2F").expect("valid pynmeagps HDG frame");
-        let hdg = Hdg::parse(&frame.fields).expect("parse HDG");
+        let hdg = Hdg::parse(&frame.fields);
         assert!((hdg.heading_mag.expect("hdg") - 70.6).abs() < 0.1);
         assert!(hdg.deviation.is_none());
         assert_eq!(hdg.variation_ew, Some('W'));
@@ -104,14 +104,14 @@ mod tests {
         };
         let sentence = hdg.to_sentence("SD").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let hdg2 = Hdg::parse(&frame.fields).expect("re-parse HDG");
+        let hdg2 = Hdg::parse(&frame.fields);
         assert_eq!(hdg, hdg2);
     }
 
     #[test]
     fn hdg_with_variation_signalk() {
         let frame = parse_frame("$SDHDG,181.9,,,0.6,E*32").expect("valid");
-        let hdg = Hdg::parse(&frame.fields).expect("parse HDG");
+        let hdg = Hdg::parse(&frame.fields);
         assert!((hdg.heading_mag.expect("hdg") - 181.9).abs() < 0.1);
         assert!(hdg.deviation.is_none());
         assert!(hdg.deviation_ew.is_none());

@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIDBS,035.53,f,010.83,M,005.85,F*24").expect("valid");
-    let dbs = Dbs::parse(&frame.fields).expect("parse");
+    let dbs = Dbs::parse(&frame.fields);
     let sentence = dbs.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let dbs2 = Dbs::parse(&frame2.fields).expect("parse");
+    let dbs2 = Dbs::parse(&frame2.fields);
     assert_eq!(dbs, dbs2);
 }
 
@@ -29,14 +29,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Dbs::parse(&frame.fields).expect("parse");
+    let parsed = Dbs::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn dbs_values() {
     let frame = parse_frame("$IIDBS,035.53,f,010.83,M,005.85,F*24").expect("valid");
-    let x = Dbs::parse(&frame.fields).expect("parse");
+    let x = Dbs::parse(&frame.fields);
     // (a) value half
     assert!((x.depth_feet.expect("depth_feet") - 35.53).abs() < 1e-2);
     assert!((x.depth_meters.expect("depth_meters") - 10.83).abs() < 1e-2);

@@ -18,17 +18,17 @@ pub struct Prdid {
 
 impl Prdid {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let pitch = r.f32();
         let roll = r.f32();
         let heading = r.f32();
-        Some(Self {
+        Self {
             pitch,
             roll,
             heading,
-        })
+        }
     }
 }
 
@@ -59,7 +59,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Prdid::parse(&f.fields).expect("parse");
+        let p = Prdid::parse(&f.fields);
         assert!(p.pitch.is_none());
         assert!(p.roll.is_none());
         assert!(p.heading.is_none());
@@ -74,14 +74,14 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Prdid::parse(&frame.fields).expect("parse");
+        let parsed = Prdid::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn prdid_prdid_gonmea() {
         let frame = parse_frame("$PRDID,-10.37,2.34,230.34*62").expect("valid");
-        let p = Prdid::parse(&frame.fields).expect("parse");
+        let p = Prdid::parse(&frame.fields);
         assert!((p.pitch.expect("pitch") - (-10.37)).abs() < 0.01);
         assert!((p.roll.expect("roll") - 2.34).abs() < 0.01);
         assert!((p.heading.expect("heading") - 230.34).abs() < 0.01);

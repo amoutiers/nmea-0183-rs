@@ -27,8 +27,8 @@ pub struct Bec {
 
 impl Bec {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let lat = r.f64();
@@ -42,7 +42,7 @@ impl Bec {
         let dist = r.f32();
         r.skip(); // N
         let wpt = r.string();
-        Some(Self {
+        Self {
             time,
             lat,
             ns,
@@ -52,7 +52,7 @@ impl Bec {
             bear_mag,
             dist,
             wpt,
-        })
+        }
     }
 }
 
@@ -97,7 +97,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let b = Bec::parse(&f.fields).expect("parse");
+        let b = Bec::parse(&f.fields);
         assert!(b.time.is_none());
         assert!(b.dist.is_none());
     }
@@ -117,7 +117,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Bec::parse(&frame.fields).expect("parse");
+        let parsed = Bec::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -126,7 +126,7 @@ mod tests {
         let frame =
             parse_frame("$GPBEC,220516,5130.02,N,00046.34,W,213.8,T,218.0,M,0004.6,N,EGLM*33")
                 .expect("valid");
-        let b = Bec::parse(&frame.fields).expect("parse");
+        let b = Bec::parse(&frame.fields);
         assert_eq!(b.time.as_deref(), Some("220516"));
         assert!((b.lat.expect("lat") - 5130.02).abs() < 0.01);
         assert_eq!(b.ns, Some('N'));

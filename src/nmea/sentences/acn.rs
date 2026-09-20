@@ -21,8 +21,8 @@ pub struct Acn {
 
 impl Acn {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let manufacturer = r.string();
@@ -30,14 +30,14 @@ impl Acn {
         let instance = r.u8();
         let command = r.char();
         let state = r.char();
-        Some(Self {
+        Self {
             time,
             manufacturer,
             alert_id,
             instance,
             command,
             state,
-        })
+        }
     }
 }
 
@@ -73,7 +73,7 @@ mod tests {
         }
         .to_sentence("RA").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let a = Acn::parse(&f.fields).expect("parse");
+        let a = Acn::parse(&f.fields);
         assert!(a.time.is_none());
         assert!(a.command.is_none());
     }
@@ -90,14 +90,14 @@ mod tests {
         };
         let sentence = original.to_sentence("RA").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Acn::parse(&frame.fields).expect("parse");
+        let parsed = Acn::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn acn_raacn_gonmea() {
         let frame = parse_frame("$RAACN,220516,TCK,002,1,A,C*00").expect("valid");
-        let a = Acn::parse(&frame.fields).expect("parse");
+        let a = Acn::parse(&frame.fields);
         assert_eq!(a.time.as_deref(), Some("220516"));
         assert_eq!(a.manufacturer.as_deref(), Some("TCK"));
         assert_eq!(a.alert_id.as_deref(), Some("002"));

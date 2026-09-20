@@ -21,17 +21,17 @@ pub struct Zda {
 
 impl Zda {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             time: r.string(),
             day: r.u8(),
             month: r.u8(),
             year: r.u32(),
             local_hour_offset: r.i8(),
             local_min_offset: r.u8(),
-        })
+        }
     }
 }
 
@@ -58,7 +58,7 @@ mod tests {
     #[test]
     fn zda_empty() {
         let f = parse_frame("$GPZDA,,,,,,*48").expect("valid");
-        let z = Zda::parse(&f.fields).expect("parse");
+        let z = Zda::parse(&f.fields);
         assert!(z.time.is_none());
         assert!(z.day.is_none());
         assert!(z.month.is_none());
@@ -80,7 +80,7 @@ mod tests {
         let sentence = zda.to_sentence("GP").expect("encode");
         assert!(sentence.starts_with("$GPZDA,"));
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let zda2 = Zda::parse(&frame.fields).expect("re-parse ZDA");
+        let zda2 = Zda::parse(&frame.fields);
         assert_eq!(zda.time, zda2.time);
         assert_eq!(zda.day, zda2.day);
         assert_eq!(zda.month, zda2.month);
@@ -91,7 +91,7 @@ mod tests {
     fn zda_full_gonmea() {
         let f =
             parse_frame("$GPZDA,172809.456,12,07,1996,00,00*57").expect("valid ZDA from go-nmea");
-        let z = Zda::parse(&f.fields).expect("parse ZDA");
+        let z = Zda::parse(&f.fields);
         assert_eq!(z.time, Some("172809.456".to_string()));
         assert_eq!(z.day, Some(12));
         assert_eq!(z.month, Some(7));
@@ -104,7 +104,7 @@ mod tests {
     fn zda_pynmeagps() {
         let f =
             parse_frame("$GNZDA,103607.00,06,03,2021,00,00*7F").expect("valid ZDA from pynmeagps");
-        let z = Zda::parse(&f.fields).expect("parse ZDA");
+        let z = Zda::parse(&f.fields);
         assert_eq!(z.time, Some("103607.00".to_string()));
         assert_eq!(z.day, Some(6));
         assert_eq!(z.month, Some(3));

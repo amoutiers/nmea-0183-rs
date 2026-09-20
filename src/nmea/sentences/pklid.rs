@@ -22,21 +22,21 @@ pub struct Pklid {
 
 impl Pklid {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let version = r.string();
         let fleet = r.string();
         let unit_id = r.string();
         let status = r.string();
         let extension = r.string();
-        Some(Self {
+        Self {
             version,
             fleet,
             unit_id,
             status,
             extension,
-        })
+        }
     }
 }
 
@@ -71,7 +71,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pklid::parse(&f.fields).expect("parse");
+        let p = Pklid::parse(&f.fields);
         assert!(p.version.is_none());
         assert!(p.extension.is_none());
     }
@@ -87,14 +87,14 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pklid::parse(&frame.fields).expect("parse");
+        let parsed = Pklid::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn pklid_kenwood_gonmea() {
         let f = parse_frame("$PKLID,00,100,2000,15,00,*6D").expect("valid PKLID");
-        let p = Pklid::parse(&f.fields).expect("parse PKLID");
+        let p = Pklid::parse(&f.fields);
         assert_eq!(p.version, Some("00".to_string()));
         assert_eq!(p.fleet, Some("100".to_string()));
         assert_eq!(p.unit_id, Some("2000".to_string()));

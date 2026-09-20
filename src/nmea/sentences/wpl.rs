@@ -19,21 +19,21 @@ pub struct Wpl {
 
 impl Wpl {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let lat = r.f64();
         let ns = r.char();
         let lon = r.f64();
         let ew = r.char();
         let ident = r.string();
-        Some(Self {
+        Self {
             lat,
             ns,
             lon,
             ew,
             ident,
-        })
+        }
     }
 }
 
@@ -67,7 +67,7 @@ mod tests {
         }
         .to_sentence("II").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let w = Wpl::parse(&f.fields).expect("parse");
+        let w = Wpl::parse(&f.fields);
         assert!(w.lat.is_none());
         assert!(w.ident.is_none());
     }
@@ -83,14 +83,14 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Wpl::parse(&frame.fields).expect("parse");
+        let parsed = Wpl::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn wpl_iiwpl_gonmea() {
         let frame = parse_frame("$IIWPL,5503.4530,N,01037.2742,E,411*6F").expect("valid");
-        let w = Wpl::parse(&frame.fields).expect("parse");
+        let w = Wpl::parse(&frame.fields);
         assert!((w.lat.expect("lat") - 5503.453).abs() < 0.001);
         assert_eq!(w.ns, Some('N'));
         assert!((w.lon.expect("lon") - 1037.2742).abs() < 0.001);
@@ -101,7 +101,7 @@ mod tests {
     #[test]
     fn wpl_southern_hemisphere_gonmea() {
         let frame = parse_frame("$IIWPL,3356.4650,S,15124.5567,E,411*73").expect("valid");
-        let w = Wpl::parse(&frame.fields).expect("parse");
+        let w = Wpl::parse(&frame.fields);
         assert!((w.lat.expect("lat") - 3356.465).abs() < 0.001);
         assert_eq!(w.ns, Some('S'));
         assert!((w.lon.expect("lon") - 15124.5567).abs() < 0.001);

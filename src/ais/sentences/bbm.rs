@@ -30,8 +30,8 @@ impl Bbm {
     pub const SENTENCE_TYPE: &'static str = "BBM";
 
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut idx = 0;
         let num_frags = read_u8(fields, &mut idx);
         let frag_num = read_u8(fields, &mut idx);
@@ -40,7 +40,7 @@ impl Bbm {
         let vdl_msg_num = read_u8(fields, &mut idx);
         let payload = read_string(fields, &mut idx);
         let fill_bits = read_u8(fields, &mut idx);
-        Some(Self {
+        Self {
             num_frags,
             frag_num,
             msg_id,
@@ -48,7 +48,7 @@ impl Bbm {
             vdl_msg_num,
             payload,
             fill_bits,
-        })
+        }
     }
 
     pub fn encode(&self) -> Result<Vec<String>, crate::EncodeError> {
@@ -100,7 +100,7 @@ mod tests {
         .to_sentence("AI")
         .expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let b = Bbm::parse(&f.fields).expect("parse");
+        let b = Bbm::parse(&f.fields);
         assert!(b.num_frags.is_none());
         assert!(b.channel.is_none());
         assert!(b.payload.is_none());
@@ -119,7 +119,7 @@ mod tests {
         };
         let sentence = original.to_sentence("AI").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Bbm::parse(&frame.fields).expect("parse");
+        let parsed = Bbm::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -145,7 +145,7 @@ mod tests {
     fn bbm_aibbm_gonmea() {
         let frame =
             parse_frame("!AIBBM,26,2,1,3,8,177KQJ5000G?tO`K>RA1wUbN0TKH,0*2C").expect("valid");
-        let b = Bbm::parse(&frame.fields).expect("parse BBM");
+        let b = Bbm::parse(&frame.fields);
         assert_eq!(b.num_frags, Some(26));
         assert_eq!(b.frag_num, Some(2));
         assert_eq!(b.msg_id, Some(1));

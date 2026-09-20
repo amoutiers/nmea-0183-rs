@@ -6,10 +6,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$PHTRO,10.37,P,177.62,T*65").expect("valid");
-    let phtro = Phtro::parse(&frame.fields).expect("parse");
+    let phtro = Phtro::parse(&frame.fields);
     let sentence = phtro.to_sentence("").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let phtro2 = Phtro::parse(&frame2.fields).expect("parse");
+    let phtro2 = Phtro::parse(&frame2.fields);
     assert_eq!(phtro, phtro2);
 }
 
@@ -23,7 +23,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Phtro::parse(&frame.fields).expect("parse");
+    let parsed = Phtro::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -39,7 +39,7 @@ fn dispatch() {
 #[test]
 fn phtro_values() {
     let frame = parse_frame("$PHTRO,10.37,P,177.62,T*65").expect("valid");
-    let p = Phtro::parse(&frame.fields).expect("parse");
+    let p = Phtro::parse(&frame.fields);
     assert!((p.pitch.expect("pitch") - 10.37).abs() < 0.01);
     assert_eq!(p.bow, Some('P'));
     assert!((p.roll.expect("roll") - 177.62).abs() < 0.01);

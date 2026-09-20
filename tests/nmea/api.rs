@@ -68,3 +68,12 @@ fn enum_encoding_preserves_ttd_and_proprietary_addresses() {
         );
     }
 }
+
+#[test]
+fn sentence_parsers_are_infallible_and_lenient() {
+    use nmea_0183_rs::nmea::Dbt;
+    let empty: Dbt = Dbt::parse(&[]);
+    assert_eq!(empty, Dbt::default());
+    let malformed: Dbt = Dbt::parse(&["bad", "f", "", "M", "", "F"]);
+    assert_eq!(malformed, Dbt::default());
+}

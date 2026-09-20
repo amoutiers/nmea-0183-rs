@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$SDHDG,181.9,,,0.6,E*32").expect("valid");
-    let hdg = Hdg::parse(&frame.fields).expect("parse");
+    let hdg = Hdg::parse(&frame.fields);
     let sentence = hdg.to_sentence("SD").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let hdg2 = Hdg::parse(&frame2.fields).expect("parse");
+    let hdg2 = Hdg::parse(&frame2.fields);
     assert_eq!(hdg, hdg2);
 }
 
@@ -23,7 +23,7 @@ fn dispatch() {
 #[test]
 fn hdg_values() {
     let frame = parse_frame("$SDHDG,181.9,,,0.6,E*32").expect("valid");
-    let hdg = Hdg::parse(&frame.fields).expect("parse");
+    let hdg = Hdg::parse(&frame.fields);
     assert!((hdg.heading_mag.expect("heading_mag") - 181.9).abs() < 1e-4);
     assert_eq!(hdg.deviation, None);
     assert_eq!(hdg.deviation_ew, None);
@@ -47,6 +47,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("SD").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Hdg::parse(&frame.fields).expect("parse");
+    let parsed = Hdg::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

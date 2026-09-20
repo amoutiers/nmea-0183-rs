@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$FTHSC,40.12,T,39.11,M*5E").expect("valid");
-    let hsc = Hsc::parse(&frame.fields).expect("parse");
+    let hsc = Hsc::parse(&frame.fields);
     let sentence = hsc.to_sentence("FT").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let hsc2 = Hsc::parse(&frame2.fields).expect("parse");
+    let hsc2 = Hsc::parse(&frame2.fields);
     assert_eq!(hsc, hsc2);
 }
 
@@ -24,7 +24,7 @@ fn dispatch() {
 fn hsc_values() {
     // Fixture: SignalK signalk-parser-nmea0183 HSC sample (no trailing status).
     let frame = parse_frame("$FTHSC,40.12,T,39.11,M*5E").expect("valid");
-    let hsc = Hsc::parse(&frame.fields).expect("parse");
+    let hsc = Hsc::parse(&frame.fields);
     assert!((hsc.cmd_heading_true.expect("true") - 40.12).abs() < 1e-4);
     assert!((hsc.cmd_heading_mag.expect("mag") - 39.11).abs() < 1e-4);
     assert_eq!(hsc.status, None);
@@ -49,6 +49,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("FT").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Hsc::parse(&frame.fields).expect("parse");
+    let parsed = Hsc::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

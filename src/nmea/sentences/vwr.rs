@@ -19,8 +19,8 @@ pub struct Vwr {
 
 impl Vwr {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let angle = r.f32();
         let angle_lr = r.char();
@@ -30,13 +30,13 @@ impl Vwr {
         r.skip(); // M
         let speed_kmh = r.f32();
         r.skip(); // K
-        Some(Self {
+        Self {
             angle,
             angle_lr,
             speed_knots,
             speed_ms,
             speed_kmh,
-        })
+        }
     }
 }
 
@@ -73,7 +73,7 @@ mod tests {
         }
         .to_sentence("II").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let v = Vwr::parse(&frame.fields).expect("parse");
+        let v = Vwr::parse(&frame.fields);
         assert!(v.angle.is_none());
         assert!(v.angle_lr.is_none());
         assert!(v.speed_knots.is_none());
@@ -90,14 +90,14 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Vwr::parse(&frame.fields).expect("re-parse VWR");
+        let parsed = Vwr::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn vwr_full_gonmea() {
         let frame = parse_frame("$IIVWR,75,R,1.0,N,0.51,M,1.85,K*6C").expect("valid VWR frame");
-        let vwr = Vwr::parse(&frame.fields).expect("parse VWR");
+        let vwr = Vwr::parse(&frame.fields);
         assert!((vwr.angle.expect("angle") - 75.0).abs() < 0.1);
         assert_eq!(vwr.angle_lr, Some('R'));
         assert!((vwr.speed_knots.expect("kts") - 1.0).abs() < 0.1);
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn vwr_partial_gonmea() {
         let frame = parse_frame("$IIVWR,024,L,018,N,,,,*5e").expect("valid go-nmea VWR frame");
-        let vwr = Vwr::parse(&frame.fields).expect("parse VWR");
+        let vwr = Vwr::parse(&frame.fields);
         assert!((vwr.angle.expect("angle") - 24.0).abs() < 0.1);
         assert_eq!(vwr.angle_lr, Some('L'));
         assert!((vwr.speed_knots.expect("kts") - 18.0).abs() < 0.1);

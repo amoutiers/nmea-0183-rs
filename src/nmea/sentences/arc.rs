@@ -21,21 +21,21 @@ pub struct Arc {
 
 impl Arc {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let manufacturer = r.string();
         let alert_id = r.string();
         let instance = r.u8();
         let command = r.char();
-        Some(Self {
+        Self {
             time,
             manufacturer,
             alert_id,
             instance,
             command,
-        })
+        }
     }
 }
 
@@ -69,7 +69,7 @@ mod tests {
         }
         .to_sentence("RA").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let a = Arc::parse(&f.fields).expect("parse");
+        let a = Arc::parse(&f.fields);
         assert!(a.time.is_none());
         assert!(a.command.is_none());
     }
@@ -85,14 +85,14 @@ mod tests {
         };
         let sentence = original.to_sentence("RA").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Arc::parse(&frame.fields).expect("parse");
+        let parsed = Arc::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn arc_raarc_gonmea() {
         let frame = parse_frame("$RAARC,220516,TCK,002,1,A*73").expect("valid");
-        let a = Arc::parse(&frame.fields).expect("parse");
+        let a = Arc::parse(&frame.fields);
         assert_eq!(a.time.as_deref(), Some("220516"));
         assert_eq!(a.manufacturer.as_deref(), Some("TCK"));
         assert_eq!(a.alert_id.as_deref(), Some("002"));

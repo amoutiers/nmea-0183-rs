@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39").expect("valid");
-    let gsa = Gsa::parse(&frame.fields).expect("parse");
+    let gsa = Gsa::parse(&frame.fields);
     let sentence = gsa.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let gsa2 = Gsa::parse(&frame2.fields).expect("parse");
+    let gsa2 = Gsa::parse(&frame2.fields);
     assert_eq!(gsa, gsa2);
 }
 
@@ -46,7 +46,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Gsa::parse(&frame.fields).expect("parse");
+    let parsed = Gsa::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -56,7 +56,7 @@ fn gsa_values() {
     // PRN slots (0-based): 04(0) 05(1) _(2) 09(3) 12(4) _(5) _(6) 24(7) _(8) _(9) _(10) _(11)
     let frame =
         parse_frame("$GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39").expect("valid GSA fixture");
-    let gsa = Gsa::parse(&frame.fields).expect("parse GSA");
+    let gsa = Gsa::parse(&frame.fields);
     assert_eq!(gsa.mode, Some('A'));
     assert_eq!(gsa.fix_type, Some(3));
     assert_eq!(gsa.prns[0], Some(4));

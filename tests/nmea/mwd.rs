@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIMWD,046.,T,046.,M,10.1,N,05.2,M*43").expect("valid");
-    let mwd = Mwd::parse(&frame.fields).expect("parse");
+    let mwd = Mwd::parse(&frame.fields);
     let sentence = mwd.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let mwd2 = Mwd::parse(&frame2.fields).expect("parse");
+    let mwd2 = Mwd::parse(&frame2.fields);
     assert_eq!(mwd, mwd2);
 }
 
@@ -30,7 +30,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("WI").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Mwd::parse(&frame.fields).expect("parse");
+    let parsed = Mwd::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -38,7 +38,7 @@ fn roundtrip() {
 fn mwd_values() {
     // (a) value half
     let frame = parse_frame("$IIMWD,046.,T,046.,M,10.1,N,05.2,M*43").expect("valid");
-    let x = Mwd::parse(&frame.fields).expect("parse");
+    let x = Mwd::parse(&frame.fields);
     assert!((x.wind_dir_true.expect("wind_dir_true") - 46.0).abs() < 1e-2);
     assert!((x.wind_dir_mag.expect("wind_dir_mag") - 46.0).abs() < 1e-2);
     assert!((x.wind_speed_kts.expect("wind_speed_kts") - 10.1).abs() < 1e-2);

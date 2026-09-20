@@ -27,8 +27,8 @@ pub struct Tll {
 
 impl Tll {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let target_num = r.u8();
         let lat = r.f64();
@@ -39,7 +39,7 @@ impl Tll {
         let time = r.string();
         let status = r.char();
         let ref_target = r.char();
-        Some(Self {
+        Self {
             target_num,
             lat,
             ns,
@@ -49,7 +49,7 @@ impl Tll {
             time,
             status,
             ref_target,
-        })
+        }
     }
 }
 
@@ -91,7 +91,7 @@ mod tests {
         }
         .to_sentence("RA").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let t = Tll::parse(&f.fields).expect("parse");
+        let t = Tll::parse(&f.fields);
         assert!(t.target_num.is_none());
         assert!(t.lat.is_none());
     }
@@ -111,7 +111,7 @@ mod tests {
         };
         let sentence = original.to_sentence("RA").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Tll::parse(&frame.fields).expect("parse");
+        let parsed = Tll::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -119,7 +119,7 @@ mod tests {
     fn tll_full_gonmea() {
         let frame =
             parse_frame("$RATLL,1,3646.54266,N,00235.37778,W,test,020915,L,R*78").expect("valid");
-        let t = Tll::parse(&frame.fields).expect("parse");
+        let t = Tll::parse(&frame.fields);
         assert_eq!(t.target_num, Some(1));
         assert!((t.lat.expect("lat") - 3646.54266).abs() < 0.00001);
         assert_eq!(t.ns, Some('N'));
@@ -134,7 +134,7 @@ mod tests {
     #[test]
     fn tll_ratll_gonmea() {
         let frame = parse_frame("$RATLL,,3647.422,N,01432.592,E,,,,*58").expect("valid");
-        let t = Tll::parse(&frame.fields).expect("parse");
+        let t = Tll::parse(&frame.fields);
         assert!(t.target_num.is_none());
         assert!((t.lat.expect("lat") - 3647.422).abs() < 0.001);
         assert_eq!(t.ns, Some('N'));

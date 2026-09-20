@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$SDXDR,C,23.15,C,WTHI*70").expect("valid");
-    let xdr = Xdr::parse(&frame.fields).expect("parse");
+    let xdr = Xdr::parse(&frame.fields);
     let sentence = xdr.to_sentence("SD").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let xdr2 = Xdr::parse(&frame2.fields).expect("parse");
+    let xdr2 = Xdr::parse(&frame2.fields);
     assert_eq!(xdr, xdr2);
 }
 
@@ -42,14 +42,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("WI").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Xdr::parse(&frame.fields).expect("parse");
+    let parsed = Xdr::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn xdr_values() {
     let frame = parse_frame("$SDXDR,C,23.15,C,WTHI*70").expect("valid");
-    let xdr = Xdr::parse(&frame.fields).expect("parse");
+    let xdr = Xdr::parse(&frame.fields);
     assert_eq!(xdr.groups.len(), 1);
     assert_eq!(xdr.groups[0].sensor_type, Some('C'));
     assert!((xdr.groups[0].value.expect("value") - 23.15).abs() < 1e-2);

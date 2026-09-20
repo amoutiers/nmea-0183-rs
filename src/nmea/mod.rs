@@ -51,24 +51,9 @@ macro_rules! nmea_sentences {
                 if frame.prefix != '$' {
                     #[cfg(feature = "ttd")]
                     if frame.prefix == '!' && frame.talker == "**" && frame.sentence_type == "TTD" {
-                        return match sentences::Ttd::parse(&frame.fields) {
-                            Some(value) => Self::Ttd(value),
-                            None => Self::from_frame(frame),
-                        };
+                        return Self::Ttd(sentences::Ttd::parse(&frame.fields));
                     }
                     return Self::from_frame(frame);
-                }
-
-                macro_rules! try_parse {
-                    ($parser:expr, $v:ident) => {
-                        match $parser(&frame.fields) {
-                            Some(v) => return Self::$v(v),
-                            // parse() is documented to always return Some for known
-                            // types; degrade to Unknown rather than panic if that
-                            // invariant is ever broken by a future change.
-                            None => return Self::from_frame(frame),
-                        }
-                    };
                 }
 
                 // Standard table matches the 3-char code for '$'-prefixed frames.
@@ -77,7 +62,7 @@ macro_rules! nmea_sentences {
                 match frame.sentence_type {
                     $(
                         #[cfg(feature = $feat)]
-                        $wire => try_parse!(sentences::$variant::parse, $variant),
+                        $wire => return Self::$variant(sentences::$variant::parse(&frame.fields)),
                     )*
                     _ => {}
                 }
@@ -88,7 +73,7 @@ macro_rules! nmea_sentences {
                     match frame.sentence_type {
                         $(
                             #[cfg(feature = $pfeat)]
-                            $pwire => try_parse!(sentences::$pvariant::parse, $pvariant),
+                            $pwire => return Self::$pvariant(sentences::$pvariant::parse(&frame.fields)),
                         )*
                         _ => {}
                     }
@@ -139,11 +124,17 @@ macro_rules! nmea_sentences {
         fn sentence_defaults_construct() {
             $(
                 #[cfg(feature = $feat)]
-                { let _ = sentences::$variant::default(); }
+                {
+                    let _: sentences::$variant = sentences::$variant::parse(&[]);
+                    let _ = sentences::$variant::default();
+                }
             )*
             $(
                 #[cfg(feature = $pfeat)]
-                { let _ = sentences::$pvariant::default(); }
+                {
+                    let _: sentences::$pvariant = sentences::$pvariant::parse(&[]);
+                    let _ = sentences::$pvariant::default();
+                }
             )*
         }
     };

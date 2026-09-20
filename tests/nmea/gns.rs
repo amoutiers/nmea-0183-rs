@@ -9,10 +9,10 @@ fn decode_encode() {
     let frame =
         parse_frame("$GPGNS,111648.00,0235.0379,S,04422.1450,W,ANN,12,0.8,8.5,-22.3,,,S*5D")
             .expect("valid");
-    let gns = Gns::parse(&frame.fields).expect("parse");
+    let gns = Gns::parse(&frame.fields);
     let sentence = gns.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let gns2 = Gns::parse(&frame2.fields).expect("parse");
+    let gns2 = Gns::parse(&frame2.fields);
     assert_eq!(gns, gns2);
 }
 
@@ -29,7 +29,7 @@ fn gns_values() {
     let frame =
         parse_frame("$GPGNS,111648.00,0235.0379,S,04422.1450,W,ANN,12,0.8,8.5,-22.3,,,S*5D")
             .expect("valid");
-    let gns = Gns::parse(&frame.fields).expect("parse");
+    let gns = Gns::parse(&frame.fields);
     assert_eq!(gns.time, Some("111648.00".to_string()));
     assert!((gns.lat.expect("lat") - 235.0379).abs() < 1e-9);
     assert_eq!(gns.ns, Some('S'));
@@ -72,6 +72,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Gns::parse(&frame.fields).expect("parse");
+    let parsed = Gns::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

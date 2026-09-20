@@ -17,8 +17,8 @@ pub struct Txt {
 
 impl Txt {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let num_msg = r.u8();
         let msg_num = r.u8();
@@ -31,7 +31,7 @@ impl Txt {
         } else {
             None
         };
-        Some(Self { num_msg, msg_num, msg_type, text })
+        Self { num_msg, msg_num, msg_type, text }
     }
 }
 
@@ -63,7 +63,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let t = Txt::parse(&frame.fields).expect("parse");
+        let t = Txt::parse(&frame.fields);
         assert!(t.num_msg.is_none());
         assert!(t.msg_num.is_none());
         assert!(t.msg_type.is_none());
@@ -80,7 +80,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Txt::parse(&frame.fields).expect("re-parse TXT");
+        let parsed = Txt::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -88,7 +88,7 @@ mod tests {
     fn txt_full_gonmea() {
         let frame =
             parse_frame("$GPTXT,01,01,02,u-blox ag - www.u-blox.com*50").expect("valid TXT frame");
-        let txt = Txt::parse(&frame.fields).expect("parse TXT");
+        let txt = Txt::parse(&frame.fields);
         assert_eq!(txt.num_msg, Some(1));
         assert_eq!(txt.msg_num, Some(1));
         assert_eq!(txt.msg_type, Some(2));
@@ -99,7 +99,7 @@ mod tests {
     fn txt_text_with_embedded_comma() {
         // On the wire "...,02,Hello, World" -> parse_frame splits into ["Hello"," World"];
         // Txt::parse must rejoin them into the full text.
-        let t = Txt::parse(&["01", "01", "02", "Hello", " World"]).expect("parse");
+        let t = Txt::parse(&["01", "01", "02", "Hello", " World"]);
         assert_eq!(t.text, Some("Hello, World".to_string()));
     }
 }

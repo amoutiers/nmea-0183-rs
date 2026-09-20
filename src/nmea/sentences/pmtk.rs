@@ -16,12 +16,12 @@ pub struct Pmtk {
 
 impl Pmtk {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let cmd = r.u32();
         let flag = r.u8();
-        Some(Self { cmd, flag })
+        Self { cmd, flag }
     }
 }
 
@@ -46,7 +46,7 @@ mod tests {
     fn pmtk_empty() {
         let s = Pmtk { cmd: None, flag: None }.to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pmtk::parse(&f.fields).expect("parse");
+        let p = Pmtk::parse(&f.fields);
         assert!(p.cmd.is_none());
         assert!(p.flag.is_none());
     }
@@ -59,14 +59,14 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pmtk::parse(&frame.fields).expect("parse");
+        let parsed = Pmtk::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn pmtk_values() {
         let frame = parse_frame("$PMTK001,604,3*32").expect("valid");
-        let p = Pmtk::parse(&frame.fields).expect("parse");
+        let p = Pmtk::parse(&frame.fields);
         assert_eq!(p.cmd, Some(604));
         assert_eq!(p.flag, Some(3));
     }

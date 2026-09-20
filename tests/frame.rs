@@ -118,17 +118,17 @@ fn encode_typed_rejects_address_injection() {
     #[cfg(feature = "dbt")]
     {
         use nmea_0183_rs::NmeaEncodable;
-        let sentence = nmea_0183_rs::nmea::sentences::Dbt::parse(&[]).expect("parse");
+        let sentence = nmea_0183_rs::nmea::sentences::Dbt::parse(&[]);
         assert!(sentence.to_sentence(talker).is_err());
     }
     #[cfg(feature = "abm")]
     {
-        let sentence = nmea_0183_rs::ais::sentences::Abm::parse(&[]).expect("parse");
+        let sentence = nmea_0183_rs::ais::sentences::Abm::parse(&[]);
         assert!(sentence.to_sentence(talker).is_err());
     }
     #[cfg(feature = "bbm")]
     {
-        let sentence = nmea_0183_rs::ais::sentences::Bbm::parse(&[]).expect("parse");
+        let sentence = nmea_0183_rs::ais::sentences::Bbm::parse(&[]);
         assert!(sentence.to_sentence(talker).is_err());
     }
 }

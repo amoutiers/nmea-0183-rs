@@ -15,17 +15,17 @@ pub struct Hbt {
 
 impl Hbt {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let interval = r.f32();
         let operation_status = r.char();
         let msg_id = r.u8();
-        Some(Self {
+        Self {
             interval,
             operation_status,
             msg_id,
-        })
+        }
     }
 }
 
@@ -55,7 +55,7 @@ mod tests {
         }
         .to_sentence("HC").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let h = Hbt::parse(&f.fields).expect("parse");
+        let h = Hbt::parse(&f.fields);
         assert!(h.interval.is_none());
         assert!(h.operation_status.is_none());
         assert!(h.msg_id.is_none());
@@ -70,14 +70,14 @@ mod tests {
         };
         let sentence = original.to_sentence("HC").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Hbt::parse(&frame.fields).expect("parse");
+        let parsed = Hbt::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn hbt_hchbt_gonmea() {
         let frame = parse_frame("$HCHBT,1.5,A,1*23").expect("valid");
-        let h = Hbt::parse(&frame.fields).expect("parse");
+        let h = Hbt::parse(&frame.fields);
         assert!((h.interval.expect("interval") - 1.5).abs() < 0.01);
         assert_eq!(h.operation_status, Some('A'));
         assert_eq!(h.msg_id, Some(1));

@@ -11,11 +11,11 @@ pub struct Ack {
 
 impl Ack {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let alert_id = r.string();
-        Some(Self { alert_id })
+        Self { alert_id }
     }
 }
 
@@ -38,7 +38,7 @@ mod tests {
     fn ack_empty() {
         let s = Ack { alert_id: None }.to_sentence("VR").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let a = Ack::parse(&f.fields).expect("parse");
+        let a = Ack::parse(&f.fields);
         assert!(a.alert_id.is_none());
     }
 
@@ -49,14 +49,14 @@ mod tests {
         };
         let sentence = original.to_sentence("VR").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Ack::parse(&frame.fields).expect("parse");
+        let parsed = Ack::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn ack_vrack_001_gonmea() {
         let frame = parse_frame("$VRACK,001*50").expect("valid");
-        let a = Ack::parse(&frame.fields).expect("parse");
+        let a = Ack::parse(&frame.fields);
         assert_eq!(a.alert_id.as_deref(), Some("001"));
     }
 }

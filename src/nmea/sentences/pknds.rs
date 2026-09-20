@@ -40,8 +40,8 @@ pub struct Pknds {
 
 impl Pknds {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let validity = r.char();
@@ -57,7 +57,7 @@ impl Pknds {
         let unit_id = r.string();
         let status = r.string();
         let extension = r.string();
-        Some(Self {
+        Self {
             time,
             validity,
             lat,
@@ -72,7 +72,7 @@ impl Pknds {
             unit_id,
             status,
             extension,
-        })
+        }
     }
 }
 
@@ -125,7 +125,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pknds::parse(&f.fields).expect("parse");
+        let p = Pknds::parse(&f.fields);
         assert!(p.time.is_none());
         assert!(p.extension.is_none());
     }
@@ -150,7 +150,7 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pknds::parse(&frame.fields).expect("parse");
+        let parsed = Pknds::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -160,7 +160,7 @@ mod tests {
             "$PKNDS,220516,A,5133.82,N,00042.24,W,173.8,231.8,130694,004.2,E00,U00001,207,00,*3A",
         )
         .expect("valid PKNDS east variation");
-        let p = Pknds::parse(&f.fields).expect("parse PKNDS");
+        let p = Pknds::parse(&f.fields);
         assert_eq!(p.variation, Some(4.2));
         assert_eq!(p.var_ew.as_deref(), Some("E00"));
     }
@@ -171,7 +171,7 @@ mod tests {
             "$PKNDS,220516,A,5133.82,N,00042.24,W,173.8,231.8,130694,004.2,W00,U00001,207,00,*28",
         )
         .expect("valid PKNDS");
-        let p = Pknds::parse(&f.fields).expect("parse PKNDS");
+        let p = Pknds::parse(&f.fields);
         assert_eq!(p.time, Some("220516".to_string()));
         assert_eq!(p.validity, Some('A'));
         assert!((p.lat.expect("lat") - 5133.82).abs() < 0.001);

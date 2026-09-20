@@ -39,8 +39,8 @@ pub struct Ttm {
 
 impl Ttm {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let target_num = r.u8();
         let dist = r.f32();
@@ -57,7 +57,7 @@ impl Ttm {
         let ref_target = r.char();
         let time = r.string();
         let acq_type = r.char();
-        Some(Self {
+        Self {
             target_num,
             dist,
             bearing,
@@ -73,7 +73,7 @@ impl Ttm {
             ref_target,
             time,
             acq_type,
-        })
+        }
     }
 }
 
@@ -127,7 +127,7 @@ mod tests {
         }
         .to_sentence("RA").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let t = Ttm::parse(&f.fields).expect("parse");
+        let t = Ttm::parse(&f.fields);
         assert!(t.target_num.is_none());
         assert!(t.dist.is_none());
         assert!(t.acq_type.is_none());
@@ -154,7 +154,7 @@ mod tests {
         };
         let sentence = original.to_sentence("RA").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Ttm::parse(&frame.fields).expect("parse");
+        let parsed = Ttm::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -162,7 +162,7 @@ mod tests {
     fn ttm_rattm_gonmea() {
         let f = parse_frame("$RATTM,02,1.43,170.5,T,0.16,264.4,T,1.42,36.9,N,,T,,,M*2A")
             .expect("valid TTM");
-        let t = Ttm::parse(&f.fields).expect("parse TTM");
+        let t = Ttm::parse(&f.fields);
         assert_eq!(t.target_num, Some(2));
         assert!((t.dist.expect("dist") - 1.43).abs() < 0.001);
         assert!((t.bearing.expect("bearing") - 170.5).abs() < 0.01);

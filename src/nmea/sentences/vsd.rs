@@ -27,10 +27,10 @@ pub struct Vsd {
 
 impl Vsd {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             type_of_ship: r.u8(),
             draught: r.f32(),
             persons: r.u16(),
@@ -40,7 +40,7 @@ impl Vsd {
             arrival_month: r.u8(),
             nav_status: r.u8(),
             regional: r.u8(),
-        })
+        }
     }
 }
 
@@ -83,7 +83,7 @@ mod tests {
         .to_sentence("RA")
         .expect("encode");
         let frame = parse_frame(sentence.trim()).expect("valid");
-        let vsd = Vsd::parse(&frame.fields).expect("parse");
+        let vsd = Vsd::parse(&frame.fields);
         assert!(vsd.type_of_ship.is_none());
         assert!(vsd.destination.is_none());
     }
@@ -122,7 +122,7 @@ mod tests {
         };
         let sentence = original.to_sentence("RA").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Vsd::parse(&frame.fields).expect("parse");
+        let parsed = Vsd::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -130,7 +130,7 @@ mod tests {
     fn vsd_ravsd_gonmea() {
         let frame =
             parse_frame("$RAVSD,0,4.5,6,@@@@@@@@@@@@@@@@@@@@,220516,01,02,8,*6E").expect("valid");
-        let vsd = Vsd::parse(&frame.fields).expect("parse");
+        let vsd = Vsd::parse(&frame.fields);
         assert_eq!(vsd.type_of_ship, Some(0));
         assert!((vsd.draught.expect("draught") - 4.5).abs() < 0.01);
         assert_eq!(vsd.persons, Some(6));

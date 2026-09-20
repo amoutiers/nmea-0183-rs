@@ -25,8 +25,8 @@ pub struct Ala {
 
 impl Ala {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let system = r.string();
@@ -36,7 +36,7 @@ impl Ala {
         let condition = r.char();
         let ack_state = r.char();
         let message = r.string();
-        Some(Self {
+        Self {
             time,
             system,
             subsystem,
@@ -45,7 +45,7 @@ impl Ala {
             condition,
             ack_state,
             message,
-        })
+        }
     }
 }
 
@@ -85,7 +85,7 @@ mod tests {
         }
         .to_sentence("FR").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let a = Ala::parse(&f.fields).expect("parse");
+        let a = Ala::parse(&f.fields);
         assert!(a.time.is_none());
         assert!(a.system.is_none());
         assert!(a.condition.is_none());
@@ -106,7 +106,7 @@ mod tests {
         };
         let sentence = original.to_sentence("FR").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Ala::parse(&frame.fields).expect("parse");
+        let parsed = Ala::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -114,7 +114,7 @@ mod tests {
     fn ala_frala_gonmea() {
         let f = parse_frame("$FRALA,143955,FR,OT,00,901,N,V,Syst Fault : AutroSafe comm. OK*4F")
             .expect("valid ALA");
-        let a = Ala::parse(&f.fields).expect("parse ALA");
+        let a = Ala::parse(&f.fields);
         assert_eq!(a.time, Some("143955".to_string()));
         assert_eq!(a.system, Some("FR".to_string()));
         assert_eq!(a.subsystem, Some("OT".to_string()));

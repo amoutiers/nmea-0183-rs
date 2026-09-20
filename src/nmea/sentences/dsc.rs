@@ -33,8 +33,8 @@ pub struct Dsc {
 
 impl Dsc {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let format_specifier = r.string();
         let address = r.string();
@@ -47,7 +47,7 @@ impl Dsc {
         let distress_cause = r.string();
         let ack = r.string().and_then(|value| value.trim().chars().next());
         let expansion = r.string().and_then(|value| value.trim().chars().next());
-        Some(Self {
+        Self {
             format_specifier,
             address,
             category,
@@ -59,7 +59,7 @@ impl Dsc {
             distress_cause,
             ack,
             expansion,
-        })
+        }
     }
 }
 
@@ -106,7 +106,7 @@ mod tests {
         .to_sentence("CD")
         .expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let d = Dsc::parse(&f.fields).expect("parse");
+        let d = Dsc::parse(&f.fields);
         assert!(d.format_specifier.is_none());
         assert!(d.address.is_none());
         assert!(d.expansion.is_none());
@@ -129,7 +129,7 @@ mod tests {
         };
         let sentence = original.to_sentence("CD").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Dsc::parse(&frame.fields).expect("parse");
+        let parsed = Dsc::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -137,7 +137,7 @@ mod tests {
     fn dsc_cddsc_signalk() {
         let f = parse_frame("$CDDSC,12,3380400790,12,06,00,1423108312,2019,,,S,E*6A")
             .expect("valid DSC");
-        let d = Dsc::parse(&f.fields).expect("parse DSC");
+        let d = Dsc::parse(&f.fields);
         assert_eq!(d.format_specifier, Some("12".to_string()));
         assert_eq!(d.address, Some("3380400790".to_string()));
         assert_eq!(d.category, Some("12".to_string()));
@@ -157,7 +157,7 @@ mod tests {
             "$CDDSC,12,3380400790,12,06,00,1423108312,2019, ,  , S, E  *4a",
         )
         .expect("valid DSC");
-        let d = Dsc::parse(&f.fields).expect("parse DSC");
+        let d = Dsc::parse(&f.fields);
         assert_eq!(d.ack, Some('S'));
         assert_eq!(d.expansion, Some('E'));
     }

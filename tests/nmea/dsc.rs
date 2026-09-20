@@ -8,10 +8,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 fn decode_encode() {
     let frame =
         parse_frame("$CDDSC,12,3380400790,12,06,00,1423108312,2019,,,S,E*6A").expect("valid");
-    let dsc = Dsc::parse(&frame.fields).expect("parse");
+    let dsc = Dsc::parse(&frame.fields);
     let sentence = dsc.to_sentence("CD").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let dsc2 = Dsc::parse(&frame2.fields).expect("parse");
+    let dsc2 = Dsc::parse(&frame2.fields);
     assert_eq!(dsc, dsc2);
 }
 
@@ -39,7 +39,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("CD").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Dsc::parse(&frame.fields).expect("parse");
+    let parsed = Dsc::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -47,7 +47,7 @@ fn roundtrip() {
 fn dsc_values() {
     let frame =
         parse_frame("$CDDSC,12,3380400790,12,06,00,1423108312,2019,,,S,E*6A").expect("valid");
-    let dsc = Dsc::parse(&frame.fields).expect("parse");
+    let dsc = Dsc::parse(&frame.fields);
     assert_eq!(
         dsc,
         Dsc {

@@ -8,7 +8,7 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn alc_values() {
     let frame = parse_frame("$FBALC,02,01,03,02,FEB,01,02,03,TEB,02,03,04*5F").expect("valid");
-    let alc = Alc::parse(&frame.fields).expect("parse");
+    let alc = Alc::parse(&frame.fields);
     assert_eq!(alc.num_frags, Some(2));
     assert_eq!(alc.frag_num, Some(1));
     assert_eq!(alc.msg_id, Some(3));
@@ -46,13 +46,12 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("FB").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    assert_eq!(Alc::parse(&frame.fields).expect("parse"), original);
+    assert_eq!(Alc::parse(&frame.fields), original);
 }
 
 #[test]
 fn retains_entries_after_missing_or_partial_group_fields() {
-    let alc =
-        Alc::parse(&["1", "1", "0", "3", "", "bad", "x", "", "FEB", "01", "2"]).expect("parse");
+    let alc = Alc::parse(&["1", "1", "0", "3", "", "bad", "x", "", "FEB", "01", "2"]);
     assert_eq!(alc.entries.len(), 2);
     assert_eq!(alc.entries[0].manufacturer, None);
     assert_eq!(alc.entries[1].manufacturer.as_deref(), Some("FEB"));

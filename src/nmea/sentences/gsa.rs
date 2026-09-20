@@ -26,8 +26,8 @@ pub struct Gsa {
 
 impl Gsa {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let mode = r.char();
         let fix_type = r.u8();
@@ -49,7 +49,7 @@ impl Gsa {
         let hdop = r.f32();
         let vdop = r.f32();
         let system_id = r.char();
-        Some(Self {
+        Self {
             mode,
             fix_type,
             prns,
@@ -57,7 +57,7 @@ impl Gsa {
             hdop,
             vdop,
             system_id,
-        })
+        }
     }
 }
 
@@ -97,7 +97,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let g = Gsa::parse(&frame.fields).expect("parse");
+        let g = Gsa::parse(&frame.fields);
         assert!(g.mode.is_none());
         assert!(g.fix_type.is_none());
         assert!(g.prns.iter().all(|p| p.is_none()));
@@ -130,7 +130,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Gsa::parse(&frame.fields).expect("re-parse GSA");
+        let parsed = Gsa::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -138,7 +138,7 @@ mod tests {
     fn gsa_signalk() {
         let frame = parse_frame("$GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39")
             .expect("valid signalk GSA frame");
-        let gsa = Gsa::parse(&frame.fields).expect("parse GSA");
+        let gsa = Gsa::parse(&frame.fields);
         assert_eq!(gsa.mode, Some('A'));
         assert_eq!(gsa.fix_type, Some(3));
         assert_eq!(gsa.prns[0], Some(4));
@@ -157,12 +157,12 @@ mod tests {
         // NMEA 4.11 GSA appends a GNSS system id; '4' (BeiDou) must round-trip.
         let frame = parse_frame("$GNGSA,A,3,13,12,22,19,08,21,,,,,,,1.05,0.64,0.83,4*0B")
             .expect("valid GN GSA frame");
-        let gsa = Gsa::parse(&frame.fields).expect("parse GSA");
+        let gsa = Gsa::parse(&frame.fields);
         assert_eq!(gsa.system_id, Some('4'));
 
         let sentence = gsa.to_sentence("GN").expect("encode");
         let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-        let gsa2 = Gsa::parse(&frame2.fields).expect("re-parse");
+        let gsa2 = Gsa::parse(&frame2.fields);
         assert_eq!(gsa2.system_id, Some('4'));
     }
 
@@ -171,7 +171,7 @@ mod tests {
         // NMEA 4.11 adds system_id after vdop; struct silently ignores it
         let frame = parse_frame("$GNGSA,A,3,13,12,22,19,08,21,,,,,,,1.05,0.64,0.83,4*0B")
             .expect("valid go-nmea GSA frame");
-        let gsa = Gsa::parse(&frame.fields).expect("parse GSA");
+        let gsa = Gsa::parse(&frame.fields);
         assert_eq!(gsa.mode, Some('A'));
         assert_eq!(gsa.fix_type, Some(3));
         assert_eq!(gsa.prns[0], Some(13));

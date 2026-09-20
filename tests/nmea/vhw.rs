@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$SDVHW,182.5,T,181.8,M,0.0,N,0.0,K*4C").expect("valid");
-    let vhw = Vhw::parse(&frame.fields).expect("parse");
+    let vhw = Vhw::parse(&frame.fields);
     let sentence = vhw.to_sentence("SD").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let vhw2 = Vhw::parse(&frame2.fields).expect("parse");
+    let vhw2 = Vhw::parse(&frame2.fields);
     assert_eq!(vhw, vhw2);
 }
 
@@ -30,7 +30,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("SD").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Vhw::parse(&frame.fields).expect("parse");
+    let parsed = Vhw::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -38,7 +38,7 @@ fn roundtrip() {
 fn vhw_values() {
     // (a) value half
     let frame = parse_frame("$SDVHW,182.5,T,181.8,M,0.0,N,0.0,K*4C").expect("valid VHW frame");
-    let x = Vhw::parse(&frame.fields).expect("parse VHW");
+    let x = Vhw::parse(&frame.fields);
     assert!((x.heading_true.expect("heading_true") - 182.5).abs() < 1e-2);
     assert!((x.heading_mag.expect("heading_mag") - 181.8).abs() < 1e-2);
     assert!((x.speed_kts.expect("speed_kts") - 0.0).abs() < 1e-2);

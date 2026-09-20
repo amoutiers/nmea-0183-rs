@@ -9,10 +9,10 @@ fn decode_encode() {
     let frame =
         parse_frame("$ECRMB,A,0.000,L,001,002,4653.550,N,07115.984,W,2.505,334.205,0.000,V*04")
             .expect("valid");
-    let rmb = Rmb::parse(&frame.fields).expect("parse");
+    let rmb = Rmb::parse(&frame.fields);
     let sentence = rmb.to_sentence("EC").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let rmb2 = Rmb::parse(&frame2.fields).expect("parse");
+    let rmb2 = Rmb::parse(&frame2.fields);
     assert_eq!(rmb, rmb2);
 }
 
@@ -44,7 +44,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("EC").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Rmb::parse(&frame.fields).expect("parse");
+    let parsed = Rmb::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -53,7 +53,7 @@ fn rmb_values() {
     let frame =
         parse_frame("$ECRMB,A,0.000,L,001,002,4653.550,N,07115.984,W,2.505,334.205,0.000,V*04")
             .expect("valid");
-    let r = Rmb::parse(&frame.fields).expect("parse");
+    let r = Rmb::parse(&frame.fields);
     assert_eq!(r.status, Some('A'));
     assert!((r.ctrkerr.expect("ctrkerr") - 0.0).abs() < 1e-4);
     assert_eq!(r.dirs, Some('L'));

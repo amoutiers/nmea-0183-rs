@@ -23,10 +23,10 @@ pub struct Gll {
 
 impl Gll {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             lat: r.f64(),
             ns: r.char(),
             lon: r.f64(),
@@ -34,7 +34,7 @@ impl Gll {
             time: r.string(),
             status: r.char(),
             mode: r.char(),
-        })
+        }
     }
 }
 
@@ -63,7 +63,7 @@ mod tests {
     fn gll_empty() {
         // SignalK fixture: all fields empty
         let frame = parse_frame("$GPGLL,,,,,,,*7C").expect("valid empty GLL frame");
-        let gll = Gll::parse(&frame.fields).expect("parse empty GLL");
+        let gll = Gll::parse(&frame.fields);
         assert!(gll.lat.is_none());
         assert!(gll.ns.is_none());
         assert!(gll.lon.is_none());
@@ -74,7 +74,7 @@ mod tests {
     fn gll_full_signalk() {
         let frame =
             parse_frame("$GPGLL,5958.613,N,02325.928,E,121022,A,D*40").expect("valid GLL frame");
-        let gll = Gll::parse(&frame.fields).expect("parse GLL");
+        let gll = Gll::parse(&frame.fields);
         assert!((gll.lat.expect("lat") - 5958.613).abs() < 0.001);
         assert_eq!(gll.ns, Some('N'));
         assert!((gll.lon.expect("lon") - 2325.928).abs() < 0.001);
@@ -88,7 +88,7 @@ mod tests {
         // pynmeagps fixture: GN talker
         let frame = parse_frame("$GNGLL,5327.03942,N,00214.42462,W,103607.00,A,A*68")
             .expect("valid GN GLL frame");
-        let gll = Gll::parse(&frame.fields).expect("parse GN GLL");
+        let gll = Gll::parse(&frame.fields);
         assert!((gll.lat.expect("lat") - 5327.03942).abs() < 0.00001);
         assert_eq!(gll.ns, Some('N'));
         assert!((gll.lon.expect("lon") - 214.42462).abs() < 0.00001);
@@ -102,7 +102,7 @@ mod tests {
     fn gll_encode_pads_longitude_degrees() {
         let frame = parse_frame("$GPGLL,5958.613,N,02325.928,E,120000,A*29")
             .expect("valid GLL");
-        let gll = Gll::parse(&frame.fields).expect("parse GLL");
+        let gll = Gll::parse(&frame.fields);
         let sentence = gll.to_sentence("GP").expect("encode");
         // Longitude 023°25.928' must keep its 3-digit (5-char integer) degree field.
         assert!(sentence.contains(",02325.928,"), "leading zero lost: {sentence}");
@@ -121,7 +121,7 @@ mod tests {
         };
         let sentence = gll.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse GLL");
-        let gll2 = Gll::parse(&frame.fields).expect("parse roundtrip GLL");
+        let gll2 = Gll::parse(&frame.fields);
         assert_eq!(gll, gll2);
     }
 }

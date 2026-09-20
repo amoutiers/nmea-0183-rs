@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIVWR,75,R,1.0,N,0.51,M,1.85,K*6C").expect("valid");
-    let vwr = Vwr::parse(&frame.fields).expect("parse");
+    let vwr = Vwr::parse(&frame.fields);
     let sentence = vwr.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let vwr2 = Vwr::parse(&frame2.fields).expect("parse");
+    let vwr2 = Vwr::parse(&frame2.fields);
     assert_eq!(vwr, vwr2);
 }
 
@@ -31,7 +31,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Vwr::parse(&frame.fields).expect("parse");
+    let parsed = Vwr::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -39,7 +39,7 @@ fn roundtrip() {
 fn vwr_values() {
     // (a) value half
     let frame = parse_frame("$IIVWR,75,R,1.0,N,0.51,M,1.85,K*6C").expect("valid VWR frame");
-    let x = Vwr::parse(&frame.fields).expect("parse VWR");
+    let x = Vwr::parse(&frame.fields);
     assert!((x.angle.expect("angle") - 75.0).abs() < 1e-2);
     assert_eq!(x.angle_lr, Some('R'));
     assert!((x.speed_knots.expect("speed_knots") - 1.0).abs() < 1e-2);

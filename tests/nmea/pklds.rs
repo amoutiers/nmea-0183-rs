@@ -10,10 +10,10 @@ fn decode_encode() {
         "$PKLDS,220516,A,5133.82,N,00042.24,W,173.8,231.8,130694,004.2,W00,100,2000,15,00,*60",
     )
     .expect("valid");
-    let p = Pklds::parse(&frame.fields).expect("parse");
+    let p = Pklds::parse(&frame.fields);
     let sentence = p.to_sentence("").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let p2 = Pklds::parse(&frame2.fields).expect("parse");
+    let p2 = Pklds::parse(&frame2.fields);
     assert_eq!(p, p2);
 }
 
@@ -50,13 +50,13 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Pklds::parse(&frame.fields).expect("parse");
+    let parsed = Pklds::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn encodes_coordinates_with_nmea_padding_and_validation() {
-    let mut value = Pklds::parse(&[]).expect("parse empty");
+    let mut value = Pklds::parse(&[]);
     value.lat = Some(133.82);
     value.lon = Some(42.24);
     assert_eq!(value.encode().expect("encode")[2], "0133.82");

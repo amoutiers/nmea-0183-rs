@@ -6,10 +6,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPVBW,12.3,0.07,A,11.78,0.12,A*6F").expect("valid");
-    let vbw = Vbw::parse(&frame.fields).expect("parse");
+    let vbw = Vbw::parse(&frame.fields);
     let sentence = vbw.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let vbw2 = Vbw::parse(&frame2.fields).expect("parse");
+    let vbw2 = Vbw::parse(&frame2.fields);
     assert_eq!(vbw, vbw2);
 }
 
@@ -35,14 +35,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Vbw::parse(&frame.fields).expect("parse");
+    let parsed = Vbw::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn vbw_values() {
     let frame = parse_frame("$GPVBW,12.3,0.07,A,11.78,0.12,A*6F").expect("valid");
-    let vbw = Vbw::parse(&frame.fields).expect("parse");
+    let vbw = Vbw::parse(&frame.fields);
     assert!((vbw.long_water_spd.expect("long_water_spd") - 12.3).abs() < 1e-2);
     assert!((vbw.trans_water_spd.expect("trans_water_spd") - 0.07).abs() < 1e-2);
     assert_eq!(vbw.water_spd_status, Some('A'));

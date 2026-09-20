@@ -17,8 +17,8 @@ pub struct Mwd {
 
 impl Mwd {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let wind_dir_true = r.f32();
         r.skip(); // T
@@ -27,12 +27,12 @@ impl Mwd {
         let wind_speed_kts = r.f32();
         r.skip(); // N
         let wind_speed_ms = r.f32();
-        Some(Self {
+        Self {
             wind_dir_true,
             wind_dir_mag,
             wind_speed_kts,
             wind_speed_ms,
-        })
+        }
     }
 }
 
@@ -61,7 +61,7 @@ mod tests {
     #[test]
     fn mwd_empty() {
         let f = parse_frame("$IIMWD,,,,,,,,*5E").expect("valid");
-        let m = Mwd::parse(&f.fields).expect("parse");
+        let m = Mwd::parse(&f.fields);
         assert!(m.wind_dir_true.is_none());
         assert!(m.wind_dir_mag.is_none());
         assert!(m.wind_speed_kts.is_none());
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn mwd_full_signalk() {
         let frame = parse_frame("$IIMWD,046.,T,046.,M,10.1,N,05.2,M*43").expect("valid");
-        let mwd = Mwd::parse(&frame.fields).expect("parse MWD");
+        let mwd = Mwd::parse(&frame.fields);
         assert!((mwd.wind_dir_true.expect("dir") - 46.0).abs() < 0.1);
         assert!((mwd.wind_dir_mag.expect("mag") - 46.0).abs() < 0.1);
         assert!((mwd.wind_speed_kts.expect("kts") - 10.1).abs() < 0.1);
@@ -96,7 +96,7 @@ mod tests {
     #[test]
     fn mwd_partial_mag_only_signalk() {
         let frame = parse_frame("$IIMWD,,,046.,M,10.1,N,05.2,M*0B").expect("valid");
-        let mwd = Mwd::parse(&frame.fields).expect("parse MWD");
+        let mwd = Mwd::parse(&frame.fields);
         assert!(mwd.wind_dir_true.is_none());
         assert!((mwd.wind_dir_mag.expect("mag") - 46.0).abs() < 0.1);
     }
@@ -104,7 +104,7 @@ mod tests {
     #[test]
     fn mwd_partial_true_only_signalk() {
         let frame = parse_frame("$IIMWD,046.,T,,,,,5.2,M*72").expect("valid");
-        let mwd = Mwd::parse(&frame.fields).expect("parse MWD");
+        let mwd = Mwd::parse(&frame.fields);
         assert!((mwd.wind_dir_true.expect("true") - 46.0).abs() < 0.1);
         assert!(mwd.wind_dir_mag.is_none());
         assert!(mwd.wind_speed_kts.is_none());
@@ -131,13 +131,13 @@ mod tests {
         };
         let sentence = mwd.to_sentence("WI").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let mwd2 = Mwd::parse(&frame.fields).expect("re-parse MWD");
+        let mwd2 = Mwd::parse(&frame.fields);
         assert_eq!(mwd, mwd2);
     }
 
     #[test]
     fn mwd_strict_sentence_rejects_invalid_talker() {
-        let mwd = Mwd::parse(&[]).expect("lenient typed parse");
+        let mwd = Mwd::parse(&[]);
         assert!(mwd.to_sentence("wi").is_ok());
         assert!(mwd.to_sentence_strict("wi").is_err());
         mwd.to_sentence_strict("WI").expect("strict MWD");

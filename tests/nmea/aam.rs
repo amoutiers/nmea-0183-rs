@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPAAM,A,A,0.10,N,WPTNME*32").expect("valid");
-    let aam = Aam::parse(&frame.fields).expect("parse");
+    let aam = Aam::parse(&frame.fields);
     let sentence = aam.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let aam2 = Aam::parse(&frame2.fields).expect("parse");
+    let aam2 = Aam::parse(&frame2.fields);
     assert_eq!(aam, aam2);
 }
 
@@ -31,14 +31,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Aam::parse(&frame.fields).expect("parse");
+    let parsed = Aam::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn aam_values() {
     let frame = parse_frame("$GPAAM,A,A,0.10,N,WPTNME*32").expect("valid");
-    let a = Aam::parse(&frame.fields).expect("parse");
+    let a = Aam::parse(&frame.fields);
     assert_eq!(a.arrce, Some('A'));
     assert_eq!(a.perp, Some('A'));
     assert!((a.crad.expect("crad") - 0.10).abs() < 1e-4);

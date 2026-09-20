@@ -20,19 +20,19 @@ pub struct Pcdin {
 
 impl Pcdin {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let pgn = r.string();
         let timestamp = r.string();
         let source = r.string();
         let data = r.string();
-        Some(Self {
+        Self {
             pgn,
             timestamp,
             source,
             data,
-        })
+        }
     }
 }
 
@@ -65,7 +65,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pcdin::parse(&f.fields).expect("parse");
+        let p = Pcdin::parse(&f.fields);
         assert!(p.pgn.is_none());
         assert!(p.data.is_none());
     }
@@ -80,7 +80,7 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pcdin::parse(&frame.fields).expect("parse");
+        let parsed = Pcdin::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -88,7 +88,7 @@ mod tests {
     fn pcdin_pcdin_gonmea() {
         let frame =
             parse_frame("$PCDIN,01F112,000C72EA,09,28C36A0000B40AFD*56").expect("valid");
-        let p = Pcdin::parse(&frame.fields).expect("parse");
+        let p = Pcdin::parse(&frame.fields);
         assert_eq!(p.pgn.as_deref(), Some("01F112"));
         assert_eq!(p.timestamp.as_deref(), Some("000C72EA"));
         assert_eq!(p.source.as_deref(), Some("09"));

@@ -6,10 +6,10 @@ use nmea_0183_rs::parse_frame;
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$RATLL,,3647.422,N,01432.592,E,,,,*58").expect("valid");
-    let tll = Tll::parse(&frame.fields).expect("parse");
+    let tll = Tll::parse(&frame.fields);
     let sentence = tll.to_sentence("RA").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let tll2 = Tll::parse(&frame2.fields).expect("parse");
+    let tll2 = Tll::parse(&frame2.fields);
     assert_eq!(tll, tll2);
 }
 
@@ -28,7 +28,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("RA").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Tll::parse(&frame.fields).expect("parse");
+    let parsed = Tll::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -37,7 +37,7 @@ fn tll_values() {
     // Wire: $RATLL,,3647.422,N,01432.592,E,,,,*58
     // target_num absent (empty field), lat/lon are raw DDMM format
     let frame = parse_frame("$RATLL,,3647.422,N,01432.592,E,,,,*58").expect("valid TLL frame");
-    let x = Tll::parse(&frame.fields).expect("parse TLL");
+    let x = Tll::parse(&frame.fields);
     assert!(x.target_num.is_none());
     assert!((x.lat.expect("lat") - 3647.422).abs() < 1e-2);
     assert_eq!(x.ns, Some('N'));

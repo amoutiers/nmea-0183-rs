@@ -8,10 +8,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 fn decode_encode() {
     let frame =
         parse_frame("$RATTM,02,1.43,170.5,T,0.16,264.4,T,1.42,36.9,N,,T,,,M*2A").expect("valid");
-    let ttm = Ttm::parse(&frame.fields).expect("parse");
+    let ttm = Ttm::parse(&frame.fields);
     let sentence = ttm.to_sentence("RA").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let ttm2 = Ttm::parse(&frame2.fields).expect("parse");
+    let ttm2 = Ttm::parse(&frame2.fields);
     assert_eq!(ttm, ttm2);
 }
 
@@ -43,7 +43,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("RA").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Ttm::parse(&frame.fields).expect("parse");
+    let parsed = Ttm::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -58,7 +58,7 @@ fn ttm_values() {
     //   acq_type='M' -> Some('M')
     let frame = parse_frame("$RATTM,02,1.43,170.5,T,0.16,264.4,T,1.42,36.9,N,,T,,,M*2A")
         .expect("valid TTM frame");
-    let x = Ttm::parse(&frame.fields).expect("parse TTM");
+    let x = Ttm::parse(&frame.fields);
     assert_eq!(x.target_num, Some(2));
     assert!((x.dist.expect("dist") - 1.43).abs() < 1e-2);
     assert!((x.bearing.expect("bearing") - 170.5).abs() < 1e-2);

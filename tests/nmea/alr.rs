@@ -6,7 +6,7 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn alr_values() {
     let frame = parse_frame("$RAALR,220516,001,A,A,Bilge pump alarm1*4C").expect("valid");
-    let alr = Alr::parse(&frame.fields).expect("parse");
+    let alr = Alr::parse(&frame.fields);
 
     assert_eq!(alr.time.as_deref(), Some("220516"));
     assert_eq!(alr.alarm_id.as_deref(), Some("001"));
@@ -18,10 +18,10 @@ fn alr_values() {
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$RAALR,220516,001,A,A,Bilge pump alarm1*4C").expect("valid");
-    let alr = Alr::parse(&frame.fields).expect("parse");
+    let alr = Alr::parse(&frame.fields);
     let sentence = alr.to_sentence("RA").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let alr2 = Alr::parse(&frame2.fields).expect("parse");
+    let alr2 = Alr::parse(&frame2.fields);
     assert_eq!(alr, alr2);
 }
 
@@ -42,6 +42,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("RA").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Alr::parse(&frame.fields).expect("parse");
+    let parsed = Alr::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

@@ -32,15 +32,9 @@ impl AisSentence {
     pub fn parse(frame: &NmeaFrame<'_>) -> Self {
         match (frame.prefix, frame.sentence_type) {
             #[cfg(feature = "abm")]
-            ('!', Abm::SENTENCE_TYPE) => match Abm::parse(&frame.fields) {
-                Some(v) => return Self::Abm(v),
-                None => return Self::from_frame(frame),
-            },
+            ('!', Abm::SENTENCE_TYPE) => return Self::Abm(Abm::parse(&frame.fields)),
             #[cfg(feature = "bbm")]
-            ('!', Bbm::SENTENCE_TYPE) => match Bbm::parse(&frame.fields) {
-                Some(v) => return Self::Bbm(v),
-                None => return Self::from_frame(frame),
-            },
+            ('!', Bbm::SENTENCE_TYPE) => return Self::Bbm(Bbm::parse(&frame.fields)),
             _ => {}
         }
 

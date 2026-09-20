@@ -13,10 +13,10 @@ fn decode_encode() {
     };
     let sentence = wcv.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("valid");
-    let wcv2 = Wcv::parse(&frame.fields).expect("parse");
+    let wcv2 = Wcv::parse(&frame.fields);
     let sentence2 = wcv2.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence2.trim()).expect("re-parse");
-    let wcv3 = Wcv::parse(&frame2.fields).expect("parse");
+    let wcv3 = Wcv::parse(&frame2.fields);
     assert_eq!(wcv2, wcv3);
 }
 
@@ -41,7 +41,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Wcv::parse(&frame.fields).expect("parse");
+    let parsed = Wcv::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -49,7 +49,7 @@ fn roundtrip() {
 fn wcv_values() {
     // (a) value half — authored fixture $IIWCV,5.3,N,DEST,A*63
     let frame = parse_frame("$IIWCV,5.3,N,DEST,A*63").expect("valid WCV frame");
-    let x = Wcv::parse(&frame.fields).expect("parse WCV");
+    let x = Wcv::parse(&frame.fields);
     assert!((x.vel.expect("vel") - 5.3).abs() < 1e-2);
     assert_eq!(x.wpt.as_deref(), Some("DEST"));
     assert_eq!(x.mode, Some('A'));

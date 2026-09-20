@@ -10,10 +10,10 @@ fn decode_encode() {
         "$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031*4F",
     )
     .expect("valid");
-    let gga = Gga::parse(&frame.fields).expect("parse");
+    let gga = Gga::parse(&frame.fields);
     let sentence = gga.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let gga2 = Gga::parse(&frame2.fields).expect("parse");
+    let gga2 = Gga::parse(&frame2.fields);
     assert_eq!(gga, gga2);
 }
 
@@ -32,7 +32,7 @@ fn gga_values() {
         "$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031*4F",
     )
     .expect("valid");
-    let gga = Gga::parse(&frame.fields).expect("parse");
+    let gga = Gga::parse(&frame.fields);
     assert_eq!(gga.time, Some("172814.0".to_string()));
     assert!((gga.lat.expect("lat") - 3723.46587704).abs() < 1e-9);
     assert_eq!(gga.ns, Some('N'));
@@ -77,6 +77,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Gga::parse(&frame.fields).expect("parse");
+    let parsed = Gga::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

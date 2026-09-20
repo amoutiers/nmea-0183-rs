@@ -6,7 +6,7 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn arc_values() {
     let frame = parse_frame("$RAARC,220516,TCK,002,1,A*73").expect("valid");
-    let arc = Arc::parse(&frame.fields).expect("parse");
+    let arc = Arc::parse(&frame.fields);
 
     assert_eq!(arc.time.as_deref(), Some("220516"));
     assert_eq!(arc.manufacturer.as_deref(), Some("TCK"));
@@ -18,10 +18,10 @@ fn arc_values() {
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$RAARC,220516,TCK,002,1,A*73").expect("valid");
-    let arc = Arc::parse(&frame.fields).expect("parse");
+    let arc = Arc::parse(&frame.fields);
     let sentence = arc.to_sentence("RA").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let arc2 = Arc::parse(&frame2.fields).expect("parse");
+    let arc2 = Arc::parse(&frame2.fields);
     assert_eq!(arc, arc2);
 }
 
@@ -42,6 +42,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("RA").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Arc::parse(&frame.fields).expect("parse");
+    let parsed = Arc::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

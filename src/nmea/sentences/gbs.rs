@@ -25,10 +25,10 @@ pub struct Gbs {
 
 impl Gbs {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             time: r.string(),
             err_lat: r.f32(),
             err_lon: r.f32(),
@@ -37,7 +37,7 @@ impl Gbs {
             prob: r.f32(),
             bias: r.f32(),
             stddev: r.f32(),
-        })
+        }
     }
 }
 
@@ -66,7 +66,7 @@ mod tests {
     #[test]
     fn gbs_empty() {
         let f = parse_frame("$GPGBS,,,,,,,,*41").expect("valid");
-        let g = Gbs::parse(&f.fields).expect("parse");
+        let g = Gbs::parse(&f.fields);
         assert!(g.time.is_none());
         assert!(g.err_lat.is_none());
         assert!(g.err_lon.is_none());
@@ -82,7 +82,7 @@ mod tests {
         // pynmeagps fixture with svid, bias, stddev populated
         let frame = parse_frame("$GPGBS,235458.00,1.4,1.3,3.1,03,,-21.4,3.8,1,0*5A")
             .expect("valid pynmeagps full GBS");
-        let gbs = Gbs::parse(&frame.fields).expect("parse GBS");
+        let gbs = Gbs::parse(&frame.fields);
         assert_eq!(gbs.time, Some("235458.00".to_string()));
         assert!((gbs.err_lat.expect("err_lat") - 1.4).abs() < 0.1);
         assert!((gbs.err_lon.expect("err_lon") - 1.3).abs() < 0.1);
@@ -97,7 +97,7 @@ mod tests {
     fn gbs_multi_constellation_pynmeagps() {
         let frame = parse_frame("$GNGBS,103607.00,15.1,24.2,31.0,,,,,,*6F")
             .expect("valid pynmeagps GNGBS frame");
-        let gbs = Gbs::parse(&frame.fields).expect("parse GBS");
+        let gbs = Gbs::parse(&frame.fields);
         assert_eq!(gbs.time, Some("103607.00".to_string()));
         assert!((gbs.err_lat.expect("err_lat") - 15.1).abs() < 0.1);
         assert!((gbs.err_lon.expect("err_lon") - 24.2).abs() < 0.1);
@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn gbs_partial_gpsd() {
         let frame = parse_frame("$GPGBS,194907.00,3.0,1.9,4.2,,,,*4E").expect("valid");
-        let gbs = Gbs::parse(&frame.fields).expect("parse GBS");
+        let gbs = Gbs::parse(&frame.fields);
         assert_eq!(gbs.time, Some("194907.00".to_string()));
         assert!((gbs.err_lat.expect("err_lat") - 3.0).abs() < 0.1);
         assert!((gbs.err_lon.expect("err_lon") - 1.9).abs() < 0.1);
@@ -118,7 +118,7 @@ mod tests {
     fn gbs_pynmeagps() {
         let frame =
             parse_frame("$GPGBS,235503.00,1.6,1.4,3.2,,,,,,*40").expect("valid pynmeagps GBS");
-        let gbs = Gbs::parse(&frame.fields).expect("parse GBS");
+        let gbs = Gbs::parse(&frame.fields);
         assert_eq!(gbs.time, Some("235503.00".to_string()));
         assert!((gbs.err_lat.expect("err_lat") - 1.6).abs() < 0.1);
         assert!((gbs.err_alt.expect("err_alt") - 3.2).abs() < 0.1);
@@ -138,7 +138,7 @@ mod tests {
         let sentence = gbs.to_sentence("GP").expect("encode");
         assert!(sentence.starts_with("$GPGBS,"));
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let gbs2 = Gbs::parse(&frame.fields).expect("re-parse GBS");
+        let gbs2 = Gbs::parse(&frame.fields);
         assert_eq!(gbs, gbs2);
     }
 }

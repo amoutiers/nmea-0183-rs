@@ -15,19 +15,19 @@ pub struct Dbs {
 
 impl Dbs {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let depth_feet = r.f32();
         r.skip();
         let depth_meters = r.f32();
         r.skip();
         let depth_fathoms = r.f32();
-        Some(Self {
+        Self {
             depth_feet,
             depth_meters,
             depth_fathoms,
-        })
+        }
     }
 }
 
@@ -54,7 +54,7 @@ mod tests {
     #[test]
     fn dbs_empty() {
         let f = parse_frame("$IIDBS,,,,,,*55").expect("empty DBS frame");
-        let d = Dbs::parse(&f.fields).expect("parse DBS");
+        let d = Dbs::parse(&f.fields);
         assert!(d.depth_feet.is_none());
         assert!(d.depth_meters.is_none());
         assert!(d.depth_fathoms.is_none());
@@ -71,7 +71,7 @@ mod tests {
         assert!(sentence.starts_with("$IIDBS,"));
 
         let frame = parse_frame(sentence.trim()).expect("re-parse DBS sentence");
-        let parsed = Dbs::parse(&frame.fields).expect("parse DBS from re-encoded frame");
+        let parsed = Dbs::parse(&frame.fields);
 
         assert_eq!(original, parsed);
     }
@@ -79,7 +79,7 @@ mod tests {
     #[test]
     fn dbs_signalk() {
         let f = parse_frame("$IIDBS,035.53,f,010.83,M,005.85,F*24").expect("valid DBS frame");
-        let d = Dbs::parse(&f.fields).expect("parse DBS");
+        let d = Dbs::parse(&f.fields);
         assert!((d.depth_meters.expect("depth_meters present") - 10.83).abs() < 0.01);
     }
 }

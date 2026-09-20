@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIDPT,4.1,0.0*45").expect("valid");
-    let dpt = Dpt::parse(&frame.fields).expect("parse");
+    let dpt = Dpt::parse(&frame.fields);
     let sentence = dpt.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let dpt2 = Dpt::parse(&frame2.fields).expect("parse");
+    let dpt2 = Dpt::parse(&frame2.fields);
     assert_eq!(dpt, dpt2);
 }
 
@@ -29,14 +29,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Dpt::parse(&frame.fields).expect("parse");
+    let parsed = Dpt::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn dpt_values() {
     let frame = parse_frame("$IIDPT,4.1,0.0*45").expect("valid");
-    let d = Dpt::parse(&frame.fields).expect("parse");
+    let d = Dpt::parse(&frame.fields);
     assert!((d.depth.expect("depth") - 4.1).abs() < 1e-4);
     assert!((d.offset.expect("offset") - 0.0).abs() < 1e-4);
     assert!(d.rangescale.is_none());

@@ -29,8 +29,8 @@ pub struct Dor {
 
 impl Dor {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let door_type = r.char();
         let time = r.string();
@@ -41,7 +41,7 @@ impl Dor {
         let door_status = r.char();
         let switch_setting = r.char();
         let message = r.string();
-        Some(Self {
+        Self {
             door_type,
             time,
             system,
@@ -51,7 +51,7 @@ impl Dor {
             door_status,
             switch_setting,
             message,
-        })
+        }
     }
 }
 
@@ -94,7 +94,7 @@ mod tests {
         .to_sentence("FR")
         .expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let d = Dor::parse(&f.fields).expect("parse");
+        let d = Dor::parse(&f.fields);
         assert!(d.door_type.is_none());
         assert!(d.time.is_none());
         assert!(d.message.is_none());
@@ -115,7 +115,7 @@ mod tests {
         };
         let sentence = original.to_sentence("FR").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Dor::parse(&frame.fields).expect("parse");
+        let parsed = Dor::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -124,7 +124,7 @@ mod tests {
         let f =
             parse_frame("$FRDOR,E,233042,FD,FP,000,010,C,C,Door Closed : TEST FPA Name*4D")
                 .expect("valid DOR");
-        let d = Dor::parse(&f.fields).expect("parse DOR");
+        let d = Dor::parse(&f.fields);
         assert_eq!(d.door_type, Some('E'));
         assert_eq!(d.time, Some("233042".to_string()));
         assert_eq!(d.system, Some("FD".to_string()));

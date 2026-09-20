@@ -19,8 +19,8 @@ pub struct Vtg {
 
 impl Vtg {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let course_true = r.f32();
         r.skip();
@@ -31,13 +31,13 @@ impl Vtg {
         let speed_kmh = r.f32();
         r.skip();
         let mode = r.char();
-        Some(Self {
+        Self {
             course_true,
             course_mag,
             speed_kts,
             speed_kmh,
             mode,
-        })
+        }
     }
 }
 
@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn vtg_empty() {
         let f = parse_frame("$IIVTG,,,,,,,,,*69").expect("valid");
-        let v = Vtg::parse(&f.fields).expect("parse");
+        let v = Vtg::parse(&f.fields);
         assert!(v.course_true.is_none());
         assert!(v.course_mag.is_none());
         assert!(v.speed_kts.is_none());
@@ -78,7 +78,7 @@ mod tests {
     #[test]
     fn vtg_full_signalk() {
         let f = parse_frame("$GPVTG,0.0,T,359.3,M,0.0,N,0.0,K,A*2F").expect("valid VTG frame");
-        let v = Vtg::parse(&f.fields).expect("parse VTG");
+        let v = Vtg::parse(&f.fields);
         assert!((v.course_mag.expect("course_mag present") - 359.3).abs() < 0.01);
         assert_eq!(v.mode, Some('A'));
     }
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn vtg_missing_course_signalk() {
         let f = parse_frame("$GPVTG,,T,,M,0.102,N,0.190,K,A*28").expect("valid VTG frame");
-        let v = Vtg::parse(&f.fields).expect("parse VTG");
+        let v = Vtg::parse(&f.fields);
         assert!(v.course_true.is_none());
         assert!((v.speed_kts.expect("speed_kts present") - 0.102).abs() < 0.001);
     }
@@ -102,7 +102,7 @@ mod tests {
         };
         let s = v.to_sentence("GP").expect("encode");
         let f = parse_frame(s.trim()).expect("re-parse VTG frame");
-        let v2 = Vtg::parse(&f.fields).expect("re-parse VTG");
+        let v2 = Vtg::parse(&f.fields);
         assert_eq!(v, v2);
     }
 }

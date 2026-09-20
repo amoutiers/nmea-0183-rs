@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$IIVWT,030.,R,10.1,N,05.2,M,018.7,K*75").expect("valid");
-    let vwt = Vwt::parse(&frame.fields).expect("parse");
+    let vwt = Vwt::parse(&frame.fields);
     let sentence = vwt.to_sentence("II").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let vwt2 = Vwt::parse(&frame2.fields).expect("parse");
+    let vwt2 = Vwt::parse(&frame2.fields);
     assert_eq!(vwt, vwt2);
 }
 
@@ -31,7 +31,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("II").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Vwt::parse(&frame.fields).expect("parse");
+    let parsed = Vwt::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -39,7 +39,7 @@ fn roundtrip() {
 fn vwt_values() {
     // (a) value half — fixture has 030., 05.2, 018.7 which parse to 30.0, 5.2, 18.7
     let frame = parse_frame("$IIVWT,030.,R,10.1,N,05.2,M,018.7,K*75").expect("valid VWT frame");
-    let x = Vwt::parse(&frame.fields).expect("parse VWT");
+    let x = Vwt::parse(&frame.fields);
     assert!((x.angle.expect("angle") - 30.0).abs() < 1e-2);
     assert_eq!(x.angle_lr, Some('R'));
     assert!((x.speed_knots.expect("speed_knots") - 10.1).abs() < 1e-2);

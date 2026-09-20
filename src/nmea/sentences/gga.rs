@@ -37,10 +37,10 @@ pub struct Gga {
 
 impl Gga {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             time: r.string(),
             lat: r.f64(),
             ns: r.char(),
@@ -55,7 +55,7 @@ impl Gga {
             geoid_unit: r.char(),
             dgps_age: r.f32(),
             dgps_station: r.string(),
-        })
+        }
     }
 }
 
@@ -91,7 +91,7 @@ mod tests {
     fn gga_empty() {
         // SignalK fixture: all fields empty
         let frame = parse_frame("$GPGGA,,,,,,,,,,,,,,*56").expect("valid empty GGA frame");
-        let gga = Gga::parse(&frame.fields).expect("parse empty GGA");
+        let gga = Gga::parse(&frame.fields);
         assert!(gga.time.is_none());
         assert!(gga.lat.is_none());
         assert!(gga.quality.is_none());
@@ -102,7 +102,7 @@ mod tests {
     fn gga_full_signalk() {
         let frame = parse_frame("$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031*4F")
             .expect("valid GGA frame");
-        let gga = Gga::parse(&frame.fields).expect("parse GGA");
+        let gga = Gga::parse(&frame.fields);
         assert_eq!(gga.time, Some("172814.0".to_string()));
         assert!((gga.lat.expect("lat") - 3723.46587704).abs() < 0.0001);
         assert_eq!(gga.ns, Some('N'));
@@ -118,7 +118,7 @@ mod tests {
         let frame =
             parse_frame("$GNGGA,103607.00,5327.03942,N,00214.42462,W,1,06,5.88,56.0,M,48.5,M,,*64")
                 .expect("valid GN GGA frame");
-        let gga = Gga::parse(&frame.fields).expect("parse GN GGA");
+        let gga = Gga::parse(&frame.fields);
         assert_eq!(gga.time, Some("103607.00".to_string()));
         assert_eq!(gga.quality, Some(1));
         assert_eq!(gga.num_sats, Some(6));
@@ -147,7 +147,7 @@ mod tests {
         };
         let sentence = gga.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse GGA");
-        let gga2 = Gga::parse(&frame.fields).expect("parse roundtrip GGA");
+        let gga2 = Gga::parse(&frame.fields);
         assert_eq!(gga, gga2);
     }
 }

@@ -37,8 +37,8 @@ pub struct Alf {
 
 impl Alf {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let num_frags = r.u8();
         let frag_num = r.u8();
@@ -53,7 +53,7 @@ impl Alf {
         let revision = r.u8();
         let escalation = r.u8();
         let text = r.string();
-        Some(Self {
+        Self {
             num_frags,
             frag_num,
             msg_id,
@@ -67,7 +67,7 @@ impl Alf {
             revision,
             escalation,
             text,
-        })
+        }
     }
 }
 
@@ -118,7 +118,7 @@ mod tests {
         .to_sentence("VD")
         .expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let a = Alf::parse(&f.fields).expect("parse");
+        let a = Alf::parse(&f.fields);
         assert!(a.num_frags.is_none());
         assert!(a.text.is_none());
     }
@@ -142,7 +142,7 @@ mod tests {
         };
         let sentence = original.to_sentence("VD").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Alf::parse(&frame.fields).expect("parse");
+        let parsed = Alf::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -150,7 +150,7 @@ mod tests {
     fn alf_vdalf_gonmea() {
         let f = parse_frame("$VDALF,1,0,1,220516,B,A,S,SAL,001,1,2,0,My alarm*2C")
             .expect("valid ALF");
-        let a = Alf::parse(&f.fields).expect("parse ALF");
+        let a = Alf::parse(&f.fields);
         assert_eq!(a.num_frags, Some(1));
         assert_eq!(a.frag_num, Some(0));
         assert_eq!(a.msg_id, Some(1));

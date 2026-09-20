@@ -18,8 +18,8 @@ pub struct Pgrme {
 
 impl Pgrme {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let horizontal = r.f32();
         r.skip(); // M
@@ -27,11 +27,11 @@ impl Pgrme {
         r.skip(); // M
         let spherical = r.f32();
         r.skip(); // M
-        Some(Self {
+        Self {
             horizontal,
             vertical,
             spherical,
-        })
+        }
     }
 }
 
@@ -65,7 +65,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pgrme::parse(&f.fields).expect("parse");
+        let p = Pgrme::parse(&f.fields);
         assert!(p.horizontal.is_none());
         assert!(p.vertical.is_none());
         assert!(p.spherical.is_none());
@@ -80,14 +80,14 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pgrme::parse(&frame.fields).expect("parse");
+        let parsed = Pgrme::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn pgrme_pgrme_gonmea() {
         let frame = parse_frame("$PGRME,3.3,M,4.9,M,6.0,M*25").expect("valid");
-        let p = Pgrme::parse(&frame.fields).expect("parse");
+        let p = Pgrme::parse(&frame.fields);
         assert!((p.horizontal.expect("horizontal") - 3.3).abs() < 0.01);
         assert!((p.vertical.expect("vertical") - 4.9).abs() < 0.01);
         assert!((p.spherical.expect("spherical") - 6.0).abs() < 0.01);

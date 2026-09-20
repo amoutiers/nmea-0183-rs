@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPGLL,5958.613,N,02325.928,E,121022,A,D*40").expect("valid");
-    let gll = Gll::parse(&frame.fields).expect("parse");
+    let gll = Gll::parse(&frame.fields);
     let sentence = gll.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let gll2 = Gll::parse(&frame2.fields).expect("parse");
+    let gll2 = Gll::parse(&frame2.fields);
     assert_eq!(gll, gll2);
 }
 
@@ -23,7 +23,7 @@ fn dispatch() {
 #[test]
 fn gll_values() {
     let frame = parse_frame("$GPGLL,5958.613,N,02325.928,E,121022,A,D*40").expect("valid");
-    let gll = Gll::parse(&frame.fields).expect("parse");
+    let gll = Gll::parse(&frame.fields);
     assert!((gll.lat.expect("lat") - 5958.613).abs() < 1e-9);
     assert_eq!(gll.ns, Some('N'));
     assert!((gll.lon.expect("lon") - 2325.928).abs() < 1e-9);
@@ -51,6 +51,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Gll::parse(&frame.fields).expect("parse");
+    let parsed = Gll::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

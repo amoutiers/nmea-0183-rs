@@ -29,8 +29,8 @@ pub struct Bwr {
 
 impl Bwr {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let lat = r.f64();
@@ -45,7 +45,7 @@ impl Bwr {
         r.skip(); // N
         let wpt = r.string();
         let mode = r.char();
-        Some(Self {
+        Self {
             time,
             lat,
             ns,
@@ -56,7 +56,7 @@ impl Bwr {
             dist,
             wpt,
             mode,
-        })
+        }
     }
 }
 
@@ -103,7 +103,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let b = Bwr::parse(&frame.fields).expect("parse");
+        let b = Bwr::parse(&frame.fields);
         assert!(b.time.is_none());
         assert!(b.lat.is_none());
         assert!(b.wpt.is_none());
@@ -125,7 +125,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Bwr::parse(&frame.fields).expect("re-parse BWR");
+        let parsed = Bwr::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -133,7 +133,7 @@ mod tests {
     fn bwr_minimal_gonmea() {
         let frame =
             parse_frame("$GPBWR,081837,,,,,,T,,M,,N,*02").expect("valid go-nmea BWR frame");
-        let bwr = Bwr::parse(&frame.fields).expect("parse BWR");
+        let bwr = Bwr::parse(&frame.fields);
         assert_eq!(bwr.time, Some("081837".to_string()));
         assert!(bwr.lat.is_none());
         assert!(bwr.ns.is_none());
@@ -151,7 +151,7 @@ mod tests {
         let frame =
             parse_frame("$GPBWR,225444,4917.24,N,12309.57,W,051.9,T,031.6,M,001.3,N,004*38")
                 .expect("valid BWR frame");
-        let bwr = Bwr::parse(&frame.fields).expect("parse BWR");
+        let bwr = Bwr::parse(&frame.fields);
         assert_eq!(bwr.time, Some("225444".to_string()));
         assert!((bwr.lat.expect("lat") - 4917.24).abs() < 0.01);
         assert_eq!(bwr.ns, Some('N'));

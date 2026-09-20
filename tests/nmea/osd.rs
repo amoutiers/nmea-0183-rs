@@ -6,10 +6,10 @@ use nmea_0183_rs::parse_frame;
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$RAOSD,179.0,A,179.0,M,00.0,M,,,N*76").expect("valid");
-    let osd = Osd::parse(&frame.fields).expect("parse");
+    let osd = Osd::parse(&frame.fields);
     let sentence = osd.to_sentence("RA").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let osd2 = Osd::parse(&frame2.fields).expect("parse");
+    let osd2 = Osd::parse(&frame2.fields);
     assert_eq!(osd, osd2);
 }
 
@@ -17,7 +17,7 @@ fn decode_encode() {
 fn osd_values() {
     // Fixture: Radar own-ship data (heading 179° magnetic, stopped, no set/drift).
     let frame = parse_frame("$RAOSD,179.0,A,179.0,M,00.0,M,,,N*76").expect("valid");
-    let osd = Osd::parse(&frame.fields).expect("parse");
+    let osd = Osd::parse(&frame.fields);
     assert!((osd.heading.expect("heading") - 179.0).abs() < 1e-4);
     assert_eq!(osd.heading_status, Some('A'));
     assert!((osd.vessel_course.expect("course") - 179.0).abs() < 1e-4);
@@ -44,6 +44,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("RA").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Osd::parse(&frame.fields).expect("parse");
+    let parsed = Osd::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

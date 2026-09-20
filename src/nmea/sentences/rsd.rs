@@ -35,8 +35,8 @@ pub struct Rsd {
 
 impl Rsd {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let origin1_range = r.f32();
         let origin1_bearing = r.f32();
@@ -51,7 +51,7 @@ impl Rsd {
         let range_scale = r.f32();
         let range_unit = r.char();
         let display_rotation = r.char();
-        Some(Self {
+        Self {
             origin1_range,
             origin1_bearing,
             vrm1,
@@ -65,7 +65,7 @@ impl Rsd {
             range_scale,
             range_unit,
             display_rotation,
-        })
+        }
     }
 }
 
@@ -115,7 +115,7 @@ mod tests {
         }
         .to_sentence("RA").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let r = Rsd::parse(&f.fields).expect("parse");
+        let r = Rsd::parse(&f.fields);
         assert!(r.origin1_range.is_none());
         assert!(r.display_rotation.is_none());
     }
@@ -139,14 +139,14 @@ mod tests {
         };
         let sentence = original.to_sentence("RA").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Rsd::parse(&frame.fields).expect("parse");
+        let parsed = Rsd::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn rsd_cursor_only_gonmea() {
         let f = parse_frame("$RARSD,,,,,,,,,0.808,326.9,0.750,N,N*58").expect("valid RSD");
-        let r = Rsd::parse(&f.fields).expect("parse RSD");
+        let r = Rsd::parse(&f.fields);
         assert!(r.origin1_range.is_none());
         assert!(r.vrm1.is_none());
         assert!(r.origin2_range.is_none());
@@ -162,7 +162,7 @@ mod tests {
     fn rsd_rarsd_gonmea() {
         let f = parse_frame("$RARSD,0.00,,2.50,005.0,0.00,,4.50,355.0,,,3.0,N,H*51")
             .expect("valid RSD");
-        let r = Rsd::parse(&f.fields).expect("parse RSD");
+        let r = Rsd::parse(&f.fields);
         assert!((r.origin1_range.expect("o1r") - 0.0).abs() < 0.01);
         assert!(r.origin1_bearing.is_none());
         assert!((r.vrm1.expect("vrm1") - 2.5).abs() < 0.01);

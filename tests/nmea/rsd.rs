@@ -8,10 +8,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 fn decode_encode() {
     let frame =
         parse_frame("$RARSD,0.00,,2.50,005.0,0.00,,4.50,355.0,,,3.0,N,H*51").expect("valid");
-    let rsd = Rsd::parse(&frame.fields).expect("parse");
+    let rsd = Rsd::parse(&frame.fields);
     let sentence = rsd.to_sentence("RA").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let rsd2 = Rsd::parse(&frame2.fields).expect("parse");
+    let rsd2 = Rsd::parse(&frame2.fields);
     assert_eq!(rsd, rsd2);
 }
 
@@ -41,7 +41,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("RA").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Rsd::parse(&frame.fields).expect("parse");
+    let parsed = Rsd::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -49,7 +49,7 @@ fn roundtrip() {
 fn rsd_values() {
     let frame = parse_frame("$RARSD,0.00,,2.50,005.0,0.00,,4.50,355.0,,,3.0,N,H*51")
         .expect("valid RSD frame");
-    let x = Rsd::parse(&frame.fields).expect("parse RSD");
+    let x = Rsd::parse(&frame.fields);
     assert!((x.origin1_range.expect("origin1_range") - 0.0).abs() < 1e-2);
     assert!(x.origin1_bearing.is_none());
     assert!((x.vrm1.expect("vrm1") - 2.5).abs() < 1e-2);

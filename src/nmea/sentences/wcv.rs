@@ -15,14 +15,14 @@ pub struct Wcv {
 
 impl Wcv {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let vel = r.f32();
         r.skip(); // N
         let wpt = r.string();
         let mode = r.char();
-        Some(Self { vel, wpt, mode })
+        Self { vel, wpt, mode }
     }
 }
 
@@ -53,7 +53,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let w = Wcv::parse(&frame.fields).expect("parse");
+        let w = Wcv::parse(&frame.fields);
         assert!(w.vel.is_none());
         assert!(w.wpt.is_none());
         assert!(w.mode.is_none());
@@ -68,7 +68,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Wcv::parse(&frame.fields).expect("re-parse WCV");
+        let parsed = Wcv::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -81,7 +81,7 @@ mod tests {
         };
         let sentence = wcv.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let wcv2 = Wcv::parse(&frame.fields).expect("re-parse WCV");
+        let wcv2 = Wcv::parse(&frame.fields);
         assert!((wcv2.vel.expect("vel") - 5.3).abs() < 0.01);
         assert_eq!(wcv2.wpt, Some("WAYPOINT".to_string()));
         assert!(wcv2.mode.is_none());

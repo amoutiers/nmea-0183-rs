@@ -11,13 +11,13 @@ pub struct Mtw {
 
 impl Mtw {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             temperature: r.f32(),
             units: r.char(),
-        })
+        }
     }
 }
 
@@ -40,7 +40,7 @@ mod tests {
     #[test]
     fn mtw_15_signalk() {
         let f = parse_frame("$YXMTW,15.2,C*14").expect("valid MTW frame");
-        let m = Mtw::parse(&f.fields).expect("parse MTW");
+        let m = Mtw::parse(&f.fields);
         assert!((m.temperature.expect("temperature present") - 15.2).abs() < 0.01);
         assert_eq!(m.units, Some('C'));
     }
@@ -48,7 +48,7 @@ mod tests {
     #[test]
     fn mtw_17_gpsd() {
         let f = parse_frame("$INMTW,17.9,C*1B").expect("valid MTW frame");
-        let m = Mtw::parse(&f.fields).expect("parse MTW");
+        let m = Mtw::parse(&f.fields);
         assert!((m.temperature.expect("temperature present") - 17.9).abs() < 0.01);
         assert_eq!(m.units, Some('C'));
     }
@@ -56,7 +56,7 @@ mod tests {
     #[test]
     fn mtw_empty() {
         let f = parse_frame("$IIMTW,,*4E").expect("valid MTW frame");
-        let m = Mtw::parse(&f.fields).expect("parse MTW");
+        let m = Mtw::parse(&f.fields);
         assert!(m.temperature.is_none());
         assert!(m.units.is_none());
     }
@@ -69,7 +69,7 @@ mod tests {
         };
         let sentence = original.to_sentence("YX").expect("encode");
         let f = parse_frame(sentence.trim()).expect("re-parse MTW frame");
-        let parsed = Mtw::parse(&f.fields).expect("parse MTW from re-encoded frame");
+        let parsed = Mtw::parse(&f.fields);
         assert_eq!(original, parsed);
     }
 }

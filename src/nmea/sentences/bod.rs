@@ -21,17 +21,17 @@ pub struct Bod {
 
 impl Bod {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             bear_true: r.f32(),
             bear_true_type: r.char(),
             bear_mag: r.f32(),
             bear_mag_type: r.char(),
             wpt_dest: r.string(),
             wpt_origin: r.string(),
-        })
+        }
     }
 }
 
@@ -59,7 +59,7 @@ mod tests {
     fn bod_destination_only_gonmea() {
         let frame =
             parse_frame("$GPBOD,099.3,T,105.6,M,POINTB*64").expect("valid go-nmea BOD frame");
-        let bod = Bod::parse(&frame.fields).expect("parse BOD");
+        let bod = Bod::parse(&frame.fields);
         assert!((bod.bear_true.expect("bear_true") - 99.3).abs() < 0.1);
         assert_eq!(bod.bear_true_type, Some('T'));
         assert!((bod.bear_mag.expect("bear_mag") - 105.6).abs() < 0.1);
@@ -80,7 +80,7 @@ mod tests {
         }
         .to_sentence("GP").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let b = Bod::parse(&frame.fields).expect("parse");
+        let b = Bod::parse(&frame.fields);
         assert!(b.bear_true.is_none());
         assert!(b.wpt_dest.is_none());
         assert!(b.wpt_origin.is_none());
@@ -98,7 +98,7 @@ mod tests {
         };
         let sentence = original.to_sentence("GP").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Bod::parse(&frame.fields).expect("re-parse BOD");
+        let parsed = Bod::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -106,7 +106,7 @@ mod tests {
     fn bod_pynmeagps() {
         let frame =
             parse_frame("$GPBOD,097.0,T,103.2,M,POINTB,POINTA*4A").expect("valid pynmeagps BOD frame");
-        let bod = Bod::parse(&frame.fields).expect("parse BOD");
+        let bod = Bod::parse(&frame.fields);
         assert!((bod.bear_true.expect("bear_true") - 97.0).abs() < 0.1);
         assert_eq!(bod.bear_true_type, Some('T'));
         assert!((bod.bear_mag.expect("bear_mag") - 103.2).abs() < 0.1);

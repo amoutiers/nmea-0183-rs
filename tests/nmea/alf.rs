@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$VDALF,1,0,1,220516,B,A,S,SAL,001,1,2,0,My alarm*2C").expect("valid");
-    let alf = Alf::parse(&frame.fields).expect("parse");
+    let alf = Alf::parse(&frame.fields);
     let sentence = alf.to_sentence("VD").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let alf2 = Alf::parse(&frame2.fields).expect("parse");
+    let alf2 = Alf::parse(&frame2.fields);
     assert_eq!(alf, alf2);
 }
 
@@ -23,7 +23,7 @@ fn dispatch() {
 #[test]
 fn alf_values() {
     let frame = parse_frame("$VDALF,1,0,1,220516,B,A,S,SAL,001,1,2,0,My alarm*2C").expect("valid");
-    let alf = Alf::parse(&frame.fields).expect("parse");
+    let alf = Alf::parse(&frame.fields);
     assert_eq!(alf.num_frags, Some(1));
     assert_eq!(alf.frag_num, Some(0));
     assert_eq!(alf.msg_id, Some(1));
@@ -58,6 +58,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("VD").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Alf::parse(&frame.fields).expect("parse");
+    let parsed = Alf::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

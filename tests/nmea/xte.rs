@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPXTE,A,A,0.67,L,N*6F").expect("valid");
-    let xte = Xte::parse(&frame.fields).expect("parse");
+    let xte = Xte::parse(&frame.fields);
     let sentence = xte.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let xte2 = Xte::parse(&frame2.fields).expect("parse");
+    let xte2 = Xte::parse(&frame2.fields);
     assert_eq!(xte, xte2);
 }
 
@@ -32,14 +32,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Xte::parse(&frame.fields).expect("parse");
+    let parsed = Xte::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn xte_values() {
     let frame = parse_frame("$GPXTE,A,A,0.67,L,N*6F").expect("valid");
-    let xte = Xte::parse(&frame.fields).expect("parse");
+    let xte = Xte::parse(&frame.fields);
     assert_eq!(xte.gwarn, Some('A'));
     assert_eq!(xte.lccwarn, Some('A'));
     assert!((xte.ctrkerr.expect("ctrkerr") - 0.67).abs() < 1e-2);

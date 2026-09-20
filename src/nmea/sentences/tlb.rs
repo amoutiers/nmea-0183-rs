@@ -20,8 +20,8 @@ pub struct Tlb {
 
 impl Tlb {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let targets = fields
             .chunks(2)
             .map(|group| {
@@ -32,7 +32,7 @@ impl Tlb {
                 }
             })
             .collect();
-        Some(Self { targets })
+        Self { targets }
     }
 }
 
@@ -58,7 +58,7 @@ mod tests {
     fn tlb_empty() {
         let s = Tlb { targets: vec![] }.to_sentence("RA").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let t = Tlb::parse(&f.fields).expect("parse");
+        let t = Tlb::parse(&f.fields);
         assert!(t.targets.is_empty());
     }
 
@@ -78,14 +78,14 @@ mod tests {
         };
         let sentence = original.to_sentence("RA").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Tlb::parse(&frame.fields).expect("parse");
+        let parsed = Tlb::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn tlb_ratlb_gonmea() {
         let f = parse_frame("$RATLB,1,XXX*20").expect("valid TLB");
-        let t = Tlb::parse(&f.fields).expect("parse TLB");
+        let t = Tlb::parse(&f.fields);
         assert_eq!(t.targets.len(), 1);
         assert_eq!(t.targets[0].number, Some(1));
         assert_eq!(t.targets[0].label, Some("XXX".to_string()));

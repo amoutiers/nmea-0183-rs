@@ -15,10 +15,10 @@ fn decode_encode() {
     };
     let sentence = original.to_sentence("**").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("valid");
-    let ttd = Ttd::parse(&frame.fields).expect("parse");
+    let ttd = Ttd::parse(&frame.fields);
     let sentence2 = ttd.to_sentence("**").expect("encode");
     let frame2 = parse_frame(sentence2.trim()).expect("re-parse");
-    let ttd2 = Ttd::parse(&frame2.fields).expect("parse");
+    let ttd2 = Ttd::parse(&frame2.fields);
     assert_eq!(ttd, ttd2);
 }
 
@@ -47,7 +47,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("**").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Ttd::parse(&frame.fields).expect("parse");
+    let parsed = Ttd::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -62,6 +62,6 @@ fn ttd_values() {
     };
     let sentence = original.to_sentence("**").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("valid");
-    let t = Ttd::parse(&frame.fields).expect("parse");
+    let t = Ttd::parse(&frame.fields);
     assert_eq!(t, original);
 }

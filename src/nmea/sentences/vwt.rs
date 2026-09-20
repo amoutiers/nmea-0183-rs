@@ -19,8 +19,8 @@ pub struct Vwt {
 
 impl Vwt {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let angle = r.f32();
         let angle_lr = r.char();
@@ -30,13 +30,13 @@ impl Vwt {
         r.skip(); // M
         let speed_kmh = r.f32();
         r.skip(); // K
-        Some(Self {
+        Self {
             angle,
             angle_lr,
             speed_knots,
             speed_ms,
             speed_kmh,
-        })
+        }
     }
 }
 
@@ -73,7 +73,7 @@ mod tests {
         }
         .to_sentence("II").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let v = Vwt::parse(&frame.fields).expect("parse");
+        let v = Vwt::parse(&frame.fields);
         assert!(v.angle.is_none());
         assert!(v.angle_lr.is_none());
         assert!(v.speed_knots.is_none());
@@ -90,14 +90,14 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Vwt::parse(&frame.fields).expect("re-parse VWT");
+        let parsed = Vwt::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn vwt_full_signalk() {
         let frame = parse_frame("$IIVWT,030.,R,10.1,N,05.2,M,018.7,K*75").expect("valid VWT frame");
-        let vwt = Vwt::parse(&frame.fields).expect("parse VWT");
+        let vwt = Vwt::parse(&frame.fields);
         assert!((vwt.angle.expect("angle") - 30.0).abs() < 0.1);
         assert_eq!(vwt.angle_lr, Some('R'));
         assert!((vwt.speed_knots.expect("kts") - 10.1).abs() < 0.1);

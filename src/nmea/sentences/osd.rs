@@ -27,8 +27,8 @@ pub struct Osd {
 
 impl Osd {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let heading = r.f32();
         let heading_status = r.char();
@@ -39,7 +39,7 @@ impl Osd {
         let vessel_set = r.f32();
         let vessel_drift = r.f32();
         let speed_units = r.char();
-        Some(Self {
+        Self {
             heading,
             heading_status,
             vessel_course,
@@ -49,7 +49,7 @@ impl Osd {
             vessel_set,
             vessel_drift,
             speed_units,
-        })
+        }
     }
 }
 
@@ -91,7 +91,7 @@ mod tests {
         }
         .to_sentence("RA").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let o = Osd::parse(&f.fields).expect("parse");
+        let o = Osd::parse(&f.fields);
         assert!(o.heading.is_none());
         assert!(o.speed_units.is_none());
     }
@@ -111,14 +111,14 @@ mod tests {
         };
         let sentence = original.to_sentence("RA").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Osd::parse(&frame.fields).expect("parse");
+        let parsed = Osd::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn osd_raosd_gonmea() {
         let frame = parse_frame("$RAOSD,179.0,A,179.0,M,00.0,M,,,N*76").expect("valid");
-        let o = Osd::parse(&frame.fields).expect("parse");
+        let o = Osd::parse(&frame.fields);
         assert!((o.heading.expect("heading") - 179.0).abs() < 0.1);
         assert_eq!(o.heading_status, Some('A'));
         assert_eq!(o.course_ref, Some('M'));

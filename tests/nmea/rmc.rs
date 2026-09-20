@@ -14,10 +14,10 @@ fn decode_encode() {
     let frame =
         parse_frame("$GPRMC,085412.000,A,5222.3198,N,00454.5784,E,0.58,251.34,030414,,,A*65")
             .expect("valid");
-    let rmc = Rmc::parse(&frame.fields).expect("parse");
+    let rmc = Rmc::parse(&frame.fields);
     let sentence = rmc.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let rmc2 = Rmc::parse(&frame2.fields).expect("parse");
+    let rmc2 = Rmc::parse(&frame2.fields);
     assert_eq!(rmc, rmc2);
 }
 
@@ -34,7 +34,7 @@ fn rmc_values() {
     let frame =
         parse_frame("$GPRMC,085412.000,A,5222.3198,N,00454.5784,E,0.58,251.34,030414,,,A*65")
             .expect("valid");
-    let rmc = Rmc::parse(&frame.fields).expect("parse");
+    let rmc = Rmc::parse(&frame.fields);
     assert_eq!(rmc.time, Some("085412.000".to_string()));
     assert_eq!(rmc.status, Some('A'));
     assert!((rmc.lat.expect("lat") - 5222.3198).abs() < 1e-9);
@@ -77,7 +77,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Rmc::parse(&frame.fields).expect("parse");
+    let parsed = Rmc::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -85,25 +85,25 @@ fn roundtrip() {
 fn rmc_rejects_multi_character_status() {
     let malformed = sentence("$GPRMC,120000.00,ACTIVE");
     let frame = parse_frame(&malformed).expect("valid frame");
-    let parsed = Rmc::parse(&frame.fields).expect("typed parse");
+    let parsed = Rmc::parse(&frame.fields);
     assert_eq!(parsed.status, None);
 
     let valid = sentence("$GPRMC,120000.00,A");
     let frame = parse_frame(&valid).expect("valid frame");
-    let parsed = Rmc::parse(&frame.fields).expect("typed parse");
+    let parsed = Rmc::parse(&frame.fields);
     assert_eq!(parsed.status, Some('A'));
 }
 
 #[test]
 fn rmc_rejects_invalid_ddmm_coordinates_on_encode() {
-    let mut invalid_lat = Rmc::parse(&[]).expect("empty RMC");
+    let mut invalid_lat = Rmc::parse(&[]);
     invalid_lat.lat = Some(1260.0);
     assert_eq!(
         invalid_lat.to_sentence("GP"),
         Err(EncodeError::InvalidCoordinate)
     );
 
-    let mut invalid_lon = Rmc::parse(&[]).expect("empty RMC");
+    let mut invalid_lon = Rmc::parse(&[]);
     invalid_lon.lon = Some(18100.0);
     assert_eq!(
         invalid_lon.to_sentence("GP"),

@@ -10,10 +10,10 @@ fn decode_encode() {
         "$FRFIR,E,103000,FD,PT,000,007,A,V,Fire Alarm : TEST PT7 Name TEST DZ2 Name*7A",
     )
     .expect("valid");
-    let fir = Fir::parse(&frame.fields).expect("parse");
+    let fir = Fir::parse(&frame.fields);
     let sentence = fir.to_sentence("FR").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let fir2 = Fir::parse(&frame2.fields).expect("parse");
+    let fir2 = Fir::parse(&frame2.fields);
     assert_eq!(fir, fir2);
 }
 
@@ -41,7 +41,7 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("FR").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Fir::parse(&frame.fields).expect("parse");
+    let parsed = Fir::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
@@ -51,7 +51,7 @@ fn fir_values() {
         "$FRFIR,E,103000,FD,PT,000,007,A,V,Fire Alarm : TEST PT7 Name TEST DZ2 Name*7A",
     )
     .expect("valid");
-    let fir = Fir::parse(&frame.fields).expect("parse");
+    let fir = Fir::parse(&frame.fields);
     assert_eq!(fir.fire_type, Some('E'));
     assert_eq!(fir.time.as_deref(), Some("103000"));
     assert_eq!(fir.system.as_deref(), Some("FD"));

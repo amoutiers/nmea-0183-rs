@@ -8,10 +8,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 fn decode_encode() {
     let frame = parse_frame("$FRDOR,E,233042,FD,FP,000,010,C,C,Door Closed : TEST FPA Name*4D")
         .expect("valid");
-    let dor = Dor::parse(&frame.fields).expect("parse");
+    let dor = Dor::parse(&frame.fields);
     let sentence = dor.to_sentence("FR").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let dor2 = Dor::parse(&frame2.fields).expect("parse");
+    let dor2 = Dor::parse(&frame2.fields);
     assert_eq!(dor, dor2);
 }
 
@@ -26,7 +26,7 @@ fn dispatch() {
 fn dor_values() {
     let frame = parse_frame("$FRDOR,E,233042,FD,FP,000,010,C,C,Door Closed : TEST FPA Name*4D")
         .expect("valid");
-    let dor = Dor::parse(&frame.fields).expect("parse");
+    let dor = Dor::parse(&frame.fields);
     assert_eq!(dor.door_type, Some('E'));
     assert_eq!(dor.time.as_deref(), Some("233042"));
     assert_eq!(dor.system.as_deref(), Some("FD"));
@@ -53,6 +53,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("FR").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Dor::parse(&frame.fields).expect("parse");
+    let parsed = Dor::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

@@ -32,8 +32,8 @@ pub struct Pashr {
 
 impl Pashr {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let heading = r.f32();
@@ -46,7 +46,7 @@ impl Pashr {
         let heading_accuracy = r.f32();
         let gnss_quality = r.u8();
         let imu_alignment = r.u8();
-        Some(Self {
+        Self {
             time,
             heading,
             roll,
@@ -57,7 +57,7 @@ impl Pashr {
             heading_accuracy,
             gnss_quality,
             imu_alignment,
-        })
+        }
     }
 }
 
@@ -103,7 +103,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pashr::parse(&f.fields).expect("parse");
+        let p = Pashr::parse(&f.fields);
         assert!(p.time.is_none());
         assert!(p.heading.is_none());
     }
@@ -124,7 +124,7 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pashr::parse(&frame.fields).expect("parse");
+        let parsed = Pashr::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -133,7 +133,7 @@ mod tests {
         let frame =
             parse_frame("$PASHR,085335.000,224.19,T,-01.26,+00.83,+00.10,0.101,0.113,0.267,1,0*07")
                 .expect("valid");
-        let p = Pashr::parse(&frame.fields).expect("parse");
+        let p = Pashr::parse(&frame.fields);
         assert_eq!(p.time.as_deref(), Some("085335.000"));
         assert!((p.heading.expect("heading") - 224.19).abs() < 0.01);
         assert_eq!(p.gnss_quality, Some(1));

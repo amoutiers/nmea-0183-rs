@@ -15,17 +15,17 @@ pub struct Eve {
 
 impl Eve {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let time = r.string();
         let tag_code = r.string();
         let message = r.string();
-        Some(Self {
+        Self {
             time,
             tag_code,
             message,
-        })
+        }
     }
 }
 
@@ -55,7 +55,7 @@ mod tests {
         }
         .to_sentence("FR").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let e = Eve::parse(&f.fields).expect("parse");
+        let e = Eve::parse(&f.fields);
         assert!(e.time.is_none());
         assert!(e.message.is_none());
     }
@@ -69,7 +69,7 @@ mod tests {
         };
         let sentence = original.to_sentence("FR").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Eve::parse(&frame.fields).expect("parse");
+        let parsed = Eve::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -77,7 +77,7 @@ mod tests {
     fn eve_freve_gonmea() {
         let frame =
             parse_frame("$FREVE,000001,DZ00513,Fire Alarm On: TEST DZ201 Name*0A").expect("valid");
-        let e = Eve::parse(&frame.fields).expect("parse");
+        let e = Eve::parse(&frame.fields);
         assert_eq!(e.time.as_deref(), Some("000001"));
         assert_eq!(e.tag_code.as_deref(), Some("DZ00513"));
         assert_eq!(

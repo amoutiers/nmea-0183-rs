@@ -49,10 +49,10 @@ pub struct Mda {
 
 impl Mda {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             baro_inches: r.f32(),
             baro_inches_unit: r.char(),
             baro_bars: r.f32(),
@@ -73,7 +73,7 @@ impl Mda {
             wind_speed_knots_unit: r.char(),
             wind_speed_ms: r.f32(),
             wind_speed_ms_unit: r.char(),
-        })
+        }
     }
 }
 
@@ -137,7 +137,7 @@ mod tests {
         }
         .to_sentence("WI").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let m = Mda::parse(&frame.fields).expect("parse");
+        let m = Mda::parse(&frame.fields);
         assert!(m.baro_inches.is_none());
         assert!(m.air_temp.is_none());
         assert!(m.wind_speed_knots.is_none());
@@ -169,7 +169,7 @@ mod tests {
         };
         let sentence = original.to_sentence("WI").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Mda::parse(&frame.fields).expect("re-parse MDA");
+        let parsed = Mda::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
@@ -178,7 +178,7 @@ mod tests {
         let frame =
             parse_frame("$WIMDA,3.02,I,1.01,B,23.4,C,,,40.2,,12.1,C,19.3,T,20.1,M,13.1,N,1.1,M*62")
                 .expect("valid go-nmea MDA frame");
-        let mda = Mda::parse(&frame.fields).expect("parse MDA");
+        let mda = Mda::parse(&frame.fields);
         assert!((mda.baro_inches.expect("baro_in") - 3.02).abs() < 0.01);
         assert_eq!(mda.baro_inches_unit, Some('I'));
         assert!((mda.baro_bars.expect("baro_b") - 1.01).abs() < 0.01);
@@ -203,7 +203,7 @@ mod tests {
             "$WIMDA,,I,+0.985,B,+03.1,C,+5.6,C,40.0,3.0,+3.4,C,90.0,T,85.0,M,10.0,N,,M*1A",
         )
         .expect("valid signalk MDA frame");
-        let mda = Mda::parse(&frame.fields).expect("parse MDA");
+        let mda = Mda::parse(&frame.fields);
         assert!(mda.baro_inches.is_none());
         assert_eq!(mda.baro_inches_unit, Some('I'));
         assert!((mda.baro_bars.expect("baroB") - 0.985).abs() < 0.001);

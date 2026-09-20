@@ -7,10 +7,10 @@ use nmea_0183_rs::{NmeaSentence, parse_frame};
 #[test]
 fn decode_encode() {
     let frame = parse_frame("$GPGBS,194907.00,3.0,1.9,4.2,,,,*4E").expect("valid");
-    let gbs = Gbs::parse(&frame.fields).expect("parse");
+    let gbs = Gbs::parse(&frame.fields);
     let sentence = gbs.to_sentence("GP").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let gbs2 = Gbs::parse(&frame2.fields).expect("parse");
+    let gbs2 = Gbs::parse(&frame2.fields);
     assert_eq!(gbs, gbs2);
 }
 
@@ -34,14 +34,14 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("GP").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Gbs::parse(&frame.fields).expect("parse");
+    let parsed = Gbs::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
 
 #[test]
 fn gbs_values() {
     let frame = parse_frame("$GPGBS,194907.00,3.0,1.9,4.2,,,,*4E").expect("valid GBS fixture");
-    let gbs = Gbs::parse(&frame.fields).expect("parse GBS");
+    let gbs = Gbs::parse(&frame.fields);
     assert_eq!(gbs.time.as_deref(), Some("194907.00"));
     assert!((gbs.err_lat.expect("err_lat") - 3.0_f32).abs() < 1e-4);
     assert!((gbs.err_lon.expect("err_lon") - 1.9_f32).abs() < 1e-4);

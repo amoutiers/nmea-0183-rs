@@ -10,10 +10,10 @@ fn decode_encode() {
         "$PSONCMS,0.0905,0.4217,0.9020,-0.0196,-1.7685,0.3861,-9.6648,-0.0116,0.0065,-0.0080,0.0581,0.3846,0.7421,33.1*76",
     )
     .expect("valid");
-    let p = Psoncms::parse(&frame.fields).expect("parse");
+    let p = Psoncms::parse(&frame.fields);
     let sentence = p.to_sentence("").expect("encode");
     let frame2 = parse_frame(sentence.trim()).expect("re-parse");
-    let p2 = Psoncms::parse(&frame2.fields).expect("parse");
+    let p2 = Psoncms::parse(&frame2.fields);
     assert_eq!(p, p2);
 }
 
@@ -49,6 +49,6 @@ fn roundtrip() {
     };
     let sentence = original.to_sentence("").expect("encode");
     let frame = parse_frame(sentence.trim()).expect("re-parse");
-    let parsed = Psoncms::parse(&frame.fields).expect("parse");
+    let parsed = Psoncms::parse(&frame.fields);
     assert_eq!(original, parsed);
 }

@@ -25,10 +25,10 @@ pub struct Gst {
 
 impl Gst {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             time: r.string(),
             range_rms: r.f32(),
             std_major: r.f32(),
@@ -37,7 +37,7 @@ impl Gst {
             std_lat: r.f32(),
             std_lon: r.f32(),
             std_alt: r.f32(),
-        })
+        }
     }
 }
 
@@ -66,7 +66,7 @@ mod tests {
     #[test]
     fn gst_empty() {
         let f = parse_frame("$GPGST,,,,,,,,*57").expect("valid");
-        let g = Gst::parse(&f.fields).expect("parse");
+        let g = Gst::parse(&f.fields);
         assert!(g.time.is_none());
         assert!(g.range_rms.is_none());
         assert!(g.std_major.is_none());
@@ -82,7 +82,7 @@ mod tests {
         // pynmeagps fixture with all fields populated, GN talker
         let frame =
             parse_frame("$GNGST,103607.00,38,60,38,89,15,24,31*63").expect("valid pynmeagps GST");
-        let gst = Gst::parse(&frame.fields).expect("parse GST");
+        let gst = Gst::parse(&frame.fields);
         assert_eq!(gst.time, Some("103607.00".to_string()));
         assert!((gst.range_rms.expect("rms") - 38.0).abs() < 0.1);
         assert!((gst.std_major.expect("std_major") - 60.0).abs() < 0.1);
@@ -96,7 +96,7 @@ mod tests {
     #[test]
     fn gst_partial_gpsd() {
         let frame = parse_frame("$GPGST,131519.00,11,,,,0.70,0.49,1.1*53").expect("valid");
-        let gst = Gst::parse(&frame.fields).expect("parse GST");
+        let gst = Gst::parse(&frame.fields);
         assert_eq!(gst.time, Some("131519.00".to_string()));
         assert!((gst.range_rms.expect("rms") - 11.0).abs() < 0.1);
         assert!(gst.std_major.is_none());
@@ -121,7 +121,7 @@ mod tests {
         let sentence = gst.to_sentence("GP").expect("encode");
         assert!(sentence.starts_with("$GPGST,"));
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let gst2 = Gst::parse(&frame.fields).expect("re-parse GST");
+        let gst2 = Gst::parse(&frame.fields);
         assert_eq!(gst, gst2);
     }
 }

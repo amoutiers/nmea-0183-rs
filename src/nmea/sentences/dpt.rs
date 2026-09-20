@@ -15,14 +15,14 @@ pub struct Dpt {
 
 impl Dpt {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             depth: r.f32(),
             offset: r.f32(),
             rangescale: r.f32(),
-        })
+        }
     }
 }
 
@@ -46,7 +46,7 @@ mod tests {
     #[test]
     fn dpt_empty() {
         let f = parse_frame("$IIDPT,,,*6C").expect("valid");
-        let d = Dpt::parse(&f.fields).expect("parse");
+        let d = Dpt::parse(&f.fields);
         assert!(d.depth.is_none());
         assert!(d.offset.is_none());
         assert!(d.rangescale.is_none());
@@ -55,21 +55,21 @@ mod tests {
     #[test]
     fn dpt_gpsd() {
         let f = parse_frame("$INDPT,2.2,0.0*47").expect("valid DPT frame");
-        let d = Dpt::parse(&f.fields).expect("parse DPT");
+        let d = Dpt::parse(&f.fields);
         assert!((d.depth.expect("depth present") - 2.2).abs() < 0.01);
     }
 
     #[test]
     fn dpt_negative_offset_signalk() {
         let f = parse_frame("$IIDPT,4.1,-1.0*69").expect("valid DPT frame");
-        let d = Dpt::parse(&f.fields).expect("parse DPT");
+        let d = Dpt::parse(&f.fields);
         assert!((d.offset.expect("offset present") - (-1.0)).abs() < 0.01);
     }
 
     #[test]
     fn dpt_parse_signalk() {
         let f = parse_frame("$IIDPT,4.1,0.0*45").expect("valid DPT frame");
-        let d = Dpt::parse(&f.fields).expect("parse DPT");
+        let d = Dpt::parse(&f.fields);
         assert!((d.depth.expect("depth present") - 4.1).abs() < 0.01);
     }
 
@@ -88,7 +88,7 @@ mod tests {
         };
         let s = d.to_sentence("II").expect("encode");
         let f = parse_frame(s.trim()).expect("re-parse DPT frame");
-        let d2 = Dpt::parse(&f.fields).expect("re-parse DPT");
+        let d2 = Dpt::parse(&f.fields);
         assert_eq!(d, d2);
     }
 }

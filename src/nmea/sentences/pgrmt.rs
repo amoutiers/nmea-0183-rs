@@ -30,8 +30,8 @@ pub struct Pgrmt {
 
 impl Pgrmt {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let product_info = r.string();
         let rom_checksum = r.char();
@@ -42,7 +42,7 @@ impl Pgrmt {
         let data_collection = r.char();
         let sensor_temp = r.string();
         let sensor_config = r.char();
-        Some(Self {
+        Self {
             product_info,
             rom_checksum,
             receiver_failure,
@@ -52,7 +52,7 @@ impl Pgrmt {
             data_collection,
             sensor_temp,
             sensor_config,
-        })
+        }
     }
 }
 
@@ -95,7 +95,7 @@ mod tests {
         }
         .to_sentence("").expect("encode");
         let f = parse_frame(s.trim()).expect("valid");
-        let p = Pgrmt::parse(&f.fields).expect("parse");
+        let p = Pgrmt::parse(&f.fields);
         assert!(p.product_info.is_none());
         assert!(p.sensor_config.is_none());
     }
@@ -115,14 +115,14 @@ mod tests {
         };
         let sentence = original.to_sentence("").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Pgrmt::parse(&frame.fields).expect("parse");
+        let parsed = Pgrmt::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn pgrmt_pgrmt_gonmea() {
         let frame = parse_frame("$PGRMT,GPS24xd-HVS VER 2.30,,,,,,,,*10").expect("valid");
-        let p = Pgrmt::parse(&frame.fields).expect("parse");
+        let p = Pgrmt::parse(&frame.fields);
         assert_eq!(p.product_info.as_deref(), Some("GPS24xd-HVS VER 2.30"));
         assert!(p.rom_checksum.is_none());
         assert!(p.sensor_config.is_none());

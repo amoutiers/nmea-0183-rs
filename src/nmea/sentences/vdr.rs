@@ -15,8 +15,8 @@ pub struct Vdr {
 
 impl Vdr {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None` in the returned value.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
         let direction_true = r.f32();
         r.skip(); // T
@@ -24,11 +24,11 @@ impl Vdr {
         r.skip(); // M
         let speed_knots = r.f32();
         r.skip(); // N
-        Some(Self {
+        Self {
             direction_true,
             direction_mag,
             speed_knots,
-        })
+        }
     }
 }
 
@@ -61,7 +61,7 @@ mod tests {
         }
         .to_sentence("II").expect("encode");
         let frame = parse_frame(f.trim()).expect("valid");
-        let v = Vdr::parse(&frame.fields).expect("parse");
+        let v = Vdr::parse(&frame.fields);
         assert!(v.direction_true.is_none());
         assert!(v.direction_mag.is_none());
         assert!(v.speed_knots.is_none());
@@ -76,14 +76,14 @@ mod tests {
         };
         let sentence = original.to_sentence("II").expect("encode");
         let frame = parse_frame(sentence.trim()).expect("re-parse");
-        let parsed = Vdr::parse(&frame.fields).expect("re-parse VDR");
+        let parsed = Vdr::parse(&frame.fields);
         assert_eq!(original, parsed);
     }
 
     #[test]
     fn vdr_full_gonmea() {
         let frame = parse_frame("$IIVDR,10.1,T,12.3,M,1.2,N*3A").expect("valid VDR frame");
-        let vdr = Vdr::parse(&frame.fields).expect("parse VDR");
+        let vdr = Vdr::parse(&frame.fields);
         assert!((vdr.direction_true.expect("dirT") - 10.1).abs() < 0.1);
         assert!((vdr.direction_mag.expect("dirM") - 12.3).abs() < 0.1);
         assert!((vdr.speed_knots.expect("spd") - 1.2).abs() < 0.1);
