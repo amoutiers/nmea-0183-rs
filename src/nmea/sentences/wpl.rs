@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// WPL — Waypoint Location.
 ///
 /// Wire: `lat,NS,lon,EW,ident`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Wpl {
     /// Latitude in NMEA ddmm.mmm format.
     pub lat: Option<f64>,

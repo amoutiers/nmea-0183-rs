@@ -47,6 +47,28 @@ impl AisSentence {
         Self::from_frame(frame)
     }
 
+    /// Encode a typed ABM/BBM variant with the given talker.
+    ///
+    /// `Unknown` returns [`crate::EncodeError::MissingFrameContext`]. Retain the
+    /// original [`NmeaFrame`] and use its `to_sentence()` method for that case.
+    pub fn to_sentence(&self, talker: &str) -> Result<String, crate::EncodeError> {
+        match self {
+            #[cfg(feature = "abm")]
+            Self::Abm(value) => value.to_sentence(talker),
+            #[cfg(feature = "bbm")]
+            Self::Bbm(value) => value.to_sentence(talker),
+            Self::Unknown { .. } => Err(crate::EncodeError::MissingFrameContext),
+        }
+    }
+
+    /// Encode a typed variant and validate its strict frame envelope.
+    /// This does not validate the application fields or reassemble fragments.
+    pub fn to_sentence_strict(&self, talker: &str) -> Result<String, crate::StrictEncodeError> {
+        let sentence = self.to_sentence(talker)?;
+        crate::validate_sentence(&sentence)?;
+        Ok(sentence)
+    }
+
     fn from_frame(frame: &NmeaFrame<'_>) -> Self {
         Self::Unknown {
             sentence_type: frame.sentence_type.to_string(),

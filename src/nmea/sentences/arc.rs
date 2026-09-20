@@ -5,7 +5,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// Wire: `time,manufacturer,alert_id,instance,command`
 ///
 /// Reference fixture: <https://github.com/adrianmo/go-nmea/blob/master/arc_test.go>.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Arc {
     /// Time of message.
     pub time: Option<String>,

@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// VDR — Set and Drift.
 ///
 /// Wire: `dirT,T,dirM,M,spd,N`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Vdr {
     /// Set (current direction) true in degrees.
     pub direction_true: Option<f32>,

@@ -5,7 +5,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// Field layout follows NMEA 0183 ALF and the pynmeagps sentence definitions.
 ///
 /// Wire: `num_frags,frag_num,msg_id,time,category,priority,state,manufacturer,alert_id,instance,revision,escalation,text`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Alf {
     /// Total number of sentences (fragments) needed for this message.
     pub num_frags: Option<u8>,

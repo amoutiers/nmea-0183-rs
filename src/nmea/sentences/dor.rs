@@ -5,7 +5,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// Field layout follows NMEA 0183 DOR and the pynmeagps sentence definitions.
 ///
 /// Wire: `door_type,time,system,division1,division2,door_number,door_status,switch_setting,message`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Dor {
     /// Door type identifier character.
     pub door_type: Option<char>,

@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// AAM — Waypoint Arrival Alarm.
 ///
 /// Wire: `arrce,perp,crad,cunit,wpt`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Aam {
     /// Arrival circle entered ('A' = entered, 'V' = not entered).
     pub arrce: Option<char>,

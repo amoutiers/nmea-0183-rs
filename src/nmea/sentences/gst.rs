@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// GST — GNSS Pseudo-Range Error Statistics.
 ///
 /// Wire: `time,range_rms,std_major,std_minor,orient,std_lat,std_lon,std_alt`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Gst {
     /// UTC time of observation (hhmmss.ss format).
     pub time: Option<String>,

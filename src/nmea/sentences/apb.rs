@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// APB — Autopilot Sentence B.
 ///
 /// Wire: `lcgwarn,lccwarn,ctrkerr,dirs,ctrkunit,aalmcirc,aalmperp,bear_o2d,bear_o2d_type,wpt,bear_dest,bear_dest_type,bear_steer,bear_steer_type,mode`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Apb {
     /// Loran-C general warning ('A' = OK, 'V' = warning).
     pub lcgwarn: Option<char>,

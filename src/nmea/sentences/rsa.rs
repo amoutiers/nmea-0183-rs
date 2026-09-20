@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// RSA — Rudder Sensor Angle.
 ///
 /// Wire: `stbdangle,stbdstatus,portangle,portstatus`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Rsa {
     /// Starboard (or single) rudder angle in degrees (negative = port).
     pub starboard_angle: Option<f32>,

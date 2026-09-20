@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// ACN — Alert Command.
 ///
 /// Wire: `time,manufacturer,alert_id,instance,command,state`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Acn {
     /// Time of message.
     pub time: Option<String>,

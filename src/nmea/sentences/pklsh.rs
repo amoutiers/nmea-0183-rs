@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// Wire: `$PKLSH,lat,ns,lon,ew,time,validity,fleet,unit_id`
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PKLSH"`.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Pklsh {
     /// Latitude in DDDMM.MMM format.
     pub lat: Option<f64>,

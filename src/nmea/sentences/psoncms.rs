@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// Wire: `$PSONCMS,q0,q1,q2,q3,ax,ay,az,rx,ry,rz,mx,my,mz,temp`
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PSONCMS"`.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Psoncms {
     /// Quaternion component 0.
     pub quaternion_0: Option<f32>,

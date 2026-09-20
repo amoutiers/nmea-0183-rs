@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// GSA — GPS DOP and Active Satellites.
 ///
 /// Wire: `mode,fix_type,prn01..prn12,pdop,hdop,vdop,system_id`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Gsa {
     /// Selection mode ('M' = manual, 'A' = automatic).
     pub mode: Option<char>,

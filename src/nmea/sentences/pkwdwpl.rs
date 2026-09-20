@@ -7,7 +7,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PKWDWPL"`.
 /// Encode with `to_sentence("")`.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Pkwdwpl {
     /// UTC time (hhmmss).
     pub time: Option<String>,

@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// ZDA — Time and Date.
 ///
 /// Wire: `time,day,month,year,ltzh,ltzm`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Zda {
     /// UTC time (hhmmss.ss format).
     pub time: Option<String>,

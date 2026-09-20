@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// MWD — Wind Direction & Speed.
 ///
 /// Wire: `dirT,T,dirM,M,speedN,N,speedM,M`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Mwd {
     /// Wind direction true in degrees.
     pub wind_dir_true: Option<f32>,

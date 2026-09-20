@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// ACK — Alert Acknowledge.
 ///
 /// Wire: `alert_id`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Ack {
     /// Alert identifier (e.g. "001").
     pub alert_id: Option<String>,

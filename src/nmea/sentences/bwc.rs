@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// BWC — Bearing & Distance to Waypoint — Great Circle.
 ///
 /// Wire: `time,lat,ns,lon,ew,bear_true,T,bear_mag,M,dist,N,wpt,mode`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Bwc {
     /// UTC time of observation (hhmmss.ss format).
     pub time: Option<String>,

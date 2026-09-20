@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// DBS — Depth Below Surface.
 ///
 /// Wire: `depth_f,f,depth_m,M,depth_F,F`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Dbs {
     /// Depth below surface in feet.
     pub depth_feet: Option<f32>,

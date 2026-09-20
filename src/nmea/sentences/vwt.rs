@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// VWT — True Wind Speed and Angle.
 ///
 /// Wire: `angle,angleLR,spdN,N,spdMS,M,spdKMH,K`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Vwt {
     /// True wind angle in degrees (0–180).
     pub angle: Option<f32>,

@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// DTM — Datum Reference.
 ///
 /// Wire: `datum,sub_datum,lat_offset,ns,lon_offset,ew,alt_offset,ref_datum`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Dtm {
     /// Local datum code (e.g., "W84" for WGS-84).
     pub datum: Option<String>,

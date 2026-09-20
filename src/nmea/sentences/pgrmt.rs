@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PGRMT"`.
 /// Encode with `to_sentence("")`.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Pgrmt {
     /// Product/software information string.
     pub product_info: Option<String>,

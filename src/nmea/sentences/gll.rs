@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// GLL — Geographic Position (Latitude/Longitude).
 ///
 /// Wire: `lat,NS,lon,EW,time,status,mode`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Gll {
     /// Latitude in NMEA format (DDMM.MMMM).
     pub lat: Option<f64>,

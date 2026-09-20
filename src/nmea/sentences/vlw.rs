@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// VLW — Distance Traveled through Water.
 ///
 /// Wire: `twd,twdUnit,wd,wdUnit[,tgd,tgdUnit,gd,gdUnit]`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Vlw {
     /// Total cumulative water distance in nautical miles.
     pub total_water_dist: Option<f32>,

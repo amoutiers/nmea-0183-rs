@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// BOD — Bearing Origin to Destination.
 ///
 /// Wire: `bear_true,bear_true_type,bear_mag,bear_mag_type,wpt_dest,wpt_origin`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Bod {
     /// Bearing true in degrees.
     pub bear_true: Option<f32>,

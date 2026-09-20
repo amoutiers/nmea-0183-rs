@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// RTE — Routes.
 ///
 /// Wire: `num_sentences,sentence_num,mode,name[,ident,…]`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Rte {
     /// Total number of sentences needed for this route.
     pub num_sentences: Option<u8>,

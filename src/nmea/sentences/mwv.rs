@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// MWV — Wind Speed and Angle.
 ///
 /// Wire: `angle,reference(R/T),speed,speedUnit,status(A/V)`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Mwv {
     /// Wind angle in degrees (0-360).
     pub wind_angle: Option<f32>,

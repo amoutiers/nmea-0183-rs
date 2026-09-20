@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// XTE — Cross Track Error.
 ///
 /// Wire: `gwarn,lccwarn,ctrkerr,dirs,disunit[,mode]`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Xte {
     /// General warning flag ('A' = OK, 'V' = warning).
     pub gwarn: Option<char>,

@@ -1,7 +1,7 @@
 use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
 /// A single alert entry within an ALC sentence.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct AlcEntry {
     /// Manufacturer mnemonic code.
     pub manufacturer: Option<String>,
@@ -16,7 +16,7 @@ pub struct AlcEntry {
 /// ALC — Cyclic Alert List.
 ///
 /// Wire: `num_frags,frag_num,msg_id,entries_num[,manufacturer,alert_id,instance,revision,…]`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Alc {
     /// Total number of sentences (fragments) needed for this message.
     pub num_frags: Option<u8>,

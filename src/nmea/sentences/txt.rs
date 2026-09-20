@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// TXT — Text Transmission.
 ///
 /// Wire: `num_msg,msg_num,msg_type,text`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Txt {
     /// Total number of messages in this sequence.
     pub num_msg: Option<u8>,

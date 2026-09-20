@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PRDID"`.
 /// Encode with `to_sentence("")`.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Prdid {
     /// Pitch angle in degrees (positive = bow up).
     pub pitch: Option<f32>,

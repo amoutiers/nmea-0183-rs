@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// HDM — Heading Magnetic.
 ///
 /// Wire: `headingM,M`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Hdm {
     /// Magnetic heading in degrees.
     pub heading_mag: Option<f32>,

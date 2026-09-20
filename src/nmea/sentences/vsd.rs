@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// VSD — AIS voyage static data.
 ///
 /// Conventional NMEA 0183 wire form: `$--VSD,...*hh`.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Vsd {
     /// Type of ship and cargo (AIS type code).
     pub type_of_ship: Option<u8>,

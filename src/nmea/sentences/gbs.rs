@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// GBS — GNSS Satellite Fault Detection.
 ///
 /// Wire: `time,err_lat,err_lon,err_alt,svid,prob,bias,stddev`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Gbs {
     /// UTC time of observation (hhmmss.ss format).
     pub time: Option<String>,

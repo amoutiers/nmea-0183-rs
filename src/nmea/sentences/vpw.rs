@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// VPW — Speed Measured Parallel to Wind (VMG to wind).
 ///
 /// Wire: `spdN,N,spdM,M`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Vpw {
     /// Speed parallel to wind (VMG to wind) in knots.
     pub speed_knots: Option<f32>,

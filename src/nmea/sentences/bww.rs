@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// BWW — Bearing, Waypoint to Waypoint.
 ///
 /// Wire: `bear_true,T,bear_mag,M,wpt_dest,wpt_origin`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Bww {
     /// Bearing true in degrees.
     pub bear_true: Option<f32>,

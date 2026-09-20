@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// BEC — Bearing and Distance to Waypoint (Dead Reckoning).
 ///
 /// Wire: `time,lat,NS,lon,EW,bear_true,T,bear_mag,M,dist,N,wpt`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Bec {
     /// UTC time of fix.
     pub time: Option<String>,

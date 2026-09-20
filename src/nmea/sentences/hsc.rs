@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// HSC — Heading Steering Command.
 ///
 /// Wire: `cmd_heading_true,T,cmd_heading_mag,M[,status]`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Hsc {
     /// Commanded heading true in degrees.
     pub cmd_heading_true: Option<f32>,

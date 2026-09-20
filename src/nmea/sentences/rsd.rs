@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// RSD — RADAR System Data.
 ///
 /// Wire: `origin1_range,origin1_bearing,vrm1,bearing_line1,origin2_range,origin2_bearing,vrm2,bearing_line2,cursor_range,cursor_bearing,range_scale,range_unit,display_rotation`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Rsd {
     /// Origin 1 range.
     pub origin1_range: Option<f32>,

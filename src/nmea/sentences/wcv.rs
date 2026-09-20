@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// WCV — Waypoint Closure Velocity.
 ///
 /// Wire: `vel,N,wpt[,mode]`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Wcv {
     /// Closure velocity toward waypoint in knots.
     pub vel: Option<f32>,

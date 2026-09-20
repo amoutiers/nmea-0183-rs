@@ -8,7 +8,7 @@ use super::field::{encode_char, encode_u8, encode_u32, read_char, read_string, r
 ///
 /// Note: ABM sentences use the `!` prefix on the wire but field parsing
 /// is identical to `$`-prefixed sentences at the field layer.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Abm {
     /// Total number of sentences needed.
     pub num_frags: Option<u8>,
@@ -76,6 +76,13 @@ impl Abm {
         let fields = self.encode()?;
         let field_refs: Vec<&str> = fields.iter().map(|s| s.as_str()).collect();
         crate::encode_frame('!', talker, Self::SENTENCE_TYPE, &field_refs)
+    }
+
+    /// Encode and validate the strict frame envelope, not the application fields.
+    pub fn to_sentence_strict(&self, talker: &str) -> Result<String, crate::StrictEncodeError> {
+        let sentence = self.to_sentence(talker)?;
+        crate::validate_sentence(&sentence)?;
+        Ok(sentence)
     }
 }
 

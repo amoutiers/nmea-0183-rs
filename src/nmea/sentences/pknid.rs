@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// Wire: `$PKNID,version,unit_id,status,extension`
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PKNID"`.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Pknid {
     /// Protocol version.
     pub version: Option<String>,

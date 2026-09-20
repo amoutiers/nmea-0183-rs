@@ -1,7 +1,7 @@
 use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
 /// Per-satellite information block within a GSV sentence.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct SatInfo {
     /// Satellite PRN number (up to ~400 for multi-constellation).
     pub prn: Option<u32>,
@@ -16,7 +16,7 @@ pub struct SatInfo {
 /// GSV — Satellites in View.
 ///
 /// Wire: `total_msgs,msg_num,sats_in_view,[prn,elevation,azimuth,snr]×n[,signal_id]`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Gsv {
     /// Total number of GSV messages in this cycle.
     pub total_msgs: Option<u8>,

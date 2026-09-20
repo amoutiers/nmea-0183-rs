@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// RMB — Recommended Minimum Navigation Information.
 ///
 /// Wire: `status,ctrkerr,dirs,wpt_origin,wpt_dest,dest_lat,ns,dest_lon,ew,range,bearing,velclos,arrstatus,valstatus`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Rmb {
     /// Data status ('A' = active, 'V' = void).
     pub status: Option<char>,

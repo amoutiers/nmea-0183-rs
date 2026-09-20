@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// MDA — Meteorological Composite.
 ///
 /// Wire: `baroI,I,baroB,B,airT,C,waterT,C,relHumid,absHumid,dewT,C,windDirT,T,windDirM,M,windSpdN,N,windSpdM,M`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Mda {
     /// Barometric pressure in inches of mercury.
     pub baro_inches: Option<f32>,

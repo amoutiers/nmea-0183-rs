@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// FIR — Fire Detection.
 ///
 /// Wire: `fire_type,time,system,division1,division2,detector_number,condition,ack_state,message`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Fir {
     /// Fire detector type identifier.
     pub fire_type: Option<char>,

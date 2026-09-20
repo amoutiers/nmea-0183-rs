@@ -97,6 +97,34 @@ macro_rules! nmea_sentences {
                 Self::from_frame(frame)
             }
 
+            /// Encode a typed variant with the given talker.
+            ///
+            /// Proprietary variants ignore the talker; TTD requires `"**"`.
+            /// `Unknown` returns [`crate::EncodeError::MissingFrameContext`]:
+            /// retain the original [`NmeaFrame`] and use its `to_sentence()`
+            /// method to preserve the envelope of unrecognized sentences.
+            pub fn to_sentence(&self, talker: &str) -> Result<String, crate::EncodeError> {
+                match self {
+                    $(
+                        #[cfg(feature = $feat)]
+                        Self::$variant(value) => NmeaEncodable::to_sentence(value, talker),
+                    )*
+                    $(
+                        #[cfg(feature = $pfeat)]
+                        Self::$pvariant(value) => NmeaEncodable::to_sentence(value, talker),
+                    )*
+                    Self::Unknown { .. } => Err(crate::EncodeError::MissingFrameContext),
+                }
+            }
+
+            /// Encode a typed variant and validate its strict frame envelope.
+            /// This does not validate every field's semantics.
+            pub fn to_sentence_strict(&self, talker: &str) -> Result<String, crate::StrictEncodeError> {
+                let sentence = self.to_sentence(talker)?;
+                crate::validate_sentence(&sentence)?;
+                Ok(sentence)
+            }
+
             /// Build an `Unknown` variant preserving the frame's sentence type and fields.
             fn from_frame(frame: &NmeaFrame<'_>) -> Self {
                 Self::Unknown {
@@ -104,6 +132,19 @@ macro_rules! nmea_sentences {
                     fields: frame.fields.iter().map(|f| f.to_string()).collect(),
                 }
             }
+        }
+
+        #[cfg(test)]
+        #[test]
+        fn sentence_defaults_construct() {
+            $(
+                #[cfg(feature = $feat)]
+                { let _ = sentences::$variant::default(); }
+            )*
+            $(
+                #[cfg(feature = $pfeat)]
+                { let _ = sentences::$pvariant::default(); }
+            )*
         }
     };
 }

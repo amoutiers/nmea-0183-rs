@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// THS — True Heading and Status.
 ///
 /// Wire: `heading_true,mode`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Ths {
     /// True heading in degrees (0–359.9).
     pub heading_true: Option<f32>,

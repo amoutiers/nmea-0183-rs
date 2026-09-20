@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// MTA — Mean Temperature of Air.
 ///
 /// Wire: `temp,tempu`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Mta {
     /// Air temperature (unit in `units` field — typically 'C' for Celsius).
     pub temperature: Option<f32>,

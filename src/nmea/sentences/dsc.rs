@@ -5,7 +5,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// Wire: `format_specifier,address,category,cmd1,cmd2,position,time_or_tel,mmsi,distress_cause,ack,expansion`
 /// Field layout follows the NMEA 0183 definitions catalogued by
 /// [pynmeagps](https://github.com/semuconsulting/pynmeagps/blob/master/src/pynmeagps/nmeatypes_get.py).
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Dsc {
     /// Format specifier (e.g. "12" for distress).
     pub format_specifier: Option<String>,

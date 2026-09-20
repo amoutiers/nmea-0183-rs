@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// GNS — GNSS Fix Data (multi-constellation).
 ///
 /// Wire: `time,lat,NS,lon,EW,mode,numSats,hdop,alt,geoidSep,dgpsAge,dgpsStation,navStatus`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Gns {
     /// UTC time of fix (HHMMSS.SS format).
     pub time: Option<String>,

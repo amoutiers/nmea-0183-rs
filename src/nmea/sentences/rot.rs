@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// ROT — Rate of Turn.
 ///
 /// Wire: `rot,valid`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Rot {
     /// Rate of turn in degrees per minute (negative = port).
     pub rate_of_turn: Option<f32>,

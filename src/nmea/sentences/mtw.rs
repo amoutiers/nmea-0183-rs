@@ -1,7 +1,7 @@
 use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
 /// MTW — Mean Temperature of Water.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Mtw {
     /// Water temperature (unit in `units` field — typically 'C' for Celsius).
     pub temperature: Option<f32>,

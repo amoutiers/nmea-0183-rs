@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// VHW — Water Speed and Heading.
 ///
 /// Wire: `headingT,T,headingM,M,speedKts,N,speedKmh,K`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Vhw {
     /// Heading true in degrees.
     pub heading_true: Option<f32>,

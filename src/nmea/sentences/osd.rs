@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// OSD — Own Ship Data.
 ///
 /// Wire: `heading,heading_status,vessel_course,course_ref,vessel_speed,speed_ref,vessel_set,vessel_drift,speed_units`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Osd {
     /// Heading in degrees.
     pub heading: Option<f32>,

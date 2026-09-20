@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// GGA — Global Positioning System Fix Data.
 ///
 /// Wire: `time,lat,NS,lon,EW,quality,numSats,hdop,alt,altUnit,geoidSep,geoidUnit,dgpsAge,dgpsStation`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Gga {
     /// UTC time of fix (HHMMSS.SS format).
     pub time: Option<String>,

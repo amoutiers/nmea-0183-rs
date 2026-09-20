@@ -1,7 +1,7 @@
 use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
 /// A single tracked target entry within a TLB sentence.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct TlbTarget {
     /// Target number.
     pub number: Option<u8>,
@@ -12,7 +12,7 @@ pub struct TlbTarget {
 /// TLB — Target Label.
 ///
 /// Wire: repeating pairs `number,label[,number,label,…]`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Tlb {
     /// Target number/label pairs (variable length).
     pub targets: Vec<TlbTarget>,

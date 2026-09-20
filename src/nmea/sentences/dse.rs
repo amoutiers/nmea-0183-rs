@@ -1,7 +1,7 @@
 use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
 /// A single dataset within a DSE sentence.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct DseDataSet {
     /// Data code.
     pub code: Option<String>,
@@ -14,7 +14,7 @@ pub struct DseDataSet {
 /// Wire: `total,number,ack,mmsi[,code,data,…]`
 /// Field layout follows the NMEA 0183 definitions catalogued by
 /// [pynmeagps](https://github.com/semuconsulting/pynmeagps/blob/master/src/pynmeagps/nmeatypes_get.py).
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Dse {
     /// Total number of sentences.
     pub total: Option<u8>,

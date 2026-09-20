@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// DBT — Depth Below Transducer.
 ///
 /// Wire: `depth_f,f,depth_m,M,depth_F,F`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Dbt {
     /// Depth below transducer in feet.
     pub depth_feet: Option<f32>,

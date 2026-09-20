@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// HDG — Heading with Deviation & Variation.
 ///
 /// Wire: `headingM,deviation,deviationEW,variation,variationEW`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Hdg {
     /// Magnetic sensor heading in degrees.
     pub heading_mag: Option<f32>,

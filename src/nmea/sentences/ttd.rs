@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 ///
 /// Note: TTD uses hex-encoded fragment counts (e.g. "1A"). These are stored
 /// as strings to preserve the original encoding. The `msg_id` is a u8.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Ttd {
     /// Total number of sentences (may be hex string).
     pub num_frags: Option<String>,

@@ -170,3 +170,6 @@ mod xdr;
 mod xte;
 #[path = "nmea/zda.rs"]
 mod zda;
+
+#[path = "nmea/api.rs"]
+mod api;

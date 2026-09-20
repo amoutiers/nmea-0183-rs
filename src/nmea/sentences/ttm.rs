@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// TTM — Tracked Target Message.
 ///
 /// Wire: `target_num,dist,bearing,bearing_type,speed,course,course_type,dist_cpa,time_cpa,speed_units,name,status,ref_target,time,acq_type`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Ttm {
     /// Target number (0–99).
     pub target_num: Option<u8>,

@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PCDIN"`.
 /// Encode with `to_sentence("")`.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Pcdin {
     /// PGN (Parameter Group Number) in hex.
     pub pgn: Option<String>,

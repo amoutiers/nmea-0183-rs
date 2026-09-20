@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// HBT — Heartbeat Supervision.
 ///
 /// Wire: `interval,operation_status,msg_id`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Hbt {
     /// Configured repeat interval in seconds.
     pub interval: Option<f32>,

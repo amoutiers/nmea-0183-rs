@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// TLL — Target Latitude and Longitude.
 ///
 /// Wire: `target_num,lat,NS,lon,EW,name,time,status,ref_target`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Tll {
     /// Target number (00–99).
     pub target_num: Option<u8>,

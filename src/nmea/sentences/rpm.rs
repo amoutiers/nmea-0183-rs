@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// RPM — Engine Revolutions.
 ///
 /// Wire: `source,engine_shaft_num,rpm,pitch,status`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Rpm {
     /// Source indicator ('E' = engine, 'S' = shaft).
     pub source: Option<char>,

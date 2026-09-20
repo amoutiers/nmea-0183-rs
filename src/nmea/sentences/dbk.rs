@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// DBK — Depth Below Keel.
 ///
 /// Wire: `depthF,f,depthM,M,depthFathoms,F`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Dbk {
     /// Depth below keel in feet.
     pub depth_feet: Option<f32>,

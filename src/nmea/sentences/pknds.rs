@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// Wire: `$PKNDS,time,validity,lat,ns,lon,ew,speed,course,date,variation,var_ew,unit_id,status,extension`
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PKNDS"`.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Pknds {
     /// UTC time (hhmmss).
     pub time: Option<String>,

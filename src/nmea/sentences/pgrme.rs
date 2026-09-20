@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PGRME"`.
 /// Encode with `to_sentence("")` (talker is ignored for proprietary types).
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Pgrme {
     /// Horizontal position error in metres.
     pub horizontal: Option<f32>,

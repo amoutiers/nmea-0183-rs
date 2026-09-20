@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// ALA — System Faults and Alarms.
 ///
 /// Wire: `time,system,subsystem,instance,alarm_type,condition,ack_state,message`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Ala {
     /// UTC time of alarm (hhmmss).
     pub time: Option<String>,

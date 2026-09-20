@@ -1,7 +1,7 @@
 use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
 /// VBW — Dual Ground/Water Speed.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Vbw {
     /// Longitudinal water speed in knots.
     pub long_water_spd: Option<f32>,

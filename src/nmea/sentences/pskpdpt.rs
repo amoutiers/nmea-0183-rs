@@ -6,7 +6,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 ///
 /// Proprietary sentence: `parse_frame` sets `talker = ""`, `sentence_type = "PSKPDPT"`.
 /// Encode with `to_sentence("")` (talker is ignored for proprietary types).
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Pskpdpt {
     /// Water depth in metres.
     pub depth: Option<f32>,

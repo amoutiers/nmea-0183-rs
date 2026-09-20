@@ -49,3 +49,32 @@ fn roundtrip() {
     let parsed = Bbm::parse(&frame.fields).expect("parse");
     assert_eq!(original, parsed);
 }
+
+#[test]
+fn bbm_default_and_strict_encoding() {
+    use nmea_0183_rs::{ComplianceError, EncodeError, StrictEncodeError, parse_frame_strict};
+    let value = Bbm::default();
+    let line = value.to_sentence_strict("AI").expect("strict envelope");
+    assert!(parse_frame_strict(&line).is_ok());
+    let sentence = AisSentence::parse(&parse_frame(&line).expect("frame"));
+    assert_eq!(
+        sentence.to_sentence_strict("AI").expect("enum encode"),
+        line
+    );
+    assert_eq!(sentence.to_sentence("AI").expect("compatible enum"), line);
+    assert!(matches!(
+        sentence.to_sentence_strict("ai"),
+        Err(StrictEncodeError::Compliance(
+            ComplianceError::InvalidAddressCharacter('a')
+        ))
+    ));
+    let unknown = AisSentence::parse(&parse_frame("!AIXYZ,1").expect("unknown"));
+    assert_eq!(
+        unknown.to_sentence("AI"),
+        Err(EncodeError::MissingFrameContext)
+    );
+    assert_eq!(
+        unknown.to_sentence_strict("AI"),
+        Err(StrictEncodeError::Encode(EncodeError::MissingFrameContext))
+    );
+}

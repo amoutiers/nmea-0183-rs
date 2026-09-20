@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// EVE — General Event Message.
 ///
 /// Wire: `time,tag_code,message`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Eve {
     /// Event time.
     pub time: Option<String>,

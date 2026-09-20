@@ -5,7 +5,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// Wire: `time,alarm_id,condition,state,description`
 ///
 /// Reference fixture: <https://github.com/adrianmo/go-nmea/blob/master/alr_test.go>.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Alr {
     /// Time of alarm condition change.
     pub time: Option<String>,

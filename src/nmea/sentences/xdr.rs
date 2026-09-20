@@ -1,7 +1,7 @@
 use crate::nmea::field::{FieldWriter, NmeaEncodable};
 
 /// A single transducer measurement group within an XDR sentence.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct XdrGroup {
     /// Transducer type code.
     ///
@@ -65,7 +65,7 @@ pub struct XdrGroup {
 ///
 /// Empty unit fields are valid and occur in practice (e.g. generic magnetic field sensors
 /// emit `G,367,,MAGX` where the unit field is intentionally blank).
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Xdr {
     /// Repeating transducer measurement groups (4 fields each).
     pub groups: Vec<XdrGroup>,
