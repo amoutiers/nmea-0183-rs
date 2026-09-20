@@ -11,9 +11,9 @@ expected=$'### Fixed\n- Correct output.'
 for case in tag missing empty duplicate; do
   file="$tmp/$case.md"
   case "$case" in
-    tag) cp "$valid" "$file"; ! bash "$root/.github/scripts/release-notes.sh" v0.8.8 0.8.7 "$file" ;;
-    missing) printf '%s\n' '## [0.8.6] — 2026-09-19' '- old' > "$file"; ! bash "$root/.github/scripts/release-notes.sh" v0.8.7 0.8.7 "$file" ;;
-    empty) printf '%s\n' '## [0.8.7] — 2026-09-20' '' '### Fixed' > "$file"; ! bash "$root/.github/scripts/release-notes.sh" v0.8.7 0.8.7 "$file" ;;
-    duplicate) printf '%s\n' '## [0.8.7] — 2026-09-20' '- one' '## [0.8.7] — 2026-09-20' '- two' > "$file"; ! bash "$root/.github/scripts/release-notes.sh" v0.8.7 0.8.7 "$file" ;;
+    tag) cp "$valid" "$file"; if bash "$root/.github/scripts/release-notes.sh" v0.8.8 0.8.7 "$file"; then exit 1; fi ;;
+    missing) printf '%s\n' '## [0.8.6] — 2026-09-19' '- old' > "$file"; if bash "$root/.github/scripts/release-notes.sh" v0.8.7 0.8.7 "$file"; then exit 1; fi ;;
+    empty) printf '%s\n' '## [0.8.7] — 2026-09-20' '' '### Fixed' > "$file"; if bash "$root/.github/scripts/release-notes.sh" v0.8.7 0.8.7 "$file"; then exit 1; fi ;;
+    duplicate) printf '%s\n' '## [0.8.7] — 2026-09-20' '- one' '## [0.8.7] — 2026-09-20' '- two' > "$file"; if bash "$root/.github/scripts/release-notes.sh" v0.8.7 0.8.7 "$file"; then exit 1; fi ;;
   esac
 done

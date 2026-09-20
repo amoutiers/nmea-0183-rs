@@ -328,6 +328,34 @@ fn class_a_position_encodes_to_a_decodable_vdm_sentence() {
 }
 
 #[test]
+fn long_range_gnss_status_preserves_its_wire_bit() {
+    for status in [false, true] {
+        let report = LongRangePosition {
+            mmsi: 244_670_316,
+            position_accuracy: true,
+            raim: false,
+            navigation_status: NavigationStatus::UnderWayEngine,
+            longitude: Some(2.35),
+            latitude: Some(48.85),
+            sog: Some(5),
+            cog: Some(91),
+            gnss_position_status: status,
+        };
+        let lines = report
+            .to_sentences(AisTransmitOptions::vdm(AisChannel::A))
+            .expect("encode type 27");
+        assert_eq!(
+            extract_u32(&payload_bits(&lines[0]), 94, 1),
+            Some(u32::from(status))
+        );
+        assert!(matches!(
+            decode_lines(&lines),
+            AisMessage::LongRangePosition(value) if value.gnss_position_status == status
+        ));
+    }
+}
+
+#[test]
 fn class_a_static_voyage_encodes_to_two_decodable_vdm_fragments() {
     let report = ClassAStaticVoyage {
         repeat_indicator: 0,

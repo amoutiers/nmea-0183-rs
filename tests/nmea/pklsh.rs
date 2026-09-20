@@ -48,6 +48,12 @@ fn encodes_coordinates_with_nmea_padding_and_validation() {
     value.lon = Some(42.24);
     assert_eq!(value.encode().expect("encode")[0], "0133.82");
     assert_eq!(value.encode().expect("encode")[2], "00042.24");
-    value.lat = Some(f64::INFINITY);
-    assert_eq!(value.encode(), Err(EncodeError::InvalidCoordinate));
+    value.lat = Some(0.0);
+    value.lon = Some(-0.0);
+    assert_eq!(value.encode().expect("encode")[0], "0000.0");
+    assert_eq!(value.encode().expect("encode")[2], "00000.0");
+    for invalid in [-1.0, f64::NAN, f64::INFINITY] {
+        value.lat = Some(invalid);
+        assert_eq!(value.encode(), Err(EncodeError::InvalidCoordinate));
+    }
 }

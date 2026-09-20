@@ -20,7 +20,7 @@ jobs:
       - name: Validate release metadata
         run: |
           version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "nmea-0183-rs") | .version')
-          bash .github/scripts/release-notes.sh "$GITHUB_REF_NAME" "$version" CHANGELOG.md > release-notes.md
+          bash .github/scripts/release-notes.sh "$GITHUB_REF_NAME" "$version" CHANGELOG.md > /dev/null
       - uses: rust-lang/crates-io-auth-action@v1.0.4
         id: auth
       - run: cargo publish
