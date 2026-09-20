@@ -30,6 +30,8 @@ pub mod armor;
 #[cfg(feature = "ais")]
 mod encode;
 #[cfg(feature = "ais")]
+mod error;
+#[cfg(feature = "ais")]
 pub mod fragments;
 #[cfg(feature = "ais")]
 pub mod messages;
@@ -40,6 +42,9 @@ pub mod transmit;
 
 #[cfg(feature = "ais")]
 pub use messages::*;
+
+#[cfg(feature = "ais")]
+pub use error::AisDecodeError;
 
 #[cfg(feature = "ais")]
 use armor::decode_armor;

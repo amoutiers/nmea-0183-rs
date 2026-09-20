@@ -4,6 +4,8 @@
 //! The reassembler collects fragments by message ID (0-9) and returns
 //! the complete payload when the last fragment arrives.
 
+use super::AisDecodeError;
+
 /// Assembled AIS payload ready for decoding.
 #[derive(Debug, Clone)]
 pub struct AisPayload {
@@ -78,85 +80,144 @@ impl FragmentCollector {
     /// - `[5]` fill_bits
     ///
     /// Returns `Some(AisPayload)` when a complete message is assembled.
+    /// Returns `None` for pending fragments and invalid input. Use
+    /// [`Self::process_checked`] to distinguish those cases.
     pub fn process(&mut self, fields: &[&str]) -> Option<AisPayload> {
+        self.process_checked(fields).ok().flatten()
+    }
+
+    /// Process VDM/VDO fields with diagnostics for rejected fragments.
+    ///
+    /// Returns `Ok(None)` while awaiting more fragments, including a repeated
+    /// continuation already accepted by the assembly. A sequence mismatch or an
+    /// oversized continuation discards the affected assembly; other slots are
+    /// retained. Field validation errors and oversized first fragments leave
+    /// assemblies unchanged.
+    pub fn process_checked(
+        &mut self,
+        fields: &[&str],
+    ) -> Result<Option<AisPayload>, AisDecodeError> {
         if fields.len() < 6 {
-            return None;
+            return Err(AisDecodeError::MissingFragmentFields {
+                actual: fields.len(),
+            });
         }
 
-        let total: u8 = fields[0].parse().ok()?;
-        let frag_num: u8 = fields[1].parse().ok()?;
+        let total: u8 = fields[0]
+            .parse()
+            .map_err(|_| AisDecodeError::InvalidFragmentField {
+                field: "total_fragments",
+            })?;
+        let frag_num: u8 = fields[1]
+            .parse()
+            .map_err(|_| AisDecodeError::InvalidFragmentField {
+                field: "fragment_number",
+            })?;
         let msg_id_str = fields[2];
         let channel_field = fields[3];
-        let channel_index = channel_index(channel_field)?;
+        let channel_index = channel_index(channel_field)
+            .ok_or(AisDecodeError::InvalidFragmentField { field: "channel" })?;
         let channel = if channel_index == 0 { 'A' } else { 'B' };
         let payload = fields[4];
-        let fill_bits: u8 = fields[5].parse().ok().filter(|&n| n <= 5)?;
+        let fill_bits: u8 = fields[5]
+            .parse()
+            .ok()
+            .filter(|&n| n <= 5)
+            .ok_or(AisDecodeError::InvalidFragmentField { field: "fill_bits" })?;
 
-        if total == 0 || frag_num == 0 || frag_num > total || total > MAX_FRAGMENTS {
-            return None;
+        if total == 0 || total > MAX_FRAGMENTS {
+            return Err(AisDecodeError::InvalidFragmentField {
+                field: "total_fragments",
+            });
+        }
+        if frag_num == 0 || frag_num > total {
+            return Err(AisDecodeError::InvalidFragmentField {
+                field: "fragment_number",
+            });
         }
 
         // Single-fragment message — return immediately
         if total == 1 {
             if payload.len() > MAX_PAYLOAD_SIZE {
-                return None;
+                return Err(AisDecodeError::PayloadTooLong {
+                    actual: payload.len(),
+                    maximum: MAX_PAYLOAD_SIZE,
+                });
             }
-            return Some(AisPayload {
+            return Ok(Some(AisPayload {
                 payload: payload.to_string(),
                 fill_bits,
                 channel,
-            });
+            }));
         }
 
         // Multi-fragment — need a message ID
-        let msg_id: usize = msg_id_str.parse().ok()?;
+        let msg_id: usize =
+            msg_id_str
+                .parse()
+                .map_err(|_| AisDecodeError::InvalidFragmentField {
+                    field: "message_id",
+                })?;
         if msg_id > 9 {
-            return None;
+            return Err(AisDecodeError::InvalidFragmentField {
+                field: "message_id",
+            });
         }
         let ch = channel_index;
 
         if frag_num == 1 {
             // Start new assembly
             if payload.len() > MAX_PAYLOAD_SIZE {
-                return None;
+                return Err(AisDecodeError::PayloadTooLong {
+                    actual: payload.len(),
+                    maximum: MAX_PAYLOAD_SIZE,
+                });
             }
             self.slots[ch][msg_id] = Some(FragmentSlot {
                 total,
                 received: 1,
                 payload: payload.to_string(),
             });
-            None
+            Ok(None)
         } else {
             // Continue assembly
-            let slot = self.slots[ch][msg_id].as_mut()?;
+            let slot = self.slots[ch][msg_id]
+                .as_mut()
+                .ok_or(AisDecodeError::UnexpectedFragment)?;
             // A re-sent fragment (same number as the last received) is idempotent:
             // ignore it without discarding the in-progress assembly.
             if frag_num == slot.received {
-                return None;
+                return Ok(None);
             }
             if slot.total != total || slot.received + 1 != frag_num {
                 // Out of sequence — discard
                 self.slots[ch][msg_id] = None;
-                return None;
+                return Err(AisDecodeError::UnexpectedFragment);
             }
 
-            if slot.payload.len() + payload.len() > MAX_PAYLOAD_SIZE {
+            let actual = slot.payload.len() + payload.len();
+            if actual > MAX_PAYLOAD_SIZE {
                 self.slots[ch][msg_id] = None;
-                return None;
+                return Err(AisDecodeError::PayloadTooLong {
+                    actual,
+                    maximum: MAX_PAYLOAD_SIZE,
+                });
             }
             slot.payload.push_str(payload);
             slot.received = frag_num;
 
             if frag_num == total {
                 // Complete — take the slot
-                let completed = self.slots[ch][msg_id].take()?;
-                Some(AisPayload {
+                let completed = self.slots[ch][msg_id]
+                    .take()
+                    .ok_or(AisDecodeError::UnexpectedFragment)?;
+                Ok(Some(AisPayload {
                     payload: completed.payload,
                     fill_bits,
                     channel,
-                })
+                }))
             } else {
-                None
+                Ok(None)
             }
         }
     }
@@ -171,6 +232,135 @@ impl Default for FragmentCollector {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn checked_fragment_errors_and_pending_are_distinct() {
+        use crate::ais::AisDecodeError;
+        let mut c = FragmentCollector::new();
+        assert_eq!(
+            c.process_checked(&[]).err(),
+            Some(AisDecodeError::MissingFragmentFields { actual: 0 })
+        );
+        assert_eq!(
+            c.process_checked(&["1", "1", "", "Z", "1", "0"]).err(),
+            Some(AisDecodeError::InvalidFragmentField { field: "channel" })
+        );
+        assert!(matches!(
+            c.process_checked(&["2", "1", "0", "A", "1", "0"]),
+            Ok(None)
+        ));
+        assert_eq!(
+            c.process_checked(&["2", "2", "1", "A", "1", "0"]).err(),
+            Some(AisDecodeError::UnexpectedFragment)
+        );
+        let complete = c
+            .process_checked(&["2", "2", "0", "A", "2", "0"])
+            .expect("valid continuation")
+            .expect("complete");
+        assert_eq!(complete.payload, "12");
+    }
+
+    #[test]
+    fn checked_fragment_field_and_payload_limits() {
+        use crate::ais::AisDecodeError;
+        for (index, value, field) in [
+            (0, "0", "total_fragments"),
+            (0, "6", "total_fragments"),
+            (0, "bad", "total_fragments"),
+            (1, "0", "fragment_number"),
+            (1, "3", "fragment_number"),
+            (1, "bad", "fragment_number"),
+            (2, "10", "message_id"),
+            (2, "", "message_id"),
+            (3, "Z", "channel"),
+            (5, "6", "fill_bits"),
+            (5, "bad", "fill_bits"),
+        ] {
+            let mut fields = ["2", "1", "0", "A", "1", "0"];
+            fields[index] = value;
+            assert_eq!(
+                FragmentCollector::new().process_checked(&fields).err(),
+                Some(AisDecodeError::InvalidFragmentField { field }),
+                "{fields:?}"
+            );
+        }
+        let oversized = "1".repeat(257);
+        for total in ["1", "2"] {
+            assert_eq!(
+                FragmentCollector::new()
+                    .process_checked(&[total, "1", "0", "A", &oversized, "0"])
+                    .err(),
+                Some(AisDecodeError::PayloadTooLong {
+                    actual: 257,
+                    maximum: 256
+                })
+            );
+        }
+        let mut c = FragmentCollector::new();
+        let at_limit = "1".repeat(256);
+        assert!(matches!(
+            c.process_checked(&["2", "1", "0", "A", &at_limit, "0"]),
+            Ok(None)
+        ));
+        assert_eq!(
+            c.process_checked(&["2", "2", "0", "A", "1", "0"]).err(),
+            Some(AisDecodeError::PayloadTooLong {
+                actual: 257,
+                maximum: 256
+            })
+        );
+        assert_eq!(
+            c.process_checked(&["2", "2", "0", "A", "", "0"]).err(),
+            Some(AisDecodeError::UnexpectedFragment)
+        );
+    }
+
+    #[test]
+    fn checked_fragments_preserve_compatibility_and_other_slots() {
+        use crate::ais::AisDecodeError;
+        let mut c = FragmentCollector::new();
+        for channel in ["", "1", "2", "A", "B"] {
+            let payload = c
+                .process_checked(&["1", "1", "ignored", channel, "1", "0", "extra"])
+                .expect("compatible fields")
+                .expect("complete");
+            assert_eq!(
+                payload.channel,
+                if matches!(channel, "2" | "B") {
+                    'B'
+                } else {
+                    'A'
+                }
+            );
+        }
+        for channel in ["A", "B"] {
+            assert!(matches!(
+                c.process_checked(&["3", "1", "0", channel, "1", "0"]),
+                Ok(None)
+            ));
+        }
+        assert!(matches!(
+            c.process_checked(&["3", "2", "0", "A", "2", "0"]),
+            Ok(None)
+        ));
+        assert!(matches!(
+            c.process_checked(&["3", "2", "0", "A", "2", "0"]),
+            Ok(None)
+        ));
+        assert_eq!(
+            c.process_checked(&["3", "3", "0", "B", "3", "0"]).err(),
+            Some(AisDecodeError::UnexpectedFragment)
+        );
+        let payload = c
+            .process_checked(&["3", "3", "0", "A", "3", "0"])
+            .expect("A unaffected")
+            .expect("complete");
+        assert_eq!(payload.payload, "123");
+        assert_eq!(
+            c.process_checked(&["3", "2", "0", "B", "2", "0"]).err(),
+            Some(AisDecodeError::UnexpectedFragment)
+        );
+    }
 
     #[test]
     fn multi_fragment() {
