@@ -256,3 +256,24 @@ fn wind_fixture_signalk() {
     assert_eq!(frame.fields[0], "270.0");
     assert_eq!(frame.fields[4], "12.4");
 }
+
+#[test]
+fn encode_rejects_unparseable_address_lengths() {
+    use nmea_0183_rs::{EncodeError, encode_frame};
+    for (talker, kind, actual) in [("", "X", 1), ("", "XY", 2), ("", "PXX", 3), ("P", "XX", 3)] {
+        assert_eq!(
+            encode_frame('$', talker, kind, &[]),
+            Err(EncodeError::InvalidAddressLength { actual })
+        );
+    }
+    for (prefix, talker, kind) in [
+        ('$', "", "RMC"),
+        ('$', "", "PASHR"),
+        ('$', "GP", "RMC"),
+        ('!', "**", "TTD"),
+        ('$', "gp", "rmc"),
+    ] {
+        let line = encode_frame(prefix, talker, kind, &[]).expect("encode");
+        assert!(parse_frame(&line).is_ok());
+    }
+}

@@ -156,7 +156,8 @@ pub fn parse_frame(line: &str) -> Result<NmeaFrame<'_>, FrameError> {
 ///
 /// Returns an [`EncodeError`](crate::EncodeError) when the prefix is not `$`/`!`,
 /// the address contains non-alphanumeric ASCII characters, the sentence type is
-/// empty, or a field contains `,`, `*`, `\r`, `\n`, or a non-ASCII character.
+/// empty, the combined address is too short for [`parse_frame`], or a field
+/// contains `,`, `*`, `\r`, `\n`, or a non-ASCII character.
 /// Non-ASCII addresses are also rejected. An empty talker is allowed; the only
 /// non-alphanumeric address exception is the `**` talker in `!**TTD`.
 ///
@@ -197,10 +198,16 @@ pub fn encode_frame(
         validate_field(field)?;
     }
 
+    let address = format!("{talker}{sentence_type}");
+    if address.len() < 3 || (address.starts_with('P') && address.len() < 4) {
+        return Err(crate::EncodeError::InvalidAddressLength {
+            actual: address.len(),
+        });
+    }
     let body = if fields.is_empty() {
-        format!("{talker}{sentence_type}")
+        address
     } else {
-        format!("{talker}{sentence_type},{}", fields.join(","))
+        format!("{address},{}", fields.join(","))
     };
 
     let checksum = body.bytes().fold(0u8, |acc, b| acc ^ b);

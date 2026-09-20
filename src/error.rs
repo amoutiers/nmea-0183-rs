@@ -58,12 +58,16 @@ pub enum EncodeError {
     NonAsciiAddress,
     /// Sentence type is empty.
     EmptySentenceType,
+    /// The encoded address is too short for the frame parser.
+    InvalidAddressLength { actual: usize },
     /// Address contains a non-alphanumeric ASCII character (except the `!**TTD` address).
     InvalidAddressCharacter(char),
     /// A field contains `,`, `*`, `\r`, `\n`, or a non-ASCII character.
     InvalidFieldCharacter(char),
     /// Coordinate magnitude is NaN, infinite, or negative.
     InvalidCoordinate,
+    /// A numeric NMEA field is NaN or infinite rather than absent.
+    NonFiniteNumber,
     /// An AIS field is outside the range or format permitted by its bit layout.
     InvalidAisField(&'static str),
     /// AIS text exceeds the fixed-width field that carries it.
@@ -84,6 +88,9 @@ impl core::fmt::Display for EncodeError {
             Self::InvalidPrefix(c) => write!(f, "invalid prefix '{c}', expected '$' or '!'"),
             Self::NonAsciiAddress => write!(f, "talker or sentence type is not ASCII"),
             Self::EmptySentenceType => write!(f, "sentence type is empty"),
+            Self::InvalidAddressLength { actual } => {
+                write!(f, "invalid encoded address length: {actual} bytes")
+            }
             Self::InvalidAddressCharacter(c) => {
                 write!(f, "address contains invalid character {c:?}")
             }
@@ -93,6 +100,7 @@ impl core::fmt::Display for EncodeError {
             Self::InvalidCoordinate => {
                 write!(f, "coordinate magnitude is NaN, infinite, or negative")
             }
+            Self::NonFiniteNumber => write!(f, "numeric field is not finite"),
             Self::InvalidAisField(field) => write!(f, "invalid AIS field {field}"),
             Self::AisTextTooLong {
                 field,

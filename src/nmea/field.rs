@@ -158,19 +158,6 @@ pub(crate) struct FieldWriter {
     error: Option<EncodeError>,
 }
 
-// Shared logic for f32/f64 writers: non-finite → empty, -0.0 → "0".
-// Expands at the call site so type inference resolves `0.0` and `is_finite()`
-// to the concrete float type.
-macro_rules! push_optional_float {
-    ($fields:expr, $value:expr) => {
-        $fields.push(match $value {
-            Some(v) if !v.is_finite() => String::new(),
-            Some(v) => format!("{}", if v == 0.0 { 0.0 } else { v }),
-            None => String::new(),
-        });
-    };
-}
-
 #[cfg_attr(
     not(feature = "nmea"),
     expect(
@@ -186,9 +173,18 @@ impl FieldWriter {
         }
     }
 
-    /// Write an optional f32. `None` → empty field. Non-finite → empty field. `-0.0` → `"0"`.
+    /// Write an optional f32. `None` becomes an empty field; `-0.0` becomes `"0"`.
+    /// Non-finite values record an error, returned by [`Self::finish`].
     pub(crate) fn f32(&mut self, value: Option<f32>) {
-        push_optional_float!(self.fields, value);
+        if value.is_some_and(|v| !v.is_finite()) {
+            self.error.get_or_insert(EncodeError::NonFiniteNumber);
+            self.fields.push(String::new());
+            return;
+        }
+        self.fields.push(match value {
+            Some(v) => format!("{}", if v == 0.0 { 0.0 } else { v }),
+            None => String::new(),
+        });
     }
 
     /// Write an optional u8. `None` → empty field.
@@ -532,12 +528,29 @@ mod tests {
     }
 
     #[test]
-    fn writer_non_finite_and_neg_zero() {
+    fn writer_non_finite_is_an_error() {
+        for value in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY] {
+            let mut w = FieldWriter::new();
+            w.f32(Some(value));
+            assert_eq!(w.finish(), Err(EncodeError::NonFiniteNumber));
+        }
+    }
+
+    #[test]
+    fn writer_optional_floats_and_neg_zero() {
         let mut w = FieldWriter::new();
-        w.f32(Some(f32::NAN)); // -> "" (not "NaN")
-        w.f32(Some(f32::INFINITY)); // -> "" (not "inf")
-        w.f32(Some(-0.0)); // -> "0" (not "-0")
-        assert_eq!(w.finish().expect("encode"), vec!["", "", "0"]);
+        w.f32(None);
+        w.f32(Some(-0.0));
+        w.f32(Some(12.5));
+        assert_eq!(w.finish().expect("encode"), vec!["", "0", "12.5"]);
+    }
+
+    #[test]
+    fn writer_non_finite_preserves_first_error() {
+        let mut w = FieldWriter::new();
+        w.string(Some("bad,field"));
+        w.f32(Some(f32::NAN));
+        assert_eq!(w.finish(), Err(EncodeError::InvalidFieldCharacter(',')));
     }
 
     #[test]

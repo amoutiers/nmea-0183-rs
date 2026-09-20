@@ -8,6 +8,8 @@ All notable changes to nmea-0183-rs are documented here.
 - Added opt-in strict frame validation and encoding APIs while preserving the existing compatibility APIs.
 
 ### Changed
+- NMEA encoding now rejects supplied NaN and infinite numeric values with `EncodeError::NonFiniteNumber` instead of silently emitting an empty field. Use `None` for absent values; coordinate errors remain `InvalidCoordinate`.
+- `encode_frame()` now rejects combined addresses shorter than the frame parser accepts (three bytes, or four for proprietary addresses) with `EncodeError::InvalidAddressLength`. These are behavioral changes without changes to existing signatures.
 - Renamed the crate from `nmea-kit` to `nmea-0183-rs`; Rust imports now use `nmea_0183_rs`.
 - `Vsd.persons` is now `Option<u16>` so valid counts through 8191 are preserved. This is a source-breaking API change: callers with existing `Option<u8>` values can migrate with `.map(u16::from)`.
 - Multi-character indicator fields now decode to `None` instead of using only their first character.
