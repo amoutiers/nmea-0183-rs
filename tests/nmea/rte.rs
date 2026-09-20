@@ -60,3 +60,25 @@ fn rte_values() {
         ]
     );
 }
+
+#[test]
+fn roundtrip_preserves_empty_waypoint_positions() {
+    for idents in [
+        vec![],
+        vec![""],
+        vec!["", "B"],
+        vec!["A", "", "B"],
+        vec!["A", "", "", "B", ""],
+    ] {
+        let original = Rte {
+            num_sentences: Some(1),
+            sentence_num: Some(1),
+            mode: Some('c'),
+            name: Some("R".to_string()),
+            idents: idents.into_iter().map(str::to_owned).collect(),
+        };
+        let line = original.to_sentence("GP").expect("encode route");
+        let parsed = Rte::parse(&parse_frame(&line).expect("frame").fields);
+        assert_eq!(parsed, original);
+    }
+}

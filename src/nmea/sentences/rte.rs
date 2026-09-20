@@ -13,7 +13,7 @@ pub struct Rte {
     pub mode: Option<char>,
     /// Route name.
     pub name: Option<String>,
-    /// Waypoint identifiers (variable length).
+    /// Waypoint identifiers in wire order, including empty positions.
     pub idents: Vec<String>,
 }
 
@@ -26,10 +26,7 @@ impl Rte {
         let sentence_num = r.u8();
         let mode = r.char();
         let name = r.string();
-        let mut idents = Vec::new();
-        while let Some(ident) = r.string() {
-            idents.push(ident);
-        }
+        let idents = fields.iter().skip(4).map(|field| (*field).to_owned()).collect();
         Self {
             num_sentences,
             sentence_num,
