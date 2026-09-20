@@ -4,14 +4,14 @@ Cette matrice distingue les sentence formatters publiés par les six éditions d
 
 Les coches indiquent un support actuellement présent dans nmea-kit. `HTC` et `HTD` sont comptés séparément bien qu’ils soient regroupés dans une même rubrique du sommaire IEC.
 
-| Code | Édition IEC 61162-1 | Version NMEA 0183 alignée | Année de l’édition IEC |
-| --- | --- | --- | --- |
-| E1 | 1.0 | 2.1 | 1995 |
-| E2 | 2.0 | 2.30 | 2000 |
-| E3 | 3.0 | 3.01 | 2007 |
-| E4 | 4.0 | 4.00 | 2010 |
-| E5 | 5.0 | 4.10 | 2016 |
-| E6 | 6.0 | 4.10 | 2024 |
+| Code | Version IEC 61162-1 | Année |
+| --- | --- | --- |
+| E1 | 1.0 | 1995 |
+| E2 | 2.0 | 2000 |
+| E3 | 3.0 | 2007 |
+| E4 | 4.0 | 2010 |
+| E5 | 5.0 | 2016 |
+| E6 | 6.0 | 2024 |
 
 **Inférence vérifiable :** les colonnes E1 et E3 sont reconstituées à partir des TOC E2/E4 et des deltas explicitement publiés par les éditions suivantes.
 
