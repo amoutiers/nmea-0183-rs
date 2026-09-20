@@ -10,7 +10,7 @@ Bidirectional NMEA 0183 parser/encoder + AIS decoder and transponder-message enc
 | NMEA sentences | 85 (bidirectional) |
 | AIS application sentences | 2 (bidirectional) |
 | AIS message types | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
-| Tests | 904, 0 failures |
+| Tests | 933 unit/integration + 9 doctests, 0 failures (all features) |
 | Unsafe blocks | 0 |
 
 For contribution workflow, test rules, and the sentence-type checklist see [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -25,18 +25,23 @@ use nmea_0183_rs::{parse_frame, encode_frame, EncodeError, NmeaFrame, FrameError
 
 parse_frame(input: &str) -> Result<NmeaFrame, FrameError>
 encode_frame(prefix: char, talker: &str, sentence_type: &str, fields: &[&str]) -> Result<String, EncodeError>
+frame.to_sentence() -> Result<String, EncodeError> // retains envelope/tag data, normalizes checksums and CRLF
+parse_frame_strict(input: &str) -> Result<NmeaFrame, ComplianceError>
+encode_frame_strict(prefix: char, talker: &str, sentence_type: &str, fields: &[&str]) -> Result<String, StrictEncodeError>
 
 // NMEA dispatch
 use nmea_0183_rs::{NmeaSentence, NmeaEncodable};
 
 NmeaSentence::parse(&frame) -> NmeaSentence   // enum variant per type
-value.to_sentence(talker: &str) -> Result<String, EncodeError> // NmeaEncodable; proprietary types ignore talker
+value.to_sentence(talker: &str) -> Result<String, EncodeError> // struct trait or enum method; proprietary types ignore talker
+value.to_sentence_strict(talker: &str) -> Result<String, StrictEncodeError>
 
 // Individual sentence types
 use nmea_0183_rs::nmea::sentences::{Mwd, Rmc, Dbt, Vsd, ...}; // standard
 use nmea_0183_rs::nmea::sentences::{Pashr, Pskpdpt, ...};    // proprietary
 
 Type::parse(fields: &[&str]) -> Option<Self>   // always Some for known types
+Type::default() -> Self                     // absent fields, empty groups; not a valid fix
 value.encode() -> Result<Vec<String>, EncodeError> // fields in wire order
 
 // Coordinate helpers
@@ -46,12 +51,14 @@ ddmm_to_decimal(ddmm: f64) -> f64   // DDMM.MMMM → decimal degrees
 decimal_to_ddmm(decimal: f64) -> f64 // decimal degrees → DDMM.MMMM
 
 // AIS decoder and !-prefixed application-layer sentences
-use nmea_0183_rs::ais::{AisParser, AisMessage};
+use nmea_0183_rs::ais::{AisParser, AisMessage, AisDecodeOutcome, AisDecodeError};
 use nmea_0183_rs::ais::sentences::{Abm, Bbm, AisSentence};
 use nmea_0183_rs::ais::transmit::{AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition};
 
 let mut parser = AisParser::new();
-parser.decode(&frame) -> Option<AisMessage>    // None while awaiting fragments
+parser.decode(&frame) -> Option<AisMessage> // None = pending, ignored, or error
+parser.decode_detailed(&frame) -> Result<AisDecodeOutcome, AisDecodeError> // Ignored, Pending, Message
+// FragmentCollector::process_checked(&mut self, fields: &[&str]) -> Result<Option<AisPayload>, AisDecodeError>
 parser.reset()                                  // clear fragment buffers
 message.to_sentences(AisTransmitOptions::vdm(AisChannel::A)) -> Result<Vec<String>, EncodeError>
 ```
@@ -59,9 +66,11 @@ message.to_sentences(AisTransmitOptions::vdm(AisChannel::A)) -> Result<Vec<Strin
 ### Error model
 
 - **Frame layer**: `parse_frame()` returns `Result<NmeaFrame, FrameError>`. Variants: `Empty`, `InvalidPrefix`, `MalformedChecksum`, `BadChecksum`, `MalformedTagBlock`, `BadTagChecksum`, `TooShort`, `NonAsciiAddress`. When a tag-block checksum is present it is validated, and `tag_block` excludes its `*hh` suffix.
-- **Encode layer**: all encode APIs return `Result<_, EncodeError>`. Variants: `InvalidPrefix`, `NonAsciiAddress`, `EmptySentenceType`, `InvalidAddressCharacter`, `InvalidFieldCharacter`, `InvalidCoordinate`, `InvalidAisField`, `AisTextTooLong`, `MissingAisSequenceId`, `TooManyAisFragments`.
+- **Encode layer**: compatible encode APIs return `Result<_, EncodeError>`; strict encode APIs return `Result<_, StrictEncodeError>` (`Encode` or `Compliance`). `EncodeError` variants: `InvalidPrefix`, `NonAsciiAddress`, `EmptySentenceType`, `InvalidAddressLength`, `InvalidAddressCharacter`, `InvalidFieldCharacter`, `InvalidTagBlockCharacter`, `MissingFrameContext`, `InvalidCoordinate`, `NonFiniteNumber`, `InvalidAisField`, `AisTextTooLong`, `MissingAisSequenceId`, `TooManyAisFragments`.
 - **NMEA content**: `parse()` always returns `Some`. Missing/malformed fields → `None` inside the struct. Intentional for marine instruments that send partial data.
-- **AIS content**: `decode()` returns `Option<AisMessage>`. `None` = awaiting fragments or decode failure.
+- **AIS content**: `decode()` retains `Option<AisMessage>`; `None` means awaiting fragments, ignored frame or decode failure. `decode_detailed()` distinguishes those states and returns `AisDecodeError` (`MissingFragmentFields`, `InvalidFragmentField`, `UnexpectedFragment`, `PayloadTooLong`, `InvalidArmor`, `InvalidMessage`). Unknown numeric types remain decoded `AisMessage::Unknown` values.
+- **Re-encoding**: typed enums expose compatible/strict methods. Their `Unknown` variants return `MissingFrameContext`; retain the `NmeaFrame` and call its `to_sentence()`, or retain the input line for exact bytes.
+- **Encoding validity**: supplied non-finite NMEA floats are errors, not absent fields. Defaults mean absent data, not semantic validity. Strict methods validate the frame envelope only.
 - **No panics**: 0 `panic!`, 0 `unwrap()`, 0 `todo!` in library code.
 
 ### NmeaFrame
@@ -231,7 +240,7 @@ Helper functions in `position_a.rs` are `pub(crate)` — shared by `position_b.r
 
 ### AIS application-layer sentences
 
-ABM and BBM live under `ais::sentences`, preserve their `!` prefix, and are dispatched with `AisSentence::parse(&frame)`. VSD is a conventional NMEA sentence (`$--VSD`) under `nmea::sentences`, dispatched with `NmeaSentence::parse(&frame)`.
+ABM and BBM live under `ais::sentences`, preserve their `!` prefix, and are dispatched with `AisSentence::parse(&frame)`. They support `Default`, `to_sentence()` and `to_sentence_strict()` with their individual features; `AisSentence` exposes both encoding methods too. VSD is a conventional NMEA sentence (`$--VSD`) under `nmea::sentences`, dispatched with `NmeaSentence::parse(&frame)`.
 
 ## Field definitions reference
 

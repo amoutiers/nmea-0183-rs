@@ -33,6 +33,30 @@
 //! - `NmeaEncodable` — trait providing compatible and strict wire encoding (requires an NMEA feature)
 //! - `ais` — AIS decoder, transponder-message encoder, and `!`-prefixed AIS application sentences (requires `ais`, `abm`, or `bbm`)
 //!
+//! `NmeaFrame::to_sentence()` re-encodes envelope data, including tag blocks,
+//! while normalizing checksums and CRLF. Keep the original line for exact bytes.
+//! `NmeaSentence` and `ais::sentences::AisSentence` also expose compatible and
+//! strict encoding; their `Unknown` variants require the original frame instead.
+//! NMEA and ABM/BBM structs implement `Default` for construction with partial data.
+//!
+//! With `ais`, `AisParser::decode_detailed()` distinguishes ignored frames,
+//! pending fragments, messages and `AisDecodeError`. The historical `decode()`
+//! method retains its `Option` contract. Both use one parser per physical source.
+//!
+//! ## Partial construction and enum encoding
+//!
+//! ```
+//! # #[cfg(feature = "dpt")]
+//! # {
+//! use nmea_0183_rs::{NmeaSentence, parse_frame};
+//! use nmea_0183_rs::nmea::Dpt;
+//! let value = NmeaSentence::Dpt(Dpt { depth: Some(4.1), ..Default::default() });
+//! let output = value.to_sentence_strict("SD")?;
+//! assert_eq!(NmeaSentence::parse(&parse_frame(&output)?), value);
+//! # }
+//! # Ok::<(), Box<dyn std::error::Error>>(())
+//! ```
+//!
 //! Strict validation covers the shared frame envelope. It does not validate every
 //! formatter's field semantics, serial transport settings, transmission timing,
 //! or multipart reassembly outside the AIS parser.

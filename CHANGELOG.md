@@ -6,6 +6,9 @@ All notable changes to nmea-0183-rs are documented here.
 
 ### Added
 - Added opt-in strict frame validation and encoding APIs while preserving the existing compatibility APIs.
+- Added `AisParser::decode_detailed()` with distinct ignored, pending, and message outcomes, plus typed `AisDecodeError` diagnostics. `FragmentCollector::process_checked()` reports reassembly errors; the historical `Option` methods remain available.
+- Added `NmeaFrame::to_sentence()` to retain frame addresses, fields, and tag data when re-encoding unknown sentences, with normalized checksums and CRLF.
+- Added `Default` for NMEA and ABM/BBM sentence structs and their field groups, compatible/strict encoding on `NmeaSentence` and `AisSentence`, and strict encoding on ABM/BBM. Unknown enum variants return `MissingFrameContext` and can be forwarded through their original frame.
 
 ### Changed
 - NMEA encoding now rejects supplied NaN and infinite numeric values with `EncodeError::NonFiniteNumber` instead of silently emitting an empty field. Use `None` for absent values; coordinate errors remain `InvalidCoordinate`.

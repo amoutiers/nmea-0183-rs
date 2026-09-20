@@ -42,6 +42,14 @@ impl NmeaFrame<'_> {
     ///
     /// Tags must exclude their checksum and cannot contain non-ASCII characters,
     /// controls, `\\` or `*`. Commas separating tag attributes are allowed.
+    ///
+    /// ```
+    /// use nmea_0183_rs::parse_frame;
+    /// let frame = parse_frame("\\s:receiver\\!AIXYZ,1,,3")?;
+    /// let output = frame.to_sentence()?;
+    /// assert_eq!(parse_frame(&output)?, frame);
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
+    /// ```
     pub fn to_sentence(&self) -> Result<String, crate::EncodeError> {
         let sentence = encode_frame(self.prefix, self.talker, self.sentence_type, &self.fields)?;
         match self.tag_block {

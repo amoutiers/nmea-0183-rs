@@ -164,6 +164,18 @@ impl AisParser {
     /// Frame checksum errors belong to [`crate::parse_frame`]. Unknown numeric
     /// message types are returned as [`AisMessage::Unknown`], not as errors.
     /// Use one parser per physical source, just as with [`Self::decode`].
+    ///
+    /// ```
+    /// use nmea_0183_rs::ais::{AisDecodeOutcome, AisParser};
+    /// use nmea_0183_rs::parse_frame;
+    /// let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26")?;
+    /// match AisParser::new().decode_detailed(&frame)? {
+    ///     AisDecodeOutcome::Message(message) => println!("{message:?}"),
+    ///     AisDecodeOutcome::Pending | AisDecodeOutcome::Ignored => {},
+    ///     _ => {},
+    /// }
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
+    /// ```
     pub fn decode_detailed(
         &mut self,
         frame: &NmeaFrame<'_>,

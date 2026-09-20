@@ -74,6 +74,40 @@ production output. The compatibility APIs `encode_frame()` and `to_sentence()`
 remain available for reproducing device frames, including frames longer than 82
 bytes.
 
+Sentence structs support partial construction, and dispatch enums can be encoded directly:
+
+```rust
+use nmea_0183_rs::NmeaSentence;
+use nmea_0183_rs::nmea::Dpt;
+
+let value = NmeaSentence::Dpt(Dpt { depth: Some(4.1), ..Default::default() });
+let line = value.to_sentence_strict("SD").expect("encode depth");
+```
+
+`Default` means absent fields and empty groups, not a valid navigation fix.
+`None` is still encoded as an empty field. Supplied NaN/infinite NMEA numbers
+now return `EncodeError::NonFiniteNumber`; invalid coordinates retain
+`InvalidCoordinate`. `encode_frame()` rejects addresses too short for its parser.
+These are behavioral changes; existing method signatures remain available.
+Individual NMEA `parse()` methods still always return `Some`, with optional fields.
+
+### Re-encode an unknown sentence
+
+```rust
+use nmea_0183_rs::parse_frame;
+
+let frame = parse_frame("\\s:receiver\\!AIXYZ,1,,3").expect("frame");
+let output = frame.to_sentence().expect("re-encode with envelope");
+assert_eq!(parse_frame(&output).expect("reparse"), frame);
+```
+
+Keep the `NmeaFrame` alongside typed values when you need the original prefix,
+talker or tag block. The `Unknown` variants of `NmeaSentence` and `AisSentence`
+lack that context and return `EncodeError::MissingFrameContext` when encoded.
+`NmeaFrame::to_sentence()` recomputes both checksums and emits CRLF. It can reject
+fields accepted by the permissive parser; it is not byte-for-byte forwarding.
+Keep the original input line when exact bytes are required.
+
 ### Decode AIS messages
 
 ```rust
@@ -87,6 +121,29 @@ if let Some(AisMessage::Position(pos)) = parser.decode(&frame) {
     println!("MMSI: {}, lat: {:?}, lon: {:?}", pos.mmsi, pos.latitude, pos.longitude);
 }
 ```
+
+Use `decode_detailed()` when a pending fragment must be distinguished from rejected data:
+
+```rust
+use nmea_0183_rs::ais::{AisDecodeOutcome, AisParser};
+use nmea_0183_rs::parse_frame;
+
+let frame = parse_frame("!AIVDM,1,1,,A,13aEOK?P00PD2wVMdLDRhgvL289?,0*26")
+    .expect("frame");
+match AisParser::new().decode_detailed(&frame) {
+    Ok(AisDecodeOutcome::Message(message)) => println!("{message:?}"),
+    Ok(AisDecodeOutcome::Pending) => println!("Awaiting fragments"),
+    Ok(AisDecodeOutcome::Ignored) => {},
+    Err(error) => eprintln!("AIS decode failed: {error}"),
+    Ok(_) => {},
+}
+```
+
+Use one parser per physical source. `reset()` clears pending VDM and VDO assemblies.
+The historical `decode()` still maps errors, pending fragments and ignored frames
+to `None`. Detailed outcomes do not restore information already discarded by the
+message models: special position timestamps 60–63 still become `None` in received
+reports. Migrating those public field types is separate work.
 
 ### Encode an AIS transponder message
 
@@ -144,6 +201,10 @@ let abm = Abm {
 let sentence = abm.to_sentence("AI").expect("valid AIS sentence");
 // "!AIABM,1,1,0,123456789,1,6,testpayload,0*08\r\n"
 ```
+
+`Abm`, `Bbm` and `AisSentence` also expose `to_sentence_strict()`. Their strict
+methods check the frame envelope, not application-field semantics, and work with
+the individual `abm` or `bbm` feature without enabling `nmea`.
 
 ## Architecture
 
@@ -300,7 +361,23 @@ let lat = ddmm_to_decimal(4807.038); // → 48.1173
 let ddmm = decimal_to_ddmm(48.1173); // → 4807.038
 ```
 
-Apply the N/S / E/W sign separately (negate for S or W).
+Apply the N/S / E/W sign separately (negate for S or W), and do not silently
+default a missing or unrecognized hemisphere to north/east:
+
+```rust
+use nmea_0183_rs::nmea::{Rmc, ddmm_to_decimal};
+
+let fix = Rmc { lat: Some(4807.038), ns: Some('S'), ..Default::default() };
+let latitude = match (fix.lat, fix.ns) {
+    (Some(raw), Some('N')) => Some(ddmm_to_decimal(raw)),
+    (Some(raw), Some('S')) => Some(-ddmm_to_decimal(raw)),
+    _ => None,
+};
+assert!(latitude.expect("known hemisphere") < 0.0);
+```
+
+Longitude uses the same pattern with E/W. The arithmetic helpers do not validate
+coordinate ranges or fix validity; those checks remain the consumer's responsibility.
 
 ## Documentation
 
