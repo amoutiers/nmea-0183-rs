@@ -36,12 +36,16 @@
 //! `NmeaFrame::to_sentence()` re-encodes envelope data, including tag blocks,
 //! while normalizing checksums and CRLF. Keep the original line for exact bytes.
 //! `NmeaSentence` and `ais::sentences::AisSentence` also expose compatible and
-//! strict encoding; their `Unknown` variants require the original frame instead.
+//! strict encoding; their `Unknown` variants own and preserve the captured envelope.
+//! Typed variants require the original frame to retain tags and the original talker.
 //! NMEA and ABM/BBM structs implement `Default` for construction with partial data.
+//! Their field parsers return `Self` directly; missing or malformed fields remain optional.
 //!
 //! With `ais`, `AisParser::decode_detailed()` distinguishes ignored frames,
 //! pending fragments, messages and `AisDecodeError`. The historical `decode()`
 //! method retains its `Option` contract. Both use one parser per physical source.
+//! Position timestamps use `ais::messages::PositionTimestamp`, preserving the
+//! unavailable, manual-input, dead-reckoning and inoperative states.
 //!
 //! ## Partial construction and enum encoding
 //!

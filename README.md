@@ -88,24 +88,29 @@ let line = value.to_sentence_strict("SD").expect("encode depth");
 `None` is still encoded as an empty field. Supplied NaN/infinite NMEA numbers
 now return `EncodeError::NonFiniteNumber`; invalid coordinates retain
 `InvalidCoordinate`. `encode_frame()` rejects addresses too short for its parser.
-These are behavioral changes; existing method signatures remain available.
-Individual NMEA `parse()` methods still always return `Some`, with optional fields.
+These encoding changes preserve their method signatures. Individual NMEA and
+ABM/BBM `parse()` methods now return the struct directly, with optional fields.
+See the source-breaking migration guide below.
 
 ### Re-encode an unknown sentence
 
 ```rust
-use nmea_0183_rs::parse_frame;
+use nmea_0183_rs::{NmeaSentence, parse_frame};
 
 let frame = parse_frame("\\s:receiver\\!AIXYZ,1,,3").expect("frame");
-let output = frame.to_sentence().expect("re-encode with envelope");
+let value = NmeaSentence::parse(&frame);
+let output = value.to_sentence("ignored").expect("re-encode with envelope");
 assert_eq!(parse_frame(&output).expect("reparse"), frame);
 ```
 
-Keep the `NmeaFrame` alongside typed values when you need the original prefix,
-talker or tag block. The `Unknown` variants of `NmeaSentence` and `AisSentence`
-lack that context and return `EncodeError::MissingFrameContext` when encoded.
-`NmeaFrame::to_sentence()` recomputes both checksums and emits CRLF. It can reject
-fields accepted by the permissive parser; it is not byte-for-byte forwarding.
+The `Unknown` variants of `NmeaSentence` and `AisSentence` own their prefix,
+talker, fields and tag block. They ignore the encoding method's talker argument
+and retain their captured envelope, even after the input buffer is dropped.
+Typed variants still need the original `NmeaFrame` when preserving the original
+prefix, talker or tag block is required.
+
+Unknown variants reuse `NmeaFrame::to_sentence()`, which recomputes both checksums
+and emits CRLF. Encoding can reject fields accepted by the permissive parser.
 Keep the original input line when exact bytes are required.
 
 ### Decode AIS messages
@@ -141,9 +146,11 @@ match AisParser::new().decode_detailed(&frame) {
 
 Use one parser per physical source. `reset()` clears pending VDM and VDO assemblies.
 The historical `decode()` still maps errors, pending fragments and ignored frames
-to `None`. Detailed outcomes do not restore information already discarded by the
-message models: special position timestamps 60–63 still become `None` in received
-reports. Migrating those public field types is separate work.
+to `None`. Position reports preserve all timestamp states through
+`ais::messages::PositionTimestamp`: `Exact(0..=59)`, `NotAvailable` (60),
+`ManualInput` (61), `DeadReckoning` (62), and `Inoperative` (63). Types
+1/2/3/9/18/19/21 use this type in both reception and transmission. Calendar
+seconds in Types 4/11 remain optional numeric values.
 
 ### Encode an AIS transponder message
 
@@ -206,6 +213,52 @@ let sentence = abm.to_sentence("AI").expect("valid AIS sentence");
 methods check the frame envelope, not application-field semantics, and work with
 the individual `abm` or `bbm` feature without enabling `nmea`.
 
+## Migrating the unreleased API
+
+These changes break source compatibility. The package version remains unchanged
+until a release decision; update consumers before using this unreleased code.
+
+- **Sentence parsing:** all 85 NMEA parsers and ABM/BBM return `Self` instead of
+  `Option<Self>`. Remove the outer `.expect(...)`, `?`, or `Some` match. Field
+  values still use `Option`; frame parsing and AIS decoding keep their existing
+  fallible return types.
+- **AIS position timestamps:** replace `Some(second)` with
+  `PositionTimestamp::Exact(second)` and `None` with `NotAvailable` in
+  `ClassAPosition` and `ClassBPosition`. Received `PositionReport`,
+  `SarAircraftReport` and `AidToNavigation` now use the same enum. Handle all
+  five variants instead of testing for `Some`/`None`. `Exact(60)` and larger
+  values fail encoding. The existing `ais::transmit::PositionTimestamp` import
+  remains valid; the shared definition is `ais::messages::common::PositionTimestamp`,
+  also reexported by `ais::messages`.
+- **Unknown sentences:** manual constructors for `NmeaSentence::Unknown` and
+  `AisSentence::Unknown` now require `prefix`, `talker` and `tag_block`. Prefer
+  parsing the frame to capture these values. Add `..` to patterns that only
+  inspect payload fields. Encoding uses the stored talker, not its argument.
+  The legacy `EncodeError::MissingFrameContext` variant remains available but
+  is no longer returned by these enums.
+
+```rust
+use nmea_0183_rs::{NmeaSentence, parse_frame};
+use nmea_0183_rs::nmea::Dbt;
+
+let frame = parse_frame("$SDDBT,7.7,f,2.3,M,1.3,F*05").expect("frame");
+// Previously: Dbt::parse(&frame.fields).expect("parse DBT")
+let depth: Dbt = Dbt::parse(&frame.fields);
+assert_eq!(depth.depth_meters, Some(2.3));
+
+let unknown = NmeaSentence::Unknown {
+    prefix: '!',
+    talker: "AI".to_owned(),
+    sentence_type: "XYZ".to_owned(),
+    fields: vec!["1".to_owned()],
+    tag_block: None,
+};
+if let NmeaSentence::Unknown { sentence_type, .. } = &unknown {
+    assert_eq!(sentence_type, "XYZ");
+}
+assert!(unknown.to_sentence("ignored").expect("encode").starts_with("!AIXYZ,"));
+```
+
 ## Architecture
 
 ```mermaid
@@ -233,7 +286,7 @@ formatter-specific semantic validation, serial baud or electrical checks,
 transmission cadence, timeouts, or multipart reassembly for non-AIS formatters
 such as RTE, TXT, ALC, ALF, TUT, and SMV.
 
-**NMEA content** uses `FieldReader`/`FieldWriter` for sequential field parsing and encoding. Each sentence type is a standalone struct with `parse()`, `encode()`, and `to_sentence()`. Parsing is lenient: `parse()` always returns `Some` for known types, mapping missing or malformed fields to `None`. This is intentional for marine instruments that often produce partial data.
+**NMEA content** uses `FieldReader`/`FieldWriter` for sequential field parsing and encoding. Each sentence type is a standalone struct with `parse()`, `encode()`, and `to_sentence()`. Parsing is infallible and lenient: `parse()` returns the sentence struct directly, mapping missing or malformed fields to `None`. This is intentional for marine instruments that often produce partial data.
 
 **AIS content** decodes AIVDM/AIVDO 6-bit ASCII armor into a bitstream, handles multi-fragment reassembly, and extracts typed fields. `ais::transmit` encodes complete `!AIVDM` or `!AIVDO` lines for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27. It owns sentence fragmentation, while the simulator remains responsible for choosing its emission cadence. The `!`-prefixed AIS application sentences ABM and BBM live under `ais::sentences`. VSD is a conventional NMEA sentence (`$--VSD`) exposed under `nmea::sentences`.
 

@@ -10,7 +10,7 @@ Bidirectional NMEA 0183 parser/encoder + AIS decoder and transponder-message enc
 | NMEA sentences | 85 (bidirectional) |
 | AIS application sentences | 2 (bidirectional) |
 | AIS message types | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
-| Tests | 933 unit/integration + 9 doctests, 0 failures (all features) |
+| Tests | 942 unit/integration + 9 doctests, 0 failures (all features) |
 | Unsafe blocks | 0 |
 
 For contribution workflow, test rules, and the sentence-type checklist see [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -40,7 +40,7 @@ value.to_sentence_strict(talker: &str) -> Result<String, StrictEncodeError>
 use nmea_0183_rs::nmea::sentences::{Mwd, Rmc, Dbt, Vsd, ...}; // standard
 use nmea_0183_rs::nmea::sentences::{Pashr, Pskpdpt, ...};    // proprietary
 
-Type::parse(fields: &[&str]) -> Option<Self>   // always Some for known types
+Type::parse(fields: &[&str]) -> Self         // infallible; individual fields remain optional
 Type::default() -> Self                     // absent fields, empty groups; not a valid fix
 value.encode() -> Result<Vec<String>, EncodeError> // fields in wire order
 
@@ -52,6 +52,7 @@ decimal_to_ddmm(decimal: f64) -> f64 // decimal degrees → DDMM.MMMM
 
 // AIS decoder and !-prefixed application-layer sentences
 use nmea_0183_rs::ais::{AisParser, AisMessage, AisDecodeOutcome, AisDecodeError};
+use nmea_0183_rs::ais::messages::PositionTimestamp; // also available under ais::transmit
 use nmea_0183_rs::ais::sentences::{Abm, Bbm, AisSentence};
 use nmea_0183_rs::ais::transmit::{AisChannel, AisEncodable, AisTransmitOptions, ClassAPosition};
 
@@ -67,9 +68,9 @@ message.to_sentences(AisTransmitOptions::vdm(AisChannel::A)) -> Result<Vec<Strin
 
 - **Frame layer**: `parse_frame()` returns `Result<NmeaFrame, FrameError>`. Variants: `Empty`, `InvalidPrefix`, `MalformedChecksum`, `BadChecksum`, `MalformedTagBlock`, `BadTagChecksum`, `TooShort`, `NonAsciiAddress`. When a tag-block checksum is present it is validated, and `tag_block` excludes its `*hh` suffix.
 - **Encode layer**: compatible encode APIs return `Result<_, EncodeError>`; strict encode APIs return `Result<_, StrictEncodeError>` (`Encode` or `Compliance`). `EncodeError` variants: `InvalidPrefix`, `NonAsciiAddress`, `EmptySentenceType`, `InvalidAddressLength`, `InvalidAddressCharacter`, `InvalidFieldCharacter`, `InvalidTagBlockCharacter`, `MissingFrameContext`, `InvalidCoordinate`, `NonFiniteNumber`, `InvalidAisField`, `AisTextTooLong`, `MissingAisSequenceId`, `TooManyAisFragments`.
-- **NMEA content**: `parse()` always returns `Some`. Missing/malformed fields → `None` inside the struct. Intentional for marine instruments that send partial data.
+- **NMEA content**: `parse()` returns the struct directly. Missing/malformed fields → `None` inside the struct. Intentional for marine instruments that send partial data.
 - **AIS content**: `decode()` retains `Option<AisMessage>`; `None` means awaiting fragments, ignored frame or decode failure. `decode_detailed()` distinguishes those states and returns `AisDecodeError` (`MissingFragmentFields`, `InvalidFragmentField`, `UnexpectedFragment`, `PayloadTooLong`, `InvalidArmor`, `InvalidMessage`). Unknown numeric types remain decoded `AisMessage::Unknown` values.
-- **Re-encoding**: typed enums expose compatible/strict methods. Their `Unknown` variants return `MissingFrameContext`; retain the `NmeaFrame` and call its `to_sentence()`, or retain the input line for exact bytes.
+- **Re-encoding**: typed enums expose compatible/strict methods. Their `Unknown` variants own prefix, talker and tag_block and ignore the encoding talker argument. Typed variants still need the original `NmeaFrame` for full envelope preservation; retain the input line for exact bytes.
 - **Encoding validity**: supplied non-finite NMEA floats are errors, not absent fields. Defaults mean absent data, not semantic validity. Strict methods validate the frame envelope only.
 - **No panics**: 0 `panic!`, 0 `unwrap()`, 0 `todo!` in library code.
 
@@ -133,7 +134,7 @@ pub struct PositionReport {          // Types 1/2/3/18/19
     pub latitude: Option<f64>,       // decimal degrees (already converted)
     pub cog: Option<f32>,            // degrees
     pub heading: Option<u16>,        // integer degrees
-    pub timestamp: Option<u8>,
+    pub timestamp: PositionTimestamp, // Exact(0..=59), NotAvailable, ManualInput, DeadReckoning, Inoperative
     pub maneuver_indicator: Option<u8>,
     pub raim: bool,
     pub communication_state: Option<u32>,
@@ -203,7 +204,7 @@ src/ais/transmit/*.rs   → stateless AIVDM/AIVDO encoder models for a simulated
 Every NMEA sentence type follows the same pattern using `FieldReader`/`FieldWriter`:
 
 - `SENTENCE_TYPE` — 3-char const (`"MWD"`, `"RMC"`, etc.)
-- `parse(fields: &[&str]) -> Option<Self>` — sequential field reading (always returns `Some`, lenient)
+- `parse(fields: &[&str]) -> Self` — sequential field reading (infallible, lenient)
 - `encode(&self) -> Result<Vec<String>, EncodeError>` — sequential field writing
 - `to_sentence(&self, talker: &str) -> Result<String, EncodeError>` — default impl on `NmeaEncodable` trait
 

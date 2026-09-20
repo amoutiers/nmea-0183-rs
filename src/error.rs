@@ -66,7 +66,9 @@ pub enum EncodeError {
     InvalidFieldCharacter(char),
     /// A tag contains non-ASCII characters, controls, `\\` or `*`.
     InvalidTagBlockCharacter(char),
-    /// An unknown typed sentence lacks the envelope needed for encoding.
+    /// Legacy error for a sentence without its frame envelope.
+    /// Current `NmeaSentence` and `AisSentence` variants retain that context
+    /// and do not return this error.
     MissingFrameContext,
     /// Coordinate magnitude is NaN, infinite, or negative.
     InvalidCoordinate,
