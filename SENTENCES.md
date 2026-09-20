@@ -6,6 +6,8 @@ Les coches indiquent un support actuellement présent dans nmea-kit. `HTC` et `H
 
 Sources des TOC et deltas : [IEC 61162-1:1995](https://webstore.iec.ch/en/publication/19259), [IEC 61162-1:2000](https://webstore.iec.ch/en/publication/19260), [IEC 61162-1:2007](https://standards.iteh.ai/catalog/standards/iec/2bf36711-dd76-4e3e-b19c-1b46bbf88495/iec-61162-1-2007), [IEC 61162-1:2010](https://webstore.iec.ch/en/publication/4709), [IEC 61162-1:2016](https://webstore.iec.ch/en/publication/25754) et [IEC 61162-1:2024](https://webstore.iec.ch/en/publication/72729). Chronologie des versions NMEA : [NMEA 0183](https://en.wikipedia.org/wiki/NMEA_0183#Revisions).
 
+Chronologie NMEA secondaire : 2.00 (1992), 2.01 (1994), 2.10 (1995), 2.20 (1997), 2.30 (1998), 3.00 (2000), 3.01 (2002), 4.00 (2008), 4.10 (2012) et 4.11 (2018) sont recensées par [GPSD, NMEA Revealed](https://gpsd.io/NMEA.html), qui précise ne pas avoir consulté les normes NMEA. La publication de 4.11 (2018) et 4.30 (2023) est confirmée par [NMEA](https://www.nmea.org/nmea-0183.html). Les contenus sentence par sentence de ces versions NMEA ne sont pas publiés librement, elles restent donc des bornes observées dans les TOC IEC.
+
 ## Current status
 
 - **66** des **133** formatters IEC 61162-1:2024 sont supportés.
