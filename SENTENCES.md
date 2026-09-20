@@ -252,6 +252,9 @@ Le support reflète `nmea-kit` aujourd’hui. Chaque colonne donne la version NM
 
 ### Trawl / Fishing
 
+| Formatter | Description | Support | NMEA 2.1<br>(1995) | NMEA 2.30<br>(2000) | NMEA 3.01<br>(2007) | NMEA 4.00<br>(2010) | NMEA 4.10<br>(2016) | NMEA 4.10<br>(2024) |
+| --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+
 Aucun formatter de cette rubrique n’est publié dans les six éditions de l’IEC 61162-1.
 ## Legacy hors TOC IEC
 
