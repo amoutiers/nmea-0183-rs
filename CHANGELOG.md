@@ -6,7 +6,7 @@ All notable changes to nmea-0183-rs are documented here.
 
 ### Changed
 - Renamed the crate from `nmea-kit` to `nmea-0183-rs`; Rust imports now use `nmea_0183_rs`.
-- `Vsd.persons` is now `Option<u16>` so valid counts through 8191 are preserved. This is a source-breaking API change: consumers requiring `Option<u8>` can convert with `.map(u16::from)`.
+- `Vsd.persons` is now `Option<u16>` so valid counts through 8191 are preserved. This is a source-breaking API change: callers with existing `Option<u8>` values can migrate with `.map(u16::from)`.
 
 ### Fixed
 - Reject non-alphanumeric address characters during encoding to prevent NMEA sentence injection through `talker` or `sentence_type`; preserve the `!**TTD` address.
