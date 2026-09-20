@@ -106,6 +106,7 @@ pub struct LongRangePosition {
     pub latitude: Option<f64>,
     pub sog: Option<u8>,
     pub cog: Option<u16>,
+    /// `false` = GNSS position less than five seconds old; `true` = more than five seconds old.
     pub gnss_position_status: bool,
 }
 

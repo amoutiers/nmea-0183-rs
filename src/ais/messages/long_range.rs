@@ -40,7 +40,7 @@ pub struct LongRangePosition {
     pub sog: Option<u8>,
     /// Course over ground in integer degrees (0–359). `None` if not available (raw = 511).
     pub cog: Option<u16>,
-    /// `true` = current GNSS position; `false` = not GNSS position (4 h old or more).
+    /// `false` = GNSS position less than five seconds old; `true` = more than five seconds old.
     pub gnss_position_status: bool,
 }
 
@@ -89,7 +89,7 @@ impl LongRangePosition {
             longitude,
             latitude,
             sog: if sog_raw == 63 { None } else { Some(sog_raw) },
-            cog: if cog_raw == 511 { None } else { Some(cog_raw) },
+            cog: (cog_raw < 360).then_some(cog_raw),
             gnss_position_status: gnss,
         })
     }
@@ -97,6 +97,8 @@ impl LongRangePosition {
 
 #[cfg(test)]
 mod tests {
+    use super::LongRangePosition;
+    use crate::ais::messages::test_helpers::set_bits;
     use crate::ais::{AisMessage, AisParser};
     use crate::parse_frame;
 
@@ -137,6 +139,25 @@ mod tests {
             }
         } else {
             panic!("expected LongRangePosition, got {msg:?}");
+        }
+    }
+
+    #[test]
+    fn long_range_course_filters_reserved_values() {
+        for (raw, expected) in [
+            (0, Some(0)),
+            (359, Some(359)),
+            (360, None),
+            (510, None),
+            (511, None),
+        ] {
+            let mut bits = vec![0; 96];
+            set_bits(&mut bits, 0, 6, 27);
+            set_bits(&mut bits, 85, 9, raw);
+            assert_eq!(
+                LongRangePosition::decode(&bits).expect("decode").cog,
+                expected
+            );
         }
     }
 }

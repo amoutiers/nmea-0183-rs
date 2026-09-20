@@ -29,13 +29,9 @@ pub(crate) fn decode_sog(raw: u32) -> Option<f32> {
     }
 }
 
-/// Decode COG from 1/10 degree. 3600 = not available.
+/// Decode COG from 1/10 degree. Values 3600 and above are reserved.
 pub(crate) fn decode_cog(raw: u32) -> Option<f32> {
-    if raw == 3600 {
-        None
-    } else {
-        Some(raw as f32 / 10.0)
-    }
+    (raw < 3600).then_some(raw as f32 / 10.0)
 }
 
 /// Decode true heading in degrees. 511 = not available; 360-510 reserved.
@@ -59,5 +55,14 @@ mod tests {
         assert_eq!(decode_heading(360), None);
         assert_eq!(decode_heading(400), None);
         assert_eq!(decode_heading(511), None);
+    }
+
+    #[test]
+    fn course_filters_reserved_values() {
+        assert_eq!(decode_cog(0), Some(0.0));
+        assert_eq!(decode_cog(3599), Some(359.9));
+        assert_eq!(decode_cog(3600), None);
+        assert_eq!(decode_cog(3601), None);
+        assert_eq!(decode_cog(4095), None);
     }
 }
