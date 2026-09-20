@@ -10,7 +10,7 @@ Bidirectional NMEA 0183 parser/encoder + AIS decoder and transponder-message enc
 | NMEA sentences | 85 (bidirectional) |
 | AIS application sentences | 2 (bidirectional) |
 | AIS message types | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
-| Tests | 892, 0 failures |
+| Tests | 904, 0 failures |
 | Unsafe blocks | 0 |
 
 For contribution workflow, test rules, and the sentence-type checklist see [CONTRIBUTING.md](CONTRIBUTING.md).

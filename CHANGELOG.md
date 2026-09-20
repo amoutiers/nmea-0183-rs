@@ -10,6 +10,7 @@ All notable changes to nmea-0183-rs are documented here.
 
 ### Fixed
 - Reject non-alphanumeric address characters during encoding to prevent NMEA sentence injection through `talker` or `sentence_type`; preserve the `!**TTD` address.
+- Keep interleaved AIS VDM and VDO fragment assemblies separate, reject reserved AIS course values, preserve partial ALC/DSE/TLB groups, and format Kenwood coordinates through the common NMEA coordinate writers.
 
 ## [0.8.7] — 2026-09-20
 
