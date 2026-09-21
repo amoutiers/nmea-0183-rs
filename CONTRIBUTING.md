@@ -102,11 +102,16 @@ with standard 3-char sentence types.
 
 ## Code style
 
-- Zero external dependencies — no `nom`, no proc-macro, no `serde`
+- Zero external dependencies — no `nom`, no proc-macro, no `syn`/`quote`, no `serde`
 - No `unwrap()` in library code — `expect("description")` in tests only
 - No `panic!`, `todo!`, or `#[allow(dead_code)]` in `src/`
 - Rust edition 2024, MSRV 1.85.0
-- The `ais` feature includes decoding plus stateless `!AIVDM`/`!AIVDO` encoding for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24, and 27; emission scheduling remains outside the crate
+- AIS encoding is stateless: the crate constructs `!AIVDM`/`!AIVDO` lines, while callers own emission scheduling. See [SENTENCES.md](SENTENCES.md#ais) for protocol coverage.
+
+## API policy
+
+- Source-breaking changes are allowed across the public API. Remove obsolete compatibility aliases and adapters instead of maintaining historical signatures.
+- Keep interfaces that serve distinct current use cases, including permissive and strict frame validation.
 
 ## Known design issues
 

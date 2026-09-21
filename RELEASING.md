@@ -92,7 +92,7 @@ CHANGELOG entry:
 - `FieldReader::u16` / `i16` / `i32` and matching `FieldWriter` methods.
 - `NmeaEncodable::SENTENCE_TYPE` is now `&'static str` (was `&str`).
 
-[0.5.7]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.5.7
+[0.5.7]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.5.7
 ```
 
 GitHub release body:
@@ -108,6 +108,6 @@ GitHub release body:
 
 ---
 
-📜 [Full changelog](https://github.com/amoutiers/nmea-kit/blob/master/CHANGELOG.md#057--2026-05-01)
-📦 [crates.io](https://crates.io/crates/nmea-kit/0.5.7)
+📜 [Full changelog](https://github.com/amoutiers/nmea-0183-rs/blob/master/CHANGELOG.md#057--2026-05-01)
+📦 [crates.io](https://crates.io/crates/nmea-0183-rs/0.5.7)
 ```

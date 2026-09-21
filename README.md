@@ -439,7 +439,8 @@ coordinate ranges or fix validity; those checks remain the consumer's responsibi
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Getting started, TDD workflow, test rules, adding a sentence type |
 | [SENTENCES.md](SENTENCES.md)       | Full NMEA / AIS coverage matrix                                   |
 | [CHANGELOG.md](CHANGELOG.md)       | Release history                                                   |
-| [AGENTS.md](AGENTS.md)             | API surface, struct fields, and patterns (optimized for LLMs)     |
+| [AGENTS.md](AGENTS.md)             | Instructions and reference links for coding agents                |
+| [RELEASING.md](RELEASING.md)       | Release workflow and changelog/release-body templates              |
 
 ## License
 
