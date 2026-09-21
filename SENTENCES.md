@@ -32,6 +32,8 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 
 Chaque feature de catégorie ci-dessous active uniquement les formatters marqués ✓. Chaque formatter supporté conserve aussi sa feature individuelle en minuscules.
 
+`Cargo.toml` définit l'appartenance effective des features ; cette matrice en documente la couverture et les références protocolaires.
+
 ## NMEA Sentences
 
 Le support reflète `nmea-0183-rs` aujourd’hui. Les deux bornes donnent les première et dernière versions NMEA observées dans les TOC IEC disponibles, avec leur année de publication. Elles ne prouvent pas une présence continue entre ces points.

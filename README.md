@@ -298,27 +298,16 @@ such as RTE, TXT, ALC, ALF, TUT, and SMV.
 
 ## Supported types
 
-### NMEA 0183 sentences (bidirectional) — [full coverage list](SENTENCES.md)
+### NMEA 0183 sentences (bidirectional)
 
-| Category           | Sentences             |
-| ------------------ | --------------------- |
-| Position           | DTM, RMC, GGA, GLL, GNS |
-| Satellites         | GBS, GSA, GSV, GST    |
-| Wind               | MWD, MWV, VPW, VWR, VWT    |
-| Heading            | HDT, HDG, HDM, THS    |
-| Course & Speed     | RPM, VBW, VDR, VLW, VTG, VHW    |
-| Depth              | DPT, DBT, DBS, DBK    |
-| Steering           | HSC, ROT, RSA         |
-| Environment        | MDA, MTA, MTW, XDR¹        |
-| Waypoints & Routes | AAM, APB, BEC, BOD, BWC, BWR, BWW, RMB, RTE, WCV, WPL, XTE |
-| Radar / Targets    | OSD, RSD, TLL, TTM    |
-| Safety & Alarms    | ACK, ACN, ALA, ALC, ALF, ALR, ARC, DOR, DSC, DSE, EVE, FIR, HBT |
-| AIS interface      | VSD (`$--VSD`)        |
-| Communication      | TXT                   |
-| Time               | ZDA                   |
-| Proprietary        | PASHR, PGRME, PSKPDPT |
+The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 85
+bidirectional NMEA formatters, two AIS application sentences, and AIS message
+Types 1-27 decoding. [`SENTENCES.md`](SENTENCES.md) is the complete coverage
+matrix, including categories, proprietary formatters, and protocol references.
 
-¹ `Xdr` has an additional `to_sentences() -> Result<Vec<String>, EncodeError>` method that automatically splits many measurements into multiple sentences to stay within the 82-character NMEA line limit.
+`Xdr` additionally exposes `to_sentences() -> Result<Vec<String>, EncodeError>`
+to split many measurements across sentences that stay within the 82-character
+NMEA line limit.
 
 ### AIS application sentences (bidirectional)
 
@@ -380,24 +369,11 @@ nmea-0183-rs = "0.8"
 | `nmea` | yes | All 69 standard NMEA sentence types |
 | `nmea_proprietary` | yes | All 16 proprietary NMEA sentence types |
 | `ais` | yes | 24 AIS message decoders, transponder encoding, ABM/BBM, and VSD |
-| `position` | via `nmea` | DTM, GGA, GLL, GNS, RMB, RMC |
-| `satellites` | via `nmea` | GBS, GSA, GST, GSV |
-| `heading` | via `nmea` | HDG, HDM, HDT, HSC, THS |
-| `course_speed` | via `nmea` | OSD, ROT, VBW, VDR, VHW, VLW, VPW, VTG, WCV |
-| `wind` | via `nmea` | MWD, MWV, VWR, VWT |
-| `depth` | via `nmea` | DBK, DBS, DBT, DPT |
-| `steering` | via `nmea` | APB, RPM, RSA |
-| `waypoints_routes` | via `nmea` | AAM, BEC, BOD, BWC, BWR, BWW, RTE, WPL, XTE |
-| `environment` | via `nmea` | MDA, MTA, MTW, XDR |
-| `time` | via `nmea` | ZDA |
-| `targets` | via `nmea` | RSD, TLB, TLL, TTD, TTM |
-| `safety_alarms` | via `nmea` | ACK, ACN, ALA, ALC, ALF, ALR, ARC, DOR, DSC, DSE, EVE, FIR, HBT |
-| `communication` | via `nmea` | TXT |
 
-Every supported formatter also has an individual lowercase feature. The complete
-mapping is listed in [`SENTENCES.md`](SENTENCES.md). `abm` and `bbm` are enabled
-through `ais`; proprietary formatter features are enabled through
-`nmea_proprietary`.
+Every supported formatter also has an individual lowercase feature. `abm` and
+`bbm` are enabled through `ais`; proprietary formatter features are enabled
+through `nmea_proprietary`. [`SENTENCES.md`](SENTENCES.md) documents category
+coverage; [`Cargo.toml`](Cargo.toml) defines the effective feature membership.
 
 Use a group feature for common use cases:
 
