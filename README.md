@@ -377,7 +377,7 @@ NMEA line limit.
 
 ```toml
 [dependencies]
-nmea-0183-rs = "0.8"
+nmea-0183-rs = "0.9"
 ```
 
 | Feature | Default | Enables |
@@ -395,25 +395,25 @@ Use a group feature for common use cases:
 
 ```toml
 # Only position sentences, no AIS or proprietary formatters
-nmea-0183-rs = { version = "0.8", default-features = false, features = ["position"] }
+nmea-0183-rs = { version = "0.9", default-features = false, features = ["position"] }
 ```
 
 Cherry-pick individual sentences you need:
 
 ```toml
-nmea-0183-rs = { version = "0.8", default-features = false, features = ["rmc", "mwd"] }
+nmea-0183-rs = { version = "0.9", default-features = false, features = ["rmc", "mwd"] }
 ```
 
 Standard NMEA only, without AIS or proprietary formatters:
 
 ```toml
-nmea-0183-rs = { version = "0.8", default-features = false, features = ["nmea"] }
+nmea-0183-rs = { version = "0.9", default-features = false, features = ["nmea"] }
 ```
 
 Add all proprietary NMEA formatters explicitly when needed:
 
 ```toml
-nmea-0183-rs = { version = "0.8", default-features = false, features = ["nmea", "nmea_proprietary"] }
+nmea-0183-rs = { version = "0.9", default-features = false, features = ["nmea", "nmea_proprietary"] }
 ```
 
 ## Coordinate conversion
