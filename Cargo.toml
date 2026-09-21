@@ -1,9 +1,9 @@
 [package]
 name = "nmea-0183-rs"
-version = "0.8.7"
+version = "0.9.0"
 edition = "2024"
 rust-version = "1.85.0"
-description = "Bidirectional NMEA 0183 parser and encoder with AIS decoding"
+description = "Continuation of nmea-kit: bidirectional NMEA 0183 parser and encoder with AIS decoding and transponder-message encoding"
 license = "MIT OR Apache-2.0"
 authors = ["Antoine MOUTIERS"]
 readme = "README.md"
@@ -12,7 +12,7 @@ homepage = "https://github.com/amoutiers/nmea-0183-rs"
 documentation = "https://docs.rs/nmea-0183-rs"
 keywords = ["nmea", "ais", "gps", "marine", "navigation"]
 categories = ["parser-implementations", "science::geo", "network-programming", "encoding"]
-exclude = ["/tests/"]
+exclude = ["/tests/", "/.github/", "/.githooks/", "/AGENTS.md", "/SECURITY.md"]
 
 [dependencies]
 

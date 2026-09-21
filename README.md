@@ -1,11 +1,20 @@
 # nmea-0183-rs
 
+[![CI](https://github.com/amoutiers/nmea-0183-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/amoutiers/nmea-0183-rs/actions/workflows/ci.yml)
+[![Crates.io](https://img.shields.io/crates/v/nmea-0183-rs.svg)](https://crates.io/crates/nmea-0183-rs)
+[![Documentation](https://docs.rs/nmea-0183-rs/badge.svg)](https://docs.rs/nmea-0183-rs)
+[![License](https://img.shields.io/crates/l/nmea-0183-rs.svg)](https://github.com/amoutiers/nmea-0183-rs#license)
+
 Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message encoding, written in Rust.
+
+This repository is a continuation of [nmea-kit](https://github.com/amoutiers/nmea-kit).
+Version 0.9.0 is the first release published under the `nmea-0183-rs` crate name;
+historical `nmea-kit` releases remain available in the original repository.
 
 | | |
 | --- | --- |
 | **Crate** | `nmea-0183-rs` |
-| **Version** | 0.8.7 |
+| **Version** | 0.9.0 |
 | **MSRV** | 1.85.0 |
 | **Edition** | 2024 |
 | **Dependencies** | 0 |
@@ -16,6 +25,13 @@ Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message
 
 - **Shared frame layer** — handles `$` parametric and `!` encapsulated framing, IEC 61162-450 tag blocks
 - **No `nom`, no proc-macro** — `FieldReader`/`FieldWriter` helpers for clean sequential parsing
+
+## Install
+
+```toml
+[dependencies]
+nmea-0183-rs = "0.9"
+```
 
 ## Quick start
 
@@ -212,10 +228,10 @@ let sentence = abm.to_sentence("AI").expect("valid AIS sentence");
 methods check the frame envelope, not application-field semantics, and work with
 the individual `abm` or `bbm` feature without enabling `nmea`.
 
-## Migrating the unreleased API
+## Migrating to 0.9.0
 
-These changes break source compatibility. The package version remains unchanged
-until a release decision; update consumers before using this unreleased code.
+These changes break source compatibility with the historical `nmea-kit` API.
+Update consumers before moving to `nmea-0183-rs` 0.9.0.
 Source compatibility is not a constraint anywhere in the public API: obsolete
 interfaces are removed instead of retained as aliases or adapters.
 

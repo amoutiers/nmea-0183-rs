@@ -2,6 +2,27 @@
 
 Templates for CHANGELOG entries and GitHub release descriptions. Keep them in sync — the GH release body should mirror the CHANGELOG entry, not invent new wording.
 
+## First publication
+
+`nmea-0183-rs` is a new crates.io crate name. The first publication must be
+made manually because crates.io cannot configure Trusted Publishing for a crate
+that does not exist yet.
+
+1. Confirm that the crates.io account has a verified email address.
+2. Run `cargo publish --dry-run --locked` from the clean release commit.
+3. Publish `0.9.0` manually with a crates.io API token using `cargo login`, then
+   run `cargo publish --locked`.
+4. Revoke or remove the token after publication.
+5. In the crates.io crate settings, add GitHub Actions as a Trusted Publisher:
+   repository `amoutiers/nmea-0183-rs`, workflow `publish.yml`, with no
+   environment configured.
+6. Verify the published crate and docs.rs page.
+7. Push the `v0.9.0` tag. CI will run, skip the duplicate crates.io upload for
+   this first release, and create the GitHub Release.
+
+Publication is permanent. Never commit, paste into an issue, or store a crates.io
+token in the repository.
+
 ## Workflow
 
 1. While developing, add bullets under `## [Unreleased]` in `CHANGELOG.md`.
@@ -10,7 +31,11 @@ Templates for CHANGELOG entries and GitHub release descriptions. Keep them in sy
    - Rename `[Unreleased]` → `[X.Y.Z] — YYYY-MM-DD` (date = day you actually publish, not when you wrote the bullets).
    - Add the version link footnote at the bottom.
    - Commit, tag `vX.Y.Z`, push tag.
-3. **Do not run `cargo publish` locally.** The tag validates its version and dated CHANGELOG section, then the workflow publishes to crates.io and creates the GitHub Release. Monitor the GitHub Actions workflow after pushing the tag. Recover manually only after inspecting whether publication or release creation already completed.
+3. For versions after the first publication, do not run `cargo publish` locally.
+   The tag validates its version and dated CHANGELOG section, then the workflow
+   publishes to crates.io and creates the GitHub Release. Monitor the GitHub
+   Actions workflow after pushing the tag. Recover manually only after
+   inspecting whether publication or release creation already completed.
 
 ## CHANGELOG entry template
 

@@ -1,0 +1,39 @@
+name: Bug report
+description: Report incorrect parsing, encoding, or AIS behavior
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Which nmea-0183-rs version is affected?
+      placeholder: 0.9.0
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Raw input
+      description: Paste the complete NMEA or AIS sentence, including its checksum if present.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: rust
+    attributes:
+      label: Rust version
+      placeholder: rustc 1.85.0

@@ -2,7 +2,7 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
-## [Unreleased]
+## [0.9.0] — 2026-09-21
 
 ### Added
 - Added opt-in strict frame validation and encoding APIs while preserving the existing compatibility APIs.
@@ -446,6 +446,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.9.0]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.0
 [0.8.7]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.7
 [0.8.6]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.6
 [0.8.5]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.5

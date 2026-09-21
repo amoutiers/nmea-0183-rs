@@ -1,0 +1,20 @@
+name: Feature request
+description: Suggest a supported NMEA or AIS capability
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What device, sentence, or application needs this?
+    validations:
+      required: true
+  - type: textarea
+    id: wire-format
+    attributes:
+      label: Wire format or reference
+      description: Link the specification or paste a verified real-world sentence.
+    validations:
+      required: true

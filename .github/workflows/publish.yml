@@ -9,6 +9,8 @@ jobs:
     uses: ./.github/workflows/ci.yml
 
   publish:
+    # v0.9.0 is manually published once because the crate does not exist yet.
+    if: github.ref_name != 'v0.9.0'
     needs: ci
     runs-on: ubuntu-latest
     permissions:
@@ -23,12 +25,13 @@ jobs:
           bash .github/scripts/release-notes.sh "$GITHUB_REF_NAME" "$version" CHANGELOG.md > /dev/null
       - uses: rust-lang/crates-io-auth-action@v1.0.4
         id: auth
-      - run: cargo publish
+      - run: cargo publish --locked
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
 
   release:
-    needs: publish
+    needs: [ci, publish]
+    if: ${{ always() && needs.ci.result == 'success' && (needs.publish.result == 'success' || github.ref_name == 'v0.9.0') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
