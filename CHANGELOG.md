@@ -2,6 +2,14 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
+## [0.9.1] - 2026-09-24
+
+### Added
+- GRS (GNSS Range Residuals) sentence type: time, calculation mode, twelve satellite residuals, GNSS system identifier, and signal identifier.
+- RMA (Recommended Minimum Specific LORAN-C Data) sentence type: status, position, LORAN-C time differences, speed, course, and magnetic variation.
+
+NMEA sentence coverage: 85 → 87 types.
+
 ## [0.9.0] — 2026-09-21
 
 ### Added
@@ -446,6 +454,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.9.1]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.1
 [0.9.0]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.0
 [0.8.7]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.7
 [0.8.6]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.6

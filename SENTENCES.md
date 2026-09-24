@@ -18,15 +18,17 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 
 ## Current status
 
-- **66** des **133** formatters IEC 61162-1:2024 sont supportés.
-- **67** formatters IEC 61162-1:2024 restent à intégrer.
+- **68** des **133** formatters IEC 61162-1:2024 sont supportés.
+- **65** formatters IEC 61162-1:2024 restent à intégrer.
 - **7** formatters legacy supplémentaires sont supportés hors de la liste IEC 2024.
+- La version 0.9.1 comprend 87 formatters NMEA, dont 71 standard et 16 propriétaires.
+- La suite all-features compte 974 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 
 **Features Cargo**
 
 - `default` active `nmea`, `nmea_proprietary` et `ais`.
-- `nmea` regroupe les 69 formatters NMEA standard supportés.
+- `nmea` regroupe les 71 formatters NMEA standard supportés.
 - `nmea_proprietary` regroupe les 16 formatters propriétaires supportés.
 - `ais` active le décodage et l’encodage AIS, ainsi que `ABM`, `BBM` et `VSD`.
 
@@ -53,7 +55,7 @@ Feature Cargo : `position`.
 | `RMB` | Recommended minimum navigation information | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `RMC` | Recommended minimum specific GNSS data | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `POS` | Device position and ship dimensions report or configuration command |   | 4.00<br>(2008) | 4.30<br>(2023) |
-| `RMA` | Recommended minimum specific LORAN-C data |   | 2.10<br>(1995) | 4.30<br>(2023) |
+| `RMA` | Recommended minimum specific LORAN-C data | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `DCN` | Decca position |   | 2.10<br>(1995) | 3.01<br>(2002) |
 | `GLC` | Geographic position, LORAN-C |   | 2.10<br>(1995) | 3.01<br>(2002) |
 | `GMP` | GNSS map projection fix data |   | 3.01<br>(2002) | 3.01<br>(2002) |
@@ -73,7 +75,7 @@ Feature Cargo : `satellites`.
 | `GSV` | GNSS satellites in view | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `GDC` | GNSS differential correction |   | 4.30<br>(2023) | 4.30<br>(2023) |
 | `GFA` | GNSS fix accuracy and integrity |   | 4.00<br>(2008) | 4.30<br>(2023) |
-| `GRS` | GNSS range residuals |   | 2.10<br>(1995) | 4.30<br>(2023) |
+| `GRS` | GNSS range residuals | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `ALM` | GPS almanac data |   | 2.10<br>(1995) | 3.01<br>(2002) |
 | `MLA` | GLONASS almanac data |   | 2.30<br>(1998) | 3.01<br>(2002) |
 

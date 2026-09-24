@@ -4,4 +4,4 @@ version = 4
 
 [[package]]
 name = "nmea-0183-rs"
-version = "0.9.0"
+version = "0.9.1"

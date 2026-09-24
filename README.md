@@ -8,19 +8,21 @@
 Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message encoding, written in Rust.
 
 This repository is a continuation of [nmea-kit](https://github.com/amoutiers/nmea-kit).
-Version 0.9.0 is the first release published under the `nmea-0183-rs` crate name;
-historical `nmea-kit` releases remain available in the original repository.
+Version 0.9.1 is the latest release under the `nmea-0183-rs` crate name;
+version 0.9.0 was the first. Historical `nmea-kit` releases remain available
+in the original repository.
 
 | | |
 | --- | --- |
 | **Crate** | `nmea-0183-rs` |
-| **Version** | 0.9.0 |
+| **Version** | 0.9.1 |
 | **MSRV** | 1.85.0 |
 | **Edition** | 2024 |
 | **Dependencies** | 0 |
 | **License** | MIT OR Apache-2.0 |
-| **NMEA sentences** | 85 (bidirectional: parse + encode) |
+| **NMEA sentences** | 87 (bidirectional: parse + encode) |
 | **AIS application sentences** | 2 (bidirectional: parse + encode) |
+| **All-features tests** | 974 passed, including doctests |
 | **AIS message types** | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
 
 - **Shared frame layer** — handles `$` parametric and `!` encapsulated framing, IEC 61162-450 tag blocks
@@ -316,7 +318,7 @@ such as RTE, TXT, ALC, ALF, TUT, and SMV.
 
 ### NMEA 0183 sentences (bidirectional)
 
-The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 85
+The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 87
 bidirectional NMEA formatters, two AIS application sentences, and AIS message
 Types 1-27 decoding. [`SENTENCES.md`](SENTENCES.md) is the complete coverage
 matrix, including categories, proprietary formatters, and protocol references.
@@ -364,7 +366,7 @@ NMEA line limit.
 
 | Issue                  | `nmea` 0.7 / `ais` 0.12             | `nmea-0183-rs`                               |
 | ---------------------- | ----------------------------------- | ---------------------------------------- |
-| NMEA sentence coverage | ~10 types, rest manual              | 85 NMEA types + 2 AIS application sentences |
+| NMEA sentence coverage | ~10 types, rest manual              | 87 NMEA types + 2 AIS application sentences |
 | AIS message coverage   | ~5 types                            | All numeric Types 1-27                    |
 | Encoding               | Read-only                           | All NMEA + Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24, 27 |
 | Error distinction      | Can't tell unsupported vs malformed | Frame errors vs content errors           |
@@ -382,7 +384,7 @@ nmea-0183-rs = "0.9"
 
 | Feature | Default | Enables |
 | --- | --- | --- |
-| `nmea` | yes | All 69 standard NMEA sentence types |
+| `nmea` | yes | All 71 standard NMEA sentence types |
 | `nmea_proprietary` | yes | All 16 proprietary NMEA sentence types |
 | `ais` | yes | 24 AIS message decoders, transponder encoding, ABM/BBM, and VSD |
 

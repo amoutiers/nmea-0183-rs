@@ -1,5 +1,10 @@
 # nmea-0183-rs
 
+## Release 0.9.1 snapshot
+
+- 87 NMEA formatters: 71 standard and 16 proprietary; two AIS application sentences.
+- 974 tests passed across the all-features unit, integration, and doctest targets.
+
 ## Agent instructions
 
 - Read [Cargo.toml](Cargo.toml) before changing package metadata or features.
