@@ -54,6 +54,8 @@ mod gga;
 mod gll;
 #[path = "nmea/gns.rs"]
 mod gns;
+#[path = "nmea/grs.rs"]
+mod grs;
 #[path = "nmea/gsa.rs"]
 mod gsa;
 #[path = "nmea/gst.rs"]
@@ -114,6 +116,8 @@ mod prdid;
 mod pskpdpt;
 #[path = "nmea/psoncms.rs"]
 mod psoncms;
+#[path = "nmea/rma.rs"]
+mod rma;
 #[path = "nmea/rmb.rs"]
 mod rmb;
 #[path = "nmea/rmc.rs"]

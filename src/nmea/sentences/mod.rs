@@ -56,6 +56,8 @@ mod gga;
 mod gll;
 #[cfg(feature = "gns")]
 mod gns;
+#[cfg(feature = "grs")]
+mod grs;
 #[cfg(feature = "gsa")]
 mod gsa;
 #[cfg(feature = "gst")]
@@ -118,6 +120,8 @@ mod psoncms;
 mod pskpdpt;
 #[cfg(feature = "rmb")]
 mod rmb;
+#[cfg(feature = "rma")]
+mod rma;
 #[cfg(feature = "rmc")]
 mod rmc;
 #[cfg(feature = "rsd")]
@@ -227,6 +231,8 @@ pub use gga::*;
 pub use gll::*;
 #[cfg(feature = "gns")]
 pub use gns::*;
+#[cfg(feature = "grs")]
+pub use grs::*;
 #[cfg(feature = "gsa")]
 pub use gsa::*;
 #[cfg(feature = "gst")]
@@ -289,6 +295,8 @@ pub use psoncms::*;
 pub use pskpdpt::*;
 #[cfg(feature = "rmb")]
 pub use rmb::*;
+#[cfg(feature = "rma")]
+pub use rma::*;
 #[cfg(feature = "rmc")]
 pub use rmc::*;
 #[cfg(feature = "rot")]

@@ -158,9 +158,11 @@ nmea_sentences![
     standard: [
         // Position
         ["dtm", Dtm, "DTM"],
+        ["rma", Rma, "RMA"],
         ["rmc", Rmc, "RMC"],
         // Satellites
         ["gbs", Gbs, "GBS"],
+        ["grs", Grs, "GRS"],
         ["gsa", Gsa, "GSA"],
         ["gsv", Gsv, "GSV"],
         ["gst", Gst, "GST"],
