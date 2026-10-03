@@ -2,12 +2,11 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
-## Unreleased
+## [0.9.2] - 2026-10-03
 
 ### Added
-- WNC (Distance, Waypoint to Waypoint) sentence type: distances in nautical miles and kilometres, destination waypoint, and origin waypoint.
-- ZTG (UTC and Time to Destination Waypoint) sentence type: observation time, predicted time to go, and destination waypoint.
-- Individual `wnc` and `ztg` features, also enabled by `waypoints_routes` and `nmea`.
+- WNC (Distance, Waypoint to Waypoint): distances in nautical miles and kilometres between the origin and destination waypoints. Available with the `wnc` feature and through `waypoints_routes`.
+- ZTG (UTC and Time to Destination Waypoint): observation time, predicted time to go, and the destination waypoint. Available with the `ztg` feature and through `waypoints_routes`.
 
 NMEA sentence coverage: 87 → 89 types.
 
@@ -463,6 +462,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.9.2]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.2
 [0.9.1]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.1
 [0.9.0]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.0
 [0.8.7]: https://github.com/amoutiers/nmea-kit/releases/tag/v0.8.7
