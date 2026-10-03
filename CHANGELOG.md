@@ -2,6 +2,15 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
+## Unreleased
+
+### Added
+- WNC (Distance, Waypoint to Waypoint) sentence type: distances in nautical miles and kilometres, destination waypoint, and origin waypoint.
+- ZTG (UTC and Time to Destination Waypoint) sentence type: observation time, predicted time to go, and destination waypoint.
+- Individual `wnc` and `ztg` features, also enabled by `waypoints_routes` and `nmea`.
+
+NMEA sentence coverage: 87 → 89 types.
+
 ## [0.9.1] - 2026-09-24
 
 ### Added

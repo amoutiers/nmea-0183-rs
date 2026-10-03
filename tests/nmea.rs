@@ -166,6 +166,8 @@ mod vwr;
 mod vwt;
 #[path = "nmea/wcv.rs"]
 mod wcv;
+#[path = "nmea/wnc.rs"]
+mod wnc;
 #[path = "nmea/wpl.rs"]
 mod wpl;
 #[path = "nmea/xdr.rs"]
@@ -174,6 +176,8 @@ mod xdr;
 mod xte;
 #[path = "nmea/zda.rs"]
 mod zda;
+#[path = "nmea/ztg.rs"]
+mod ztg;
 
 #[path = "nmea/api.rs"]
 mod api;

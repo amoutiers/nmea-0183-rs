@@ -67,10 +67,11 @@
 //!
 //! ## Features
 //!
-//! - `nmea` (default) — all 71 standard NMEA sentence types
+//! - `nmea` (default): all 73 standard NMEA sentence types
 //! - `nmea_proprietary` (default) — all 16 proprietary NMEA sentence types
 //! - `ais` (default) — decoding for all numeric AIS Types 1-27, encoder support for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27, plus ABM, BBM and VSD sentences
 //! - Release 0.9.1 provides 87 NMEA formatters and passed 974 all-features tests, including doctests
+//! - The unreleased source adds WNC and ZTG through `waypoints_routes`, bringing NMEA coverage to 89 formatters
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
 
 mod compliance;
@@ -166,10 +167,12 @@ macro_rules! nmea_item {
             feature = "vwt",
             feature = "vsd",
             feature = "wcv",
+            feature = "wnc",
             feature = "wpl",
             feature = "xdr",
             feature = "xte",
             feature = "zda",
+            feature = "ztg",
         ))]
         $item
     };

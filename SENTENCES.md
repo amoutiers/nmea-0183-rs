@@ -18,17 +18,18 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 
 ## Current status
 
-- **68** des **133** formatters IEC 61162-1:2024 sont supportés.
-- **65** formatters IEC 61162-1:2024 restent à intégrer.
+- **70** des **133** formatters IEC 61162-1:2024 sont supportés.
+- **63** formatters IEC 61162-1:2024 restent à intégrer.
 - **7** formatters legacy supplémentaires sont supportés hors de la liste IEC 2024.
 - La version 0.9.1 comprend 87 formatters NMEA, dont 71 standard et 16 propriétaires.
-- La suite all-features compte 974 tests réussis, doctests inclus.
+- Le code non publié ajoute WNC et ZTG : 89 formatters NMEA, dont 73 standard et 16 propriétaires.
+- La suite all-features compte 992 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 
 **Features Cargo**
 
 - `default` active `nmea`, `nmea_proprietary` et `ais`.
-- `nmea` regroupe les 71 formatters NMEA standard supportés.
+- `nmea` regroupe les 73 formatters NMEA standard supportés dans le code actuel.
 - `nmea_proprietary` regroupe les 16 formatters propriétaires supportés.
 - `ais` active le décodage et l’encodage AIS, ainsi que `ABM`, `BBM` et `VSD`.
 
@@ -170,11 +171,11 @@ Feature Cargo : `waypoints_routes`.
 | `WPL` | Waypoint location | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `XTE` | Cross-track error, measured | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `RRT` | Report route transfer |   | 4.10<br>(2012) | 4.30<br>(2023) |
-| `WNC` | Distance waypoint to waypoint |   | 2.10<br>(1995) | 4.30<br>(2023) |
+| `WNC` | Distance waypoint to waypoint | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `XTR` | Cross-track error, dead reckoning |   | 2.10<br>(1995) | 4.30<br>(2023) |
 | `ZDL` | Time and distance to variable point |   | 2.10<br>(1995) | 4.30<br>(2023) |
 | `ZFO` | UTC and time from origin waypoint |   | 2.10<br>(1995) | 4.30<br>(2023) |
-| `ZTG` | UTC and time to destination waypoint |   | 2.10<br>(1995) | 4.30<br>(2023) |
+| `ZTG` | UTC and time to destination waypoint | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 
 ### Environment
 

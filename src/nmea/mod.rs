@@ -196,8 +196,10 @@ nmea_sentences![
         ["rmb", Rmb, "RMB"],
         ["rte", Rte, "RTE"],
         ["wcv", Wcv, "WCV"],
+        ["wnc", Wnc, "WNC"],
         ["wpl", Wpl, "WPL"],
         ["xte", Xte, "XTE"],
+        ["ztg", Ztg, "ZTG"],
         // Rudder
         ["rsa", Rsa, "RSA"],
         // Speed

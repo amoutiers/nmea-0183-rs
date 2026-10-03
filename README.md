@@ -318,7 +318,11 @@ such as RTE, TXT, ALC, ALF, TUT, and SMV.
 
 ### NMEA 0183 sentences (bidirectional)
 
-The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 87
+The unreleased source adds WNC (distance between waypoints) and ZTG (UTC and
+time to the destination waypoint), including individual `wnc` and `ztg`
+features in the `waypoints_routes` category.
+
+The current default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 89
 bidirectional NMEA formatters, two AIS application sentences, and AIS message
 Types 1-27 decoding. [`SENTENCES.md`](SENTENCES.md) is the complete coverage
 matrix, including categories, proprietary formatters, and protocol references.
@@ -366,7 +370,7 @@ NMEA line limit.
 
 | Issue                  | `nmea` 0.7 / `ais` 0.12             | `nmea-0183-rs`                               |
 | ---------------------- | ----------------------------------- | ---------------------------------------- |
-| NMEA sentence coverage | ~10 types, rest manual              | 87 NMEA types + 2 AIS application sentences |
+| NMEA sentence coverage | ~10 types, rest manual              | 89 NMEA types + 2 AIS application sentences (unreleased source) |
 | AIS message coverage   | ~5 types                            | All numeric Types 1-27                    |
 | Encoding               | Read-only                           | All NMEA + Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24, 27 |
 | Error distinction      | Can't tell unsupported vs malformed | Frame errors vs content errors           |
@@ -384,7 +388,7 @@ nmea-0183-rs = "0.9"
 
 | Feature | Default | Enables |
 | --- | --- | --- |
-| `nmea` | yes | All 71 standard NMEA sentence types |
+| `nmea` | yes | All 73 standard NMEA sentence types in the unreleased source |
 | `nmea_proprietary` | yes | All 16 proprietary NMEA sentence types |
 | `ais` | yes | 24 AIS message decoders, transponder encoding, ABM/BBM, and VSD |
 
