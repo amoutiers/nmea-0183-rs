@@ -48,10 +48,14 @@ mod eve;
 mod fir;
 #[path = "nmea/gbs.rs"]
 mod gbs;
+#[path = "nmea/gfa.rs"]
+mod gfa;
 #[path = "nmea/gga.rs"]
 mod gga;
 #[path = "nmea/gll.rs"]
 mod gll;
+#[path = "nmea/gmp.rs"]
+mod gmp;
 #[path = "nmea/gns.rs"]
 mod gns;
 #[path = "nmea/grs.rs"]
@@ -138,6 +142,8 @@ mod ths;
 mod tlb;
 #[path = "nmea/tll.rs"]
 mod tll;
+#[path = "nmea/trd.rs"]
+mod trd;
 #[path = "nmea/ttd.rs"]
 mod ttd;
 #[path = "nmea/ttm.rs"]
@@ -150,6 +156,8 @@ mod unknown;
 mod vbw;
 #[path = "nmea/vdr.rs"]
 mod vdr;
+#[path = "nmea/ver.rs"]
+mod ver;
 #[path = "nmea/vhw.rs"]
 mod vhw;
 #[path = "nmea/vlw.rs"]

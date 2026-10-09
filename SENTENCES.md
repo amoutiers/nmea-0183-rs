@@ -18,17 +18,18 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 
 ## Current status
 
-- **68** des **133** formatters IEC 61162-1:2024 sont supportés.
-- **65** formatters IEC 61162-1:2024 restent à intégrer.
+- **72** des **133** formatters IEC 61162-1:2024 sont supportés.
+- **61** formatters IEC 61162-1:2024 restent à intégrer.
 - **7** formatters legacy supplémentaires sont supportés hors de la liste IEC 2024.
 - La version 0.9.1 comprend 87 formatters NMEA, dont 71 standard et 16 propriétaires.
-- La suite all-features compte 974 tests réussis, doctests inclus.
+- Le code non publié ajoute GFA, GMP, TRD et VER : 91 formatters NMEA, dont 75 standard et 16 propriétaires.
+- La suite all-features compte 1002 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 
 **Features Cargo**
 
 - `default` active `nmea`, `nmea_proprietary` et `ais`.
-- `nmea` regroupe les 71 formatters NMEA standard supportés.
+- `nmea` regroupe les 75 formatters NMEA standard supportés dans le code actuel.
 - `nmea_proprietary` regroupe les 16 formatters propriétaires supportés.
 - `ais` active le décodage et l’encodage AIS, ainsi que `ABM`, `BBM` et `VSD`.
 
@@ -58,7 +59,7 @@ Feature Cargo : `position`.
 | `RMA` | Recommended minimum specific LORAN-C data | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `DCN` | Decca position |   | 2.10<br>(1995) | 3.01<br>(2002) |
 | `GLC` | Geographic position, LORAN-C |   | 2.10<br>(1995) | 3.01<br>(2002) |
-| `GMP` | GNSS map projection fix data |   | 3.01<br>(2002) | 3.01<br>(2002) |
+| `GMP` | GNSS map projection fix data | ✓ | 3.01<br>(2002) | 3.01<br>(2002) |
 | `GXA` | TRANSIT position |   | 2.10<br>(1995) | 2.10<br>(1995) |
 | `OLN` | OMEGA lane numbers |   | 2.10<br>(1995) | 2.10<br>(1995) |
 | `TRF` | TRANSIT fix data |   | 2.10<br>(1995) | 2.10<br>(1995) |
@@ -74,7 +75,7 @@ Feature Cargo : `satellites`.
 | `GST` | GNSS pseudorange error statistics | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `GSV` | GNSS satellites in view | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `GDC` | GNSS differential correction |   | 4.30<br>(2023) | 4.30<br>(2023) |
-| `GFA` | GNSS fix accuracy and integrity |   | 4.00<br>(2008) | 4.30<br>(2023) |
+| `GFA` | GNSS fix accuracy and integrity | ✓ | 4.00<br>(2008) | 4.30<br>(2023) |
 | `GRS` | GNSS range residuals | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `ALM` | GPS almanac data |   | 2.10<br>(1995) | 3.01<br>(2002) |
 | `MLA` | GLONASS almanac data |   | 2.30<br>(1998) | 3.01<br>(2002) |
@@ -151,7 +152,7 @@ Feature Cargo : `steering`.
 | `PRC` | Propulsion remote control status |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `ROR` | Rudder order status |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `TRC` | Thruster control data |   | 3.01<br>(2002) | 4.30<br>(2023) |
-| `TRD` | Thruster response data |   | 3.01<br>(2002) | 4.30<br>(2023) |
+| `TRD` | Thruster response data | ✓ | 3.01<br>(2002) | 4.30<br>(2023) |
 | `ASD` | Autopilot system data |   | 2.10<br>(1995) | 2.10<br>(1995) |
 
 ### Waypoints & Routes
@@ -296,7 +297,7 @@ Feature Cargo : `communication`.
 | `SPW` | Security password sentence |   | 4.10<br>(2012) | 4.30<br>(2023) |
 | `TUT` | Transmission of multi-language text |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `UID` | User identification code transmission |   | 3.01<br>(2002) | 4.30<br>(2023) |
-| `VER` | Version |   | 4.00<br>(2008) | 4.30<br>(2023) |
+| `VER` | Version | ✓ | 4.00<br>(2008) | 4.30<br>(2023) |
 | `LCD` | LORAN-C signal data |   | 2.10<br>(1995) | 3.01<br>(2002) |
 
 ## Proprietary
