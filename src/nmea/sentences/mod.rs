@@ -50,10 +50,14 @@ mod eve;
 mod fir;
 #[cfg(feature = "gbs")]
 mod gbs;
+#[cfg(feature = "gfa")]
+mod gfa;
 #[cfg(feature = "gga")]
 mod gga;
 #[cfg(feature = "gll")]
 mod gll;
+#[cfg(feature = "gmp")]
+mod gmp;
 #[cfg(feature = "gns")]
 mod gns;
 #[cfg(feature = "grs")]
@@ -136,6 +140,8 @@ mod rsa;
 mod rte;
 #[cfg(feature = "ths")]
 mod ths;
+#[cfg(feature = "trd")]
+mod trd;
 #[cfg(feature = "tll")]
 mod tll;
 #[cfg(feature = "tlb")]
@@ -150,6 +156,8 @@ mod txt;
 mod vbw;
 #[cfg(feature = "vdr")]
 mod vdr;
+#[cfg(feature = "ver")]
+mod ver;
 #[cfg(feature = "vhw")]
 mod vhw;
 #[cfg(feature = "vlw")]
@@ -229,10 +237,14 @@ pub use eve::*;
 pub use fir::*;
 #[cfg(feature = "gbs")]
 pub use gbs::*;
+#[cfg(feature = "gfa")]
+pub use gfa::*;
 #[cfg(feature = "gga")]
 pub use gga::*;
 #[cfg(feature = "gll")]
 pub use gll::*;
+#[cfg(feature = "gmp")]
+pub use gmp::*;
 #[cfg(feature = "gns")]
 pub use gns::*;
 #[cfg(feature = "grs")]
@@ -315,6 +327,8 @@ pub use rsd::*;
 pub use rte::*;
 #[cfg(feature = "ths")]
 pub use ths::*;
+#[cfg(feature = "trd")]
+pub use trd::*;
 #[cfg(feature = "tll")]
 pub use tll::*;
 #[cfg(feature = "tlb")]
@@ -329,6 +343,8 @@ pub use txt::*;
 pub use vbw::*;
 #[cfg(feature = "vdr")]
 pub use vdr::*;
+#[cfg(feature = "ver")]
+pub use ver::*;
 #[cfg(feature = "vhw")]
 pub use vhw::*;
 #[cfg(feature = "vlw")]

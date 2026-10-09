@@ -158,10 +158,12 @@ nmea_sentences![
     standard: [
         // Position
         ["dtm", Dtm, "DTM"],
+        ["gmp", Gmp, "GMP"],
         ["rma", Rma, "RMA"],
         ["rmc", Rmc, "RMC"],
         // Satellites
         ["gbs", Gbs, "GBS"],
+        ["gfa", Gfa, "GFA"],
         ["grs", Grs, "GRS"],
         ["gsa", Gsa, "GSA"],
         ["gsv", Gsv, "GSV"],
@@ -184,6 +186,7 @@ nmea_sentences![
         ["hsc", Hsc, "HSC"],
         ["rot", Rot, "ROT"],
         ["ths", Ths, "THS"],
+        ["trd", Trd, "TRD"],
         // Navigation
         ["aam", Aam, "AAM"],
         ["osd", Osd, "OSD"],
@@ -240,6 +243,7 @@ nmea_sentences![
         ["dsc", Dsc, "DSC"],
         ["dse", Dse, "DSE"],
         ["txt", Txt, "TXT"],
+        ["ver", Ver, "VER"],
         // Heartbeat
         ["hbt", Hbt, "HBT"],
         // Time

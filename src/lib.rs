@@ -67,10 +67,10 @@
 //!
 //! ## Features
 //!
-//! - `nmea` (default): all 73 standard NMEA sentence types
+//! - `nmea` (default): all 77 standard NMEA sentence types
 //! - `nmea_proprietary` (default) — all 16 proprietary NMEA sentence types
 //! - `ais` (default) — decoding for all numeric AIS Types 1-27, encoder support for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27, plus ABM, BBM and VSD sentences
-//! - Release 0.9.2 provides 89 NMEA formatters and passed 992 all-features tests, including doctests
+//! - Release 0.9.3 provides 93 NMEA formatters and passed 1020 all-features tests, including doctests
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
 
 mod compliance;
@@ -108,8 +108,10 @@ macro_rules! nmea_item {
             feature = "eve",
             feature = "fir",
             feature = "gbs",
+            feature = "gfa",
             feature = "gga",
             feature = "gll",
+            feature = "gmp",
             feature = "gns",
             feature = "grs",
             feature = "gsa",
@@ -151,6 +153,7 @@ macro_rules! nmea_item {
             feature = "rsd",
             feature = "rte",
             feature = "ths",
+            feature = "trd",
             feature = "tll",
             feature = "tlb",
             feature = "ttd",
@@ -158,6 +161,7 @@ macro_rules! nmea_item {
             feature = "txt",
             feature = "vbw",
             feature = "vdr",
+            feature = "ver",
             feature = "vhw",
             feature = "vlw",
             feature = "vpw",

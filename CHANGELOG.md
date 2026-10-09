@@ -2,6 +2,16 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
+## [0.9.3] - 2026-10-09
+
+### Added
+- GFA (GNSS fix accuracy and integrity): UTC fix time, protection levels, error-ellipse and altitude statistics, selected accuracy, and integrity status.
+- GMP (GNSS map projection fix data): UTC time, projection and zone, northing/easting, constellation mode, satellite count, HDOP, altitude, geoid separation, and DGPS age and station ID.
+- TRD (Thruster response data): thruster identifier, RPM response and mode, pitch response and mode, and azimuth response.
+- VER (Version): multipart equipment identity, manufacturer, serial number, model, software and hardware revisions, and sequence identifier.
+
+NMEA sentence coverage: 89 → 93 types.
+
 ## [0.9.2] - 2026-10-03
 
 ### Added
@@ -462,6 +472,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.9.3]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.3
 [0.9.2]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.2
 [0.9.1]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.1
 [0.9.0]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.0

@@ -1,9 +1,9 @@
 # nmea-0183-rs
 
-## Release 0.9.2 snapshot
+## Release 0.9.3 snapshot
 
-- 89 NMEA formatters: 73 standard and 16 proprietary; two AIS application sentences.
-- 992 tests passed across the all-features unit, integration, and doctest targets.
+- 93 NMEA formatters: 77 standard and 16 proprietary; two AIS application sentences.
+- 1020 tests passed across the all-features unit, integration, and doctest targets.
 
 ## Agent instructions
 
