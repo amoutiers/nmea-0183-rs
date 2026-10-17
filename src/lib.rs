@@ -67,11 +67,11 @@
 //!
 //! ## Features
 //!
-//! - `nmea` (default): all 81 standard NMEA sentence types in the current source tree
+//! - `nmea` (default): all 81 standard NMEA sentence types
 //! - `nmea_proprietary` (default) — all 16 proprietary NMEA sentence types
 //! - `ais` (default) — decoding for all numeric AIS Types 1-27, encoder support for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27, plus ABM, BBM and VSD sentences
-//! - The current source tree provides 97 NMEA formatters (81 standard, 16 proprietary)
-//!   and passes 1046 all-features tests, including doctests; release 0.9.3 included 93
+//! - Release 0.9.4 provides 97 NMEA formatters (81 standard, 16 proprietary) and
+//!   passed 1046 all-features tests, including doctests
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
 
 mod compliance;

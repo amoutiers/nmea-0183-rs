@@ -8,22 +8,22 @@
 Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message encoding, written in Rust.
 
 This repository is a continuation of [nmea-kit](https://github.com/amoutiers/nmea-kit).
-Version 0.9.3 is the latest release under the `nmea-0183-rs` crate name;
+Version 0.9.4 is the latest release under the `nmea-0183-rs` crate name;
 version 0.9.0 was the first. Historical `nmea-kit` releases remain available
-in the original repository. The current source tree also includes unreleased
-support for DSI, DSR, HMR, and HMS.
+in the original repository. Version 0.9.4 adds support for DSI, DSR, HMR, and
+HMS.
 
 | | |
 | --- | --- |
 | **Crate** | `nmea-0183-rs` |
-| **Version** | 0.9.3 |
+| **Version** | 0.9.4 |
 | **MSRV** | 1.85.0 |
 | **Edition** | 2024 |
 | **Dependencies** | 0 |
 | **License** | MIT OR Apache-2.0 |
-| **NMEA sentences** | 97 in the current source tree (93 in 0.9.3) |
+| **NMEA sentences** | 97 (bidirectional: parse + encode) |
 | **AIS application sentences** | 2 (bidirectional: parse + encode) |
-| **All-features tests** | 1046 passed in the current source tree, including doctests |
+| **All-features tests** | 1046 passed, including doctests |
 | **AIS message types** | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
 
 - **Shared frame layer** — handles `$` parametric and `!` encapsulated framing, IEC 61162-450 tag blocks
@@ -320,15 +320,14 @@ such as RTE, TXT, ALC, ALF, TUT, and SMV.
 ### NMEA 0183 sentences (bidirectional)
 
 The 0.9.2 release added WNC (distance between waypoints) and ZTG (UTC and time
-to the destination waypoint). The 0.9.3 release adds GFA, GMP, TRD, and VER.
-The current source tree also adds DSI, DSR, HMR, and HMS. Each has an individual
-feature and is also available through its Cargo category.
+to the destination waypoint). The 0.9.3 release added GFA, GMP, TRD, and VER.
+The 0.9.4 release adds DSI, DSR, HMR, and HMS. Each has an individual feature
+and is also available through its Cargo category.
 
 The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 97
-bidirectional NMEA formatters in the current source tree (93 in release 0.9.3),
-two AIS application sentences, and AIS message Types 1-27 decoding.
-[`SENTENCES.md`](SENTENCES.md) is the complete coverage matrix, including
-categories, proprietary formatters, and protocol references.
+bidirectional NMEA formatters, two AIS application sentences, and AIS message
+Types 1-27 decoding. [`SENTENCES.md`](SENTENCES.md) is the complete coverage
+matrix, including categories, proprietary formatters, and protocol references.
 
 `Xdr` additionally exposes `to_sentences() -> Result<Vec<String>, EncodeError>`
 to split many measurements across sentences that stay within the 82-character
@@ -373,7 +372,7 @@ NMEA line limit.
 
 | Issue                  | `nmea` 0.7 / `ais` 0.12             | `nmea-0183-rs`                               |
 | ---------------------- | ----------------------------------- | ---------------------------------------- |
-| NMEA sentence coverage | ~10 types, rest manual              | 97 NMEA types + 2 AIS application sentences in the current source tree |
+| NMEA sentence coverage | ~10 types, rest manual              | 97 NMEA types + 2 AIS application sentences |
 | AIS message coverage   | ~5 types                            | All numeric Types 1-27                    |
 | Encoding               | Read-only                           | All NMEA + Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24, 27 |
 | Error distinction      | Can't tell unsupported vs malformed | Frame errors vs content errors           |
@@ -391,7 +390,7 @@ nmea-0183-rs = "0.9"
 
 | Feature | Default | Enables |
 | --- | --- | --- |
-| `nmea` | yes | All 81 standard NMEA sentence types in the current source tree |
+| `nmea` | yes | All 81 standard NMEA sentence types |
 | `nmea_proprietary` | yes | All 16 proprietary NMEA sentence types |
 | `ais` | yes | 24 AIS message decoders, transponder encoding, ABM/BBM, and VSD |
 

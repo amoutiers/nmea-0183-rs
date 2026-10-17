@@ -2,7 +2,7 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
-## [Unreleased]
+## [0.9.4] - 2026-10-17
 
 ### Added
 - DSI (DSC transponder initiate): vessel MMSI, course and type, geographic area, command/data pairs, and expansion indicator.
@@ -482,6 +482,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.9.4]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.4
 [0.9.3]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.3
 [0.9.2]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.2
 [0.9.1]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.1
