@@ -17,8 +17,9 @@ that does not exist yet.
    repository `amoutiers/nmea-0183-rs`, workflow `publish.yml`, with no
    environment configured.
 6. Verify the published crate and docs.rs page.
-7. Push the `v0.9.0` tag. CI will run, skip the duplicate crates.io upload for
-   this first release, and create the GitHub Release.
+7. Ensure `master` and `v0.9.0` point to the release commit, then push both with
+   `git push --atomic origin master v0.9.0`. CI will run, skip the duplicate
+   crates.io upload for this first release, and create the GitHub Release.
 
 Publication is permanent. Never commit, paste into an issue, or store a crates.io
 token in the repository.
@@ -30,7 +31,10 @@ token in the repository.
    - Bump version in `Cargo.toml`.
    - Rename `[Unreleased]` → `[X.Y.Z] — YYYY-MM-DD` (date = day you actually publish, not when you wrote the bullets).
    - Add the version link footnote at the bottom.
-   - Commit, tag `vX.Y.Z`, push tag.
+   - Commit and tag `vX.Y.Z`; ensure `master` and the tag point to the same release commit.
+   - Push both together with `git push --atomic origin master vX.Y.Z`.
+   - If rejected, resolve the cause before retrying the atomic push. Never push the tag separately.
+   - Verify that remote `master` and the dereferenced tag both point to the release commit.
 3. For versions after the first publication, do not run `cargo publish` locally.
    The tag validates its version and dated CHANGELOG section, then the workflow
    publishes to crates.io and creates the GitHub Release. Monitor the GitHub

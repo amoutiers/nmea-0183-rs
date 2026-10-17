@@ -18,9 +18,9 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 
 ## Current status
 
-- **73** des **133** formatters IEC 61162-1:2024 sont supportés.
-- **60** formatters IEC 61162-1:2024 restent à intégrer.
-- **8** formatters supplémentaires sont supportés hors de la liste IEC 2024.
+- **75** des **133** formatters IEC 61162-1:2024 de cette matrice sont supportés, dont les quatre formatters AIS `ABM`, `BBM`, `VDM` et `VDO`.
+- **58** formatters IEC 61162-1:2024 restent à intégrer.
+- **10** formatters supplémentaires sont supportés hors de la liste IEC 2024.
 - La version 0.9.3 comprenait 93 formatters NMEA, dont 77 standard et 16 propriétaires.
 - La version 0.9.4 ajoute DSI, DSR, HMR et HMS, soit 97 formatters NMEA, dont 81 standard et 16 propriétaires.
 - La suite all-features actuelle compte 1046 tests réussis, doctests inclus.
@@ -137,7 +137,7 @@ Feature Cargo : `depth`.
 
 ### Steering
 
-Feature Cargo : `steering`.
+Feature Cargo : `steering` pour `APB`, `RPM` et `RSA` ; `heading` pour `TRD`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |

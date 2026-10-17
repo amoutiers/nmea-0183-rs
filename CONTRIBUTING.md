@@ -33,6 +33,7 @@ Tests come first. Every change follows this cycle:
 4. Add `["xyz", Xyz, "XYZ"],` to the `standard:` section of the `nmea_sentences!` macro in `nmea/mod.rs`
 5. Add `feature = "xyz"` to the `any(...)` gate in `lib.rs`
 6. Create `tests/nmea/xyz.rs` with `dispatch`, `decode_encode`, and `roundtrip` tests
+7. Register the test module in `tests/nmea.rs` with `#[path = "nmea/xyz.rs"] mod xyz;`
 
 ## Adding a proprietary NMEA sentence type
 
@@ -45,10 +46,11 @@ with standard 3-char sentence types.
    - Set `const PROPRIETARY: bool = true;`; `to_sentence(talker)` then ignores `talker`
    - In tests, call `value.to_sentence("ignored")` and assert that the output starts with `$PXYZ`
 2. Add `pxyz = []` to `[features]` in `Cargo.toml`, and add `"pxyz"` to `nmea_proprietary`
-3. Add `#[cfg(feature = "pxyz")] mod pxyz;` and `pub use pxyz::*;` to `sentences/mod.rs`
+3. Add `#[cfg(feature = "pxyz")] mod pxyz;` and `#[cfg(feature = "pxyz")] pub use pxyz::*;` to `sentences/mod.rs`
 4. Add `["pxyz", Pxyz, "PXYZ"],` to the `proprietary:` section of the `nmea_sentences!` macro in `nmea/mod.rs`
 5. Add `feature = "pxyz"` to the `any(...)` gate in `lib.rs`
 6. Create `tests/nmea/pxyz.rs` with `dispatch`, `decode_encode`, and `roundtrip` tests
+7. Register the test module in `tests/nmea.rs` with `#[path = "nmea/pxyz.rs"] mod pxyz;`
 
 ## What each sentence file must contain
 

@@ -370,16 +370,18 @@ NMEA line limit.
 
 ### Key improvements over existing crates
 
-| Issue                  | `nmea` 0.7 / `ais` 0.12             | `nmea-0183-rs`                               |
+| Issue                  | `nmea` 0.7.0 / `ais` 0.12.0         | `nmea-0183-rs`                               |
 | ---------------------- | ----------------------------------- | ---------------------------------------- |
-| NMEA sentence coverage | ~10 types, rest manual              | 97 NMEA types + 2 AIS application sentences |
-| AIS message coverage   | ~5 types                            | All numeric Types 1-27                    |
+| NMEA sentence coverage | 29 typed sentence variants          | 97 NMEA types + 2 AIS application sentences |
+| AIS message coverage   | 23 numeric Types: 1-21, 24, 27      | All numeric Types 1-27                    |
 | Encoding               | Read-only                           | All NMEA + Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24, 27 |
 | Error distinction      | Can't tell unsupported vs malformed | Frame errors vs content errors           |
 | AIS lat/lon precision  | `f32` (11m error)                   | `f64`                                    |
 | AIS sentinels          | 91/181/511 leak to caller           | Filtered to `None` at decode             |
 | Tag blocks             | Manual stripping                    | Built into frame layer                   |
 | Dependencies           | `nom` (AIS)                         | Zero                                     |
+
+Coverage counts use typed sentence variants in [`nmea` 0.7.0](https://docs.rs/nmea/0.7.0/nmea/enum.ParseResult.html) and numeric message types in [`ais` 0.12.0](https://docs.rs/ais/0.12.0/src/ais/messages/mod.rs.html).
 
 ## Features
 
