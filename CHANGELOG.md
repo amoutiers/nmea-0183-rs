@@ -2,6 +2,16 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
+## [Unreleased]
+
+### Added
+- DSI (DSC transponder initiate): vessel MMSI, course and type, geographic area, command/data pairs, and expansion indicator.
+- DSR (DSC transponder response): vessel MMSI, symbol/information pairs, and expansion indicator.
+- HMR (Heading Monitor Receive): two sensor IDs, heading difference and limit, sensor statuses, headings, deviations, and magnetic variation.
+- HMS (Heading Monitor Set): two sensor IDs and their maximum permitted heading difference.
+
+NMEA sentence coverage: 93 → 97 types.
+
 ## [0.9.3] - 2026-10-09
 
 ### Added

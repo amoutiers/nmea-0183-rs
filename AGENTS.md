@@ -1,9 +1,10 @@
 # nmea-0183-rs
 
-## Release 0.9.3 snapshot
+## Current development snapshot (based on 0.9.3)
 
-- 93 NMEA formatters: 77 standard and 16 proprietary; two AIS application sentences.
-- 1020 tests passed across the all-features unit, integration, and doctest targets.
+- 97 NMEA formatters: 81 standard and 16 proprietary; two AIS application sentences.
+- 1046 tests passed across the all-features unit, integration, and doctest targets.
+- DSI, DSR, HMR, and HMS are unreleased additions in the current source tree.
 
 ## Agent instructions
 

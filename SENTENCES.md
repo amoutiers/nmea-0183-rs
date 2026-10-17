@@ -21,14 +21,15 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 - **73** des **133** formatters IEC 61162-1:2024 sont supportés.
 - **60** formatters IEC 61162-1:2024 restent à intégrer.
 - **8** formatters supplémentaires sont supportés hors de la liste IEC 2024.
-- La version 0.9.3 comprend 93 formatters NMEA, dont 77 standard et 16 propriétaires.
-- La suite all-features compte 1020 tests réussis, doctests inclus.
+- La version publiée 0.9.3 comprend 93 formatters NMEA, dont 77 standard et 16 propriétaires.
+- L'arbre de travail ajoute DSI, DSR, HMR et HMS, soit 97 formatters NMEA, dont 81 standard et 16 propriétaires.
+- La suite all-features actuelle compte 1046 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 
 **Features Cargo**
 
 - `default` active `nmea`, `nmea_proprietary` et `ais`.
-- `nmea` regroupe les 77 formatters NMEA standard supportés.
+- `nmea` regroupe les 81 formatters NMEA standard supportés dans l'arbre de travail.
 - `nmea_proprietary` regroupe les 16 formatters propriétaires supportés.
 - `ais` active le décodage et l’encodage AIS, ainsi que `ABM`, `BBM` et `VSD`.
 
