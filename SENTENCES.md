@@ -91,8 +91,8 @@ Feature Cargo : `heading`.
 | `HSC` | Heading steering command | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `THS` | True heading and status | ✓ | 3.01<br>(2002) | 4.30<br>(2023) |
 | `HCR` | Heading correction report |   | 4.10<br>(2012) | 4.30<br>(2023) |
-| `HMR` | Heading monitor receive |   | 2.30<br>(1998) | 4.30<br>(2023) |
-| `HMS` | Heading monitor set |   | 2.30<br>(1998) | 4.30<br>(2023) |
+| `HMR` | Heading monitor receive | ✓ | 2.30<br>(1998) | 4.30<br>(2023) |
+| `HMS` | Heading monitor set | ✓ | 2.30<br>(1998) | 4.30<br>(2023) |
 | `HRM` | Heel angle, roll period and roll amplitude measurement device |   | 4.10<br>(2012) | 4.30<br>(2023) |
 
 ### Course & Speed
@@ -262,8 +262,8 @@ Feature Cargo : `safety_alarms`.
 | `SM4` | SafetyNET message, rectangular area address |   | 4.10<br>(2012) | 4.30<br>(2023) |
 | `SMB` | IMO SafetyNET message body |   | 4.10<br>(2012) | 4.30<br>(2023) |
 | `SMV` | SafetyNET message, vessel in distress information |   | 4.30<br>(2023) | 4.30<br>(2023) |
-| `DSI` | DSC transponder initiate |   | 2.30<br>(1998) | 3.01<br>(2002) |
-| `DSR` | DSC transponder response |   | 2.30<br>(1998) | 3.01<br>(2002) |
+| `DSI` | DSC transponder initiate | ✓ | 2.30<br>(1998) | 3.01<br>(2002) |
+| `DSR` | DSC transponder response | ✓ | 2.30<br>(1998) | 3.01<br>(2002) |
 
 ### Vessel Systems
 

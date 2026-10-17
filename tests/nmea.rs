@@ -40,6 +40,10 @@ mod dpt;
 mod dsc;
 #[path = "nmea/dse.rs"]
 mod dse;
+#[path = "nmea/dsi.rs"]
+mod dsi;
+#[path = "nmea/dsr.rs"]
+mod dsr;
 #[path = "nmea/dtm.rs"]
 mod dtm;
 #[path = "nmea/eve.rs"]
@@ -74,6 +78,10 @@ mod hdg;
 mod hdm;
 #[path = "nmea/hdt.rs"]
 mod hdt;
+#[path = "nmea/hmr.rs"]
+mod hmr;
+#[path = "nmea/hms.rs"]
+mod hms;
 #[path = "nmea/hsc.rs"]
 mod hsc;
 #[path = "nmea/mda.rs"]

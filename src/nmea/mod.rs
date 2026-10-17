@@ -181,6 +181,8 @@ nmea_sentences![
         ["vsd", Vsd, "VSD"],
         // Heading
         ["hdt", Hdt, "HDT"],
+        ["hmr", Hmr, "HMR"],
+        ["hms", Hms, "HMS"],
         ["hdg", Hdg, "HDG"],
         ["hdm", Hdm, "HDM"],
         ["hsc", Hsc, "HSC"],
@@ -242,6 +244,8 @@ nmea_sentences![
         // Communication
         ["dsc", Dsc, "DSC"],
         ["dse", Dse, "DSE"],
+        ["dsi", Dsi, "DSI"],
+        ["dsr", Dsr, "DSR"],
         ["txt", Txt, "TXT"],
         ["ver", Ver, "VER"],
         // Heartbeat

@@ -42,6 +42,10 @@ mod dpt;
 mod dsc;
 #[cfg(feature = "dse")]
 mod dse;
+#[cfg(feature = "dsi")]
+mod dsi;
+#[cfg(feature = "dsr")]
+mod dsr;
 #[cfg(feature = "dtm")]
 mod dtm;
 #[cfg(feature = "eve")]
@@ -76,6 +80,10 @@ mod hbt;
 mod hdm;
 #[cfg(feature = "hdt")]
 mod hdt;
+#[cfg(feature = "hmr")]
+mod hmr;
+#[cfg(feature = "hms")]
+mod hms;
 #[cfg(feature = "hsc")]
 mod hsc;
 #[cfg(feature = "mda")]
@@ -229,6 +237,10 @@ pub use dpt::*;
 pub use dsc::*;
 #[cfg(feature = "dse")]
 pub use dse::*;
+#[cfg(feature = "dsi")]
+pub use dsi::*;
+#[cfg(feature = "dsr")]
+pub use dsr::*;
 #[cfg(feature = "dtm")]
 pub use dtm::*;
 #[cfg(feature = "eve")]
@@ -263,6 +275,10 @@ pub use hbt::*;
 pub use hdm::*;
 #[cfg(feature = "hdt")]
 pub use hdt::*;
+#[cfg(feature = "hmr")]
+pub use hmr::*;
+#[cfg(feature = "hms")]
+pub use hms::*;
 #[cfg(feature = "hsc")]
 pub use hsc::*;
 #[cfg(feature = "mda")]
