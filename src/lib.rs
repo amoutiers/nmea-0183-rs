@@ -70,10 +70,9 @@
 //! - `nmea` (default): all 85 standard NMEA sentence types
 //! - `nmea_proprietary` (default) — all 16 proprietary NMEA sentence types
 //! - `ais` (default) — decoding for all numeric AIS Types 1-27, encoder support for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27, plus ABM, BBM and VSD sentences
-//! - Release 0.9.4 provides 97 NMEA formatters (81 standard, 16 proprietary) and
-//!   passed 1046 all-features tests, including doctests
-//! - Unreleased adds STN, XTR, ZDL, and ZFO: 101 NMEA formatters (85 standard,
-//!   16 proprietary) and 1076 passing all-features tests, including doctests
+//! - Release 0.9.5 adds STN, XTR, ZDL, and ZFO: 101 NMEA formatters
+//!   (85 standard, 16 proprietary) and 1076 passing all-features tests,
+//!   including doctests
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
 
 mod compliance;

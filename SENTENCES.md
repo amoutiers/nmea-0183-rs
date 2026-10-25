@@ -23,7 +23,7 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 - **10** formatters supplémentaires sont supportés hors de la liste IEC 2024.
 - La version 0.9.3 comprenait 93 formatters NMEA, dont 77 standard et 16 propriétaires.
 - La version 0.9.4 ajoute DSI, DSR, HMR et HMS, soit 97 formatters NMEA, dont 81 standard et 16 propriétaires.
-- Les ajouts non publiés STN, XTR, ZDL et ZFO portent la couverture actuelle à 101 formatters NMEA, dont 85 standard et 16 propriétaires.
+- La version 0.9.5 ajoute STN, XTR, ZDL et ZFO, soit 101 formatters NMEA, dont 85 standard et 16 propriétaires.
 - La suite all-features actuelle compte 1076 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 

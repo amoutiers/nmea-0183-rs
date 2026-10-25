@@ -8,18 +8,14 @@
 Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message encoding, written in Rust.
 
 This repository is a continuation of [nmea-kit](https://github.com/amoutiers/nmea-kit).
-Version 0.9.4 is the latest release under the `nmea-0183-rs` crate name;
-version 0.9.0 was the first. Historical `nmea-kit` releases remain available
-in the original repository. Version 0.9.4 adds support for DSI, DSR, HMR, and
-HMS.
-
-Unreleased additions: STN, XTR, ZDL, and ZFO. The coverage and test counts
-below describe the current source tree.
+Version 0.9.5 adds support for STN, XTR, ZDL, and ZFO.
+Version 0.9.0 was the first release under the `nmea-0183-rs` crate name.
+Historical `nmea-kit` releases remain available in the original repository.
 
 | | |
 | --- | --- |
 | **Crate** | `nmea-0183-rs` |
-| **Version** | 0.9.4 |
+| **Version** | 0.9.5 |
 | **MSRV** | 1.85.0 |
 | **Edition** | 2024 |
 | **Dependencies** | 0 |
@@ -324,10 +320,10 @@ such as RTE, TXT, ALC, ALF, TUT, and SMV.
 
 The 0.9.2 release added WNC (distance between waypoints) and ZTG (UTC and time
 to the destination waypoint). The 0.9.3 release added GFA, GMP, TRD, and VER.
-The 0.9.4 release adds DSI, DSR, HMR, and HMS. Each has an individual feature
+The 0.9.4 release added DSI, DSR, HMR, and HMS. Each has an individual feature
 and is also available through its Cargo category.
 
-The unreleased additions are STN (`stn`, `vessel_systems`), XTR (`xtr`),
+The 0.9.5 additions are STN (`stn`, `vessel_systems`), XTR (`xtr`),
 ZDL (`zdl`), and ZFO (`zfo`). The last three also belong to `waypoints_routes`.
 
 The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 101

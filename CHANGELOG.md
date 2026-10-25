@@ -2,7 +2,7 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
-## [Unreleased]
+## [0.9.5] - 2026-10-25
 
 ### Added
 - STN (Multiple data ID): data identifier, preserved as text including leading zeros. Available with `stn` and the new `vessel_systems` category.
@@ -493,6 +493,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.9.5]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.5
 [0.9.4]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.4
 [0.9.3]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.3
 [0.9.2]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.2
