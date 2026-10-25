@@ -144,6 +144,8 @@ mod rsa;
 mod rsd;
 #[path = "nmea/rte.rs"]
 mod rte;
+#[path = "nmea/stn.rs"]
+mod stn;
 #[path = "nmea/ths.rs"]
 mod ths;
 #[path = "nmea/tlb.rs"]
@@ -190,8 +192,14 @@ mod wpl;
 mod xdr;
 #[path = "nmea/xte.rs"]
 mod xte;
+#[path = "nmea/xtr.rs"]
+mod xtr;
 #[path = "nmea/zda.rs"]
 mod zda;
+#[path = "nmea/zdl.rs"]
+mod zdl;
+#[path = "nmea/zfo.rs"]
+mod zfo;
 #[path = "nmea/ztg.rs"]
 mod ztg;
 

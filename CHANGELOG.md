@@ -2,6 +2,17 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
+## [Unreleased]
+
+### Added
+- STN (Multiple data ID): data identifier, preserved as text including leading zeros. Available with `stn` and the new `vessel_systems` category.
+- XTR (Cross-track error, dead reckoning): cross-track error, steering direction, and distance unit.
+- ZDL (Time and distance to variable point): time, distance in nautical miles, and point type.
+- ZFO (UTC and time from origin waypoint): observation time, elapsed time, and origin waypoint identifier.
+- XTR, ZDL, and ZFO are available individually and through `waypoints_routes`. All four additions are enabled by `nmea`.
+
+NMEA sentence coverage: 97 → 101 types.
+
 ## [0.9.4] - 2026-10-17
 
 ### Added

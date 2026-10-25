@@ -204,6 +204,9 @@ nmea_sentences![
         ["wnc", Wnc, "WNC"],
         ["wpl", Wpl, "WPL"],
         ["xte", Xte, "XTE"],
+        ["xtr", Xtr, "XTR"],
+        ["zdl", Zdl, "ZDL"],
+        ["zfo", Zfo, "ZFO"],
         ["ztg", Ztg, "ZTG"],
         // Rudder
         ["rsa", Rsa, "RSA"],
@@ -241,6 +244,8 @@ nmea_sentences![
         ["dor", Dor, "DOR"],
         ["eve", Eve, "EVE"],
         ["fir", Fir, "FIR"],
+        // Vessel systems
+        ["stn", Stn, "STN"],
         // Communication
         ["dsc", Dsc, "DSC"],
         ["dse", Dse, "DSE"],

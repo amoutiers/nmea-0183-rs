@@ -27,18 +27,19 @@ course_speed     = ["osd", "rot", "vbw", "vdr", "vhw", "vlw", "vpw", "vtg", "wcv
 wind             = ["mwd", "mwv", "vwr", "vwt"]
 depth            = ["dbk", "dbs", "dbt", "dpt"]
 steering         = ["apb", "rpm", "rsa"]
-waypoints_routes = ["aam", "bec", "bod", "bwc", "bwr", "bww", "rte", "wnc", "wpl", "xte", "ztg"]
+waypoints_routes = ["aam", "bec", "bod", "bwc", "bwr", "bww", "rte", "wnc", "wpl", "xte", "xtr", "zdl", "zfo", "ztg"]
 environment      = ["mda", "mta", "mtw", "xdr"]
 time             = ["zda"]
 targets          = ["rsd", "tlb", "tll", "ttd", "ttm"]
 safety_alarms    = ["ack", "acn", "ala", "alc", "alf", "alr", "arc", "dor", "dsc", "dse", "dsi", "dsr", "eve", "fir", "hbt"]
+vessel_systems   = ["stn"]
 communication    = ["txt", "ver"]
 
 # Umbrella features
 nmea = [
     "position", "satellites", "heading", "course_speed", "wind", "depth",
     "steering", "waypoints_routes", "environment", "time", "targets",
-    "safety_alarms", "communication", "vsd",
+    "safety_alarms", "vessel_systems", "communication", "vsd",
 ]
 nmea_proprietary = [
     "pashr", "pcdin", "pgrme", "pgrmt", "phtro", "pklid", "pklds", "pklsh",
@@ -120,6 +121,7 @@ rpm = []
 rte = []
 rsa = []
 rsd = []
+stn = []
 ths = []
 trd = []
 tll = []
@@ -141,7 +143,10 @@ wnc = []
 wpl = []
 xdr = []
 xte = []
+xtr = []
 zda = []
+zdl = []
+zfo = []
 ztg = []
 vsd = []
 

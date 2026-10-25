@@ -146,6 +146,8 @@ mod rpm;
 mod rsa;
 #[cfg(feature = "rte")]
 mod rte;
+#[cfg(feature = "stn")]
+mod stn;
 #[cfg(feature = "ths")]
 mod ths;
 #[cfg(feature = "trd")]
@@ -190,8 +192,14 @@ mod wpl;
 mod xdr;
 #[cfg(feature = "xte")]
 mod xte;
+#[cfg(feature = "xtr")]
+mod xtr;
 #[cfg(feature = "zda")]
 mod zda;
+#[cfg(feature = "zdl")]
+mod zdl;
+#[cfg(feature = "zfo")]
+mod zfo;
 #[cfg(feature = "ztg")]
 mod ztg;
 
@@ -341,6 +349,8 @@ pub use rsa::*;
 pub use rsd::*;
 #[cfg(feature = "rte")]
 pub use rte::*;
+#[cfg(feature = "stn")]
+pub use stn::*;
 #[cfg(feature = "ths")]
 pub use ths::*;
 #[cfg(feature = "trd")]
@@ -385,7 +395,13 @@ pub use wpl::*;
 pub use xdr::*;
 #[cfg(feature = "xte")]
 pub use xte::*;
+#[cfg(feature = "xtr")]
+pub use xtr::*;
 #[cfg(feature = "zda")]
 pub use zda::*;
+#[cfg(feature = "zdl")]
+pub use zdl::*;
+#[cfg(feature = "zfo")]
+pub use zfo::*;
 #[cfg(feature = "ztg")]
 pub use ztg::*;

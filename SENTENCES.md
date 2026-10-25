@@ -18,18 +18,19 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 
 ## Current status
 
-- **75** des **133** formatters IEC 61162-1:2024 de cette matrice sont supportés, dont les quatre formatters AIS `ABM`, `BBM`, `VDM` et `VDO`.
-- **58** formatters IEC 61162-1:2024 restent à intégrer.
+- **79** des **133** formatters IEC 61162-1:2024 de cette matrice sont supportés, dont les quatre formatters AIS `ABM`, `BBM`, `VDM` et `VDO`.
+- **54** formatters IEC 61162-1:2024 restent à intégrer.
 - **10** formatters supplémentaires sont supportés hors de la liste IEC 2024.
 - La version 0.9.3 comprenait 93 formatters NMEA, dont 77 standard et 16 propriétaires.
 - La version 0.9.4 ajoute DSI, DSR, HMR et HMS, soit 97 formatters NMEA, dont 81 standard et 16 propriétaires.
-- La suite all-features actuelle compte 1046 tests réussis, doctests inclus.
+- Les ajouts non publiés STN, XTR, ZDL et ZFO portent la couverture actuelle à 101 formatters NMEA, dont 85 standard et 16 propriétaires.
+- La suite all-features actuelle compte 1076 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 
 **Features Cargo**
 
 - `default` active `nmea`, `nmea_proprietary` et `ais`.
-- `nmea` regroupe les 81 formatters NMEA standard supportés.
+- `nmea` regroupe les 85 formatters NMEA standard supportés.
 - `nmea_proprietary` regroupe les 16 formatters propriétaires supportés.
 - `ais` active le décodage et l’encodage AIS, ainsi que `ABM`, `BBM` et `VSD`.
 
@@ -172,9 +173,9 @@ Feature Cargo : `waypoints_routes`.
 | `XTE` | Cross-track error, measured | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `RRT` | Report route transfer |   | 4.10<br>(2012) | 4.30<br>(2023) |
 | `WNC` | Distance waypoint to waypoint | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
-| `XTR` | Cross-track error, dead reckoning |   | 2.10<br>(1995) | 4.30<br>(2023) |
-| `ZDL` | Time and distance to variable point |   | 2.10<br>(1995) | 4.30<br>(2023) |
-| `ZFO` | UTC and time from origin waypoint |   | 2.10<br>(1995) | 4.30<br>(2023) |
+| `XTR` | Cross-track error, dead reckoning | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
+| `ZDL` | Time and distance to variable point | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
+| `ZFO` | UTC and time from origin waypoint | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `ZTG` | UTC and time to destination waypoint | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 
 ### Environment
@@ -268,7 +269,7 @@ Feature Cargo : `safety_alarms`.
 
 ### Vessel Systems
 
-Aucune feature de catégorie tant qu’aucun formatter n’est supporté.
+Feature Cargo : `vessel_systems`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -278,7 +279,7 @@ Aucune feature de catégorie tant qu’aucun formatter n’est supporté.
 | `NLS` | Navigation light status |   | 4.30<br>(2023) | 4.30<br>(2023) |
 | `SEL` | Selection report |   | 4.30<br>(2023) | 4.30<br>(2023) |
 | `SLM` | Steering location/mode |   | 4.30<br>(2023) | 4.30<br>(2023) |
-| `STN` | Multiple data ID |   | 2.10<br>(1995) | 4.30<br>(2023) |
+| `STN` | Multiple data ID | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 
 ### Communication
 
