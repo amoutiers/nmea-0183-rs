@@ -1,10 +1,10 @@
 use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
-/// ALM — GPS Almanac Data.
+/// ALM: GPS almanac data.
 ///
 /// Wire: `total,msg,PRN,GPS week,SV health,eccentricity,reference time,inclination,
 /// omegadot,sqrt(A),omega,long ascension node,mean anomaly,af0,af1`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Alm {
     pub total_messages: Option<u8>,
     pub message_number: Option<u8>,
@@ -26,10 +26,10 @@ pub struct Alm {
 
 impl Alm {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None`.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             total_messages: r.u8(),
             message_number: r.u8(),
             prn: r.u8(),
@@ -45,7 +45,7 @@ impl Alm {
             mean_anomaly: r.string(),
             clock_parameter_af0: r.string(),
             clock_parameter_af1: r.string(),
-        })
+        }
     }
 }
 
@@ -70,5 +70,56 @@ impl NmeaEncodable for Alm {
         w.string(self.clock_parameter_af0.as_deref());
         w.string(self.clock_parameter_af1.as_deref());
         w.finish()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::parse_frame;
+
+    #[test]
+    fn alm_empty() {
+        assert_eq!(Alm::parse(&[""; 15]), Alm::default());
+    }
+
+    #[test]
+    fn alm_encode_roundtrip() {
+        let original = Alm {
+            total_messages: Some(30),
+            message_number: Some(1),
+            prn: Some(1),
+            gps_week: Some(2210),
+            sv_health: Some("00".into()),
+            eccentricity: Some("617b".into()),
+            clock_parameter_af1: Some("ffe".into()),
+            ..Default::default()
+        };
+        let sentence = original.to_sentence("GP").expect("encode ALM");
+        let frame = parse_frame(&sentence).expect("re-parse ALM");
+        assert_eq!(Alm::parse(&frame.fields), original);
+    }
+
+    #[test]
+    fn alm_malformed_fields() {
+        assert_eq!(Alm::parse(&["bad", "256", "-1", "65536"]), Alm::default());
+    }
+
+    #[test]
+    fn alm_missing_fields() {
+        assert_eq!(Alm::parse(&[]), Alm::default());
+    }
+
+    #[test]
+    fn alm_values_novatel_oem7() {
+        // https://docs.novatel.com/OEM7/Content/Logs/GPALM.htm
+        let frame = parse_frame(
+            "$GPALM,30,01,01,2210,00,617b,0f,1da7,fd70,a10d0a,24de91,6fe696,16263f,17c,ffe*7B",
+        ).expect("valid NovAtel ALM");
+        let alm = Alm::parse(&frame.fields);
+        assert_eq!(alm.gps_week, Some(2210));
+        assert_eq!(alm.sv_health.as_deref(), Some("00"));
+        assert_eq!(alm.sqrt_semi_major_axis.as_deref(), Some("a10d0a"));
+        assert_eq!(alm.clock_parameter_af1.as_deref(), Some("ffe"));
     }
 }

@@ -2,6 +2,17 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
+## [Unreleased]
+
+### Added
+- ALM (GPS almanac data): message counters, satellite PRN, GPS week, and hexadecimal almanac payloads preserved verbatim. Available with `alm` and `satellites`.
+- FSI (Frequency set information): transmit and receive frequencies, operating mode, power level, and sentence status.
+- MSK (MSK receiver interface): beacon frequency and bit rate, selection modes, MSS status interval, and optional channel and status.
+- MSS (MSK receiver signal status): fractional signal strength and signal-to-noise ratio, beacon frequency and bit rate, and optional channel.
+- FSI, MSK, and MSS are available individually and through `communication`. All four additions are enabled by `nmea`.
+
+NMEA sentence coverage: 101 → 105 types.
+
 ## [0.9.5] - 2026-10-25
 
 ### Added

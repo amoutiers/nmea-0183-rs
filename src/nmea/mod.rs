@@ -162,6 +162,7 @@ nmea_sentences![
         ["rma", Rma, "RMA"],
         ["rmc", Rmc, "RMC"],
         // Satellites
+        ["alm", Alm, "ALM"],
         ["gbs", Gbs, "GBS"],
         ["gfa", Gfa, "GFA"],
         ["grs", Grs, "GRS"],
@@ -251,6 +252,9 @@ nmea_sentences![
         ["dse", Dse, "DSE"],
         ["dsi", Dsi, "DSI"],
         ["dsr", Dsr, "DSR"],
+        ["fsi", Fsi, "FSI"],
+        ["msk", Msk, "MSK"],
+        ["mss", Mss, "MSS"],
         ["txt", Txt, "TXT"],
         ["ver", Ver, "VER"],
         // Heartbeat

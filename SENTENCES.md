@@ -18,19 +18,20 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 
 ## Current status
 
-- **79** des **133** formatters IEC 61162-1:2024 de cette matrice sont supportés, dont les quatre formatters AIS `ABM`, `BBM`, `VDM` et `VDO`.
-- **54** formatters IEC 61162-1:2024 restent à intégrer.
-- **10** formatters supplémentaires sont supportés hors de la liste IEC 2024.
+- **82** des **133** formatters IEC 61162-1:2024 de cette matrice sont supportés, dont les quatre formatters AIS `ABM`, `BBM`, `VDM` et `VDO`.
+- **51** formatters IEC 61162-1:2024 restent à intégrer.
+- **11** formatters supplémentaires sont supportés hors de la liste IEC 2024.
 - La version 0.9.3 comprenait 93 formatters NMEA, dont 77 standard et 16 propriétaires.
 - La version 0.9.4 ajoute DSI, DSR, HMR et HMS, soit 97 formatters NMEA, dont 81 standard et 16 propriétaires.
 - La version 0.9.5 ajoute STN, XTR, ZDL et ZFO, soit 101 formatters NMEA, dont 85 standard et 16 propriétaires.
-- La suite all-features actuelle compte 1076 tests réussis, doctests inclus.
+- Les ajouts non publiés ALM, FSI, MSK et MSS portent la couverture actuelle à 105 formatters NMEA, dont 89 standard et 16 propriétaires.
+- La suite all-features actuelle compte 1113 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 
 **Features Cargo**
 
 - `default` active `nmea`, `nmea_proprietary` et `ais`.
-- `nmea` regroupe les 85 formatters NMEA standard supportés.
+- `nmea` regroupe les 89 formatters NMEA standard supportés.
 - `nmea_proprietary` regroupe les 16 formatters propriétaires supportés.
 - `ais` active le décodage et l’encodage AIS, ainsi que `ABM`, `BBM` et `VSD`.
 
@@ -78,7 +79,7 @@ Feature Cargo : `satellites`.
 | `GDC` | GNSS differential correction |   | 4.30<br>(2023) | 4.30<br>(2023) |
 | `GFA` | GNSS fix accuracy and integrity | ✓ | 4.00<br>(2008) | 4.30<br>(2023) |
 | `GRS` | GNSS range residuals | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
-| `ALM` | GPS almanac data |   | 2.10<br>(1995) | 3.01<br>(2002) |
+| `ALM` | GPS almanac data | ✓ | 2.10<br>(1995) | 3.01<br>(2002) |
 | `MLA` | GLONASS almanac data |   | 2.30<br>(1998) | 3.01<br>(2002) |
 
 ### Heading
@@ -288,9 +289,9 @@ Feature Cargo : `communication`.
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
 | `TXT` | Text transmission | ✓ | 2.30<br>(1998) | 4.30<br>(2023) |
-| `FSI` | Frequency set information |   | 2.10<br>(1995) | 4.30<br>(2023) |
-| `MSK` | MSK receiver interface |   | 2.10<br>(1995) | 4.30<br>(2023) |
-| `MSS` | MSK receiver signal status |   | 2.10<br>(1995) | 4.30<br>(2023) |
+| `FSI` | Frequency set information | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
+| `MSK` | MSK receiver interface | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
+| `MSS` | MSK receiver signal status | ✓ | 2.10<br>(1995) | 4.30<br>(2023) |
 | `NRM` | NAVTEX receiver mask |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `NRX` | MSI received message |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `RLM` | Return link message |   | 4.10<br>(2012) | 4.30<br>(2023) |

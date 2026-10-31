@@ -10,6 +10,8 @@ mod ala;
 mod alc;
 #[path = "nmea/alf.rs"]
 mod alf;
+#[path = "nmea/alm.rs"]
+mod alm;
 #[path = "nmea/alr.rs"]
 mod alr;
 #[path = "nmea/apb.rs"]
@@ -50,6 +52,8 @@ mod dtm;
 mod eve;
 #[path = "nmea/fir.rs"]
 mod fir;
+#[path = "nmea/fsi.rs"]
+mod fsi;
 #[path = "nmea/gbs.rs"]
 mod gbs;
 #[path = "nmea/gfa.rs"]
@@ -86,6 +90,10 @@ mod hms;
 mod hsc;
 #[path = "nmea/mda.rs"]
 mod mda;
+#[path = "nmea/msk.rs"]
+mod msk;
+#[path = "nmea/mss.rs"]
+mod mss;
 #[path = "nmea/mta.rs"]
 mod mta;
 #[path = "nmea/mtw.rs"]

@@ -12,6 +12,8 @@ mod ala;
 mod alc;
 #[cfg(feature = "alf")]
 mod alf;
+#[cfg(feature = "alm")]
+mod alm;
 #[cfg(feature = "alr")]
 mod alr;
 #[cfg(feature = "arc")]
@@ -52,6 +54,8 @@ mod dtm;
 mod eve;
 #[cfg(feature = "fir")]
 mod fir;
+#[cfg(feature = "fsi")]
+mod fsi;
 #[cfg(feature = "gbs")]
 mod gbs;
 #[cfg(feature = "gfa")]
@@ -88,6 +92,10 @@ mod hms;
 mod hsc;
 #[cfg(feature = "mda")]
 mod mda;
+#[cfg(feature = "msk")]
+mod msk;
+#[cfg(feature = "mss")]
+mod mss;
 #[cfg(feature = "mta")]
 mod mta;
 #[cfg(feature = "mtw")]
@@ -215,6 +223,8 @@ pub use ala::*;
 pub use alc::*;
 #[cfg(feature = "alf")]
 pub use alf::*;
+#[cfg(feature = "alm")]
+pub use alm::*;
 #[cfg(feature = "alr")]
 pub use alr::*;
 #[cfg(feature = "arc")]
@@ -255,6 +265,8 @@ pub use dtm::*;
 pub use eve::*;
 #[cfg(feature = "fir")]
 pub use fir::*;
+#[cfg(feature = "fsi")]
+pub use fsi::*;
 #[cfg(feature = "gbs")]
 pub use gbs::*;
 #[cfg(feature = "gfa")]
@@ -291,6 +303,10 @@ pub use hms::*;
 pub use hsc::*;
 #[cfg(feature = "mda")]
 pub use mda::*;
+#[cfg(feature = "msk")]
+pub use msk::*;
+#[cfg(feature = "mss")]
+pub use mss::*;
 #[cfg(feature = "mta")]
 pub use mta::*;
 #[cfg(feature = "mtw")]
