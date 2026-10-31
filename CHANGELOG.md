@@ -2,7 +2,7 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
-## [Unreleased]
+## [0.9.6] - 2026-10-31
 
 ### Added
 - ALM (GPS almanac data): message counters, satellite PRN, GPS week, and hexadecimal almanac payloads preserved verbatim. Available with `alm` and `satellites`.
@@ -504,6 +504,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.9.6]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.6
 [0.9.5]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.5
 [0.9.4]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.4
 [0.9.3]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.3

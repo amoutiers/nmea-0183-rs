@@ -8,7 +8,7 @@
 Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message encoding, written in Rust.
 
 This repository is a continuation of [nmea-kit](https://github.com/amoutiers/nmea-kit).
-The unreleased additions are ALM, FSI, MSK, and MSS.
+Version 0.9.6 adds support for ALM, FSI, MSK, and MSS.
 Version 0.9.5 adds support for STN, XTR, ZDL, and ZFO.
 Version 0.9.0 was the first release under the `nmea-0183-rs` crate name.
 Historical `nmea-kit` releases remain available in the original repository.
@@ -16,12 +16,12 @@ Historical `nmea-kit` releases remain available in the original repository.
 | | |
 | --- | --- |
 | **Crate** | `nmea-0183-rs` |
-| **Version** | 0.9.5 |
+| **Version** | 0.9.6 |
 | **MSRV** | 1.85.0 |
 | **Edition** | 2024 |
 | **Dependencies** | 0 |
 | **License** | MIT OR Apache-2.0 |
-| **NMEA sentences** | 105 (bidirectional: parse + encode, including unreleased additions) |
+| **NMEA sentences** | 105 (bidirectional: parse + encode) |
 | **AIS application sentences** | 2 (bidirectional: parse + encode) |
 | **All-features tests** | 1113 passed, including doctests |
 | **AIS message types** | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
@@ -327,7 +327,7 @@ and is also available through its Cargo category.
 The 0.9.5 additions are STN (`stn`, `vessel_systems`), XTR (`xtr`),
 ZDL (`zdl`), and ZFO (`zfo`). The last three also belong to `waypoints_routes`.
 
-The unreleased additions are ALM (`alm`, `satellites`), FSI (`fsi`), MSK (`msk`),
+The 0.9.6 additions are ALM (`alm`, `satellites`), FSI (`fsi`), MSK (`msk`),
 and MSS (`mss`). The last three also belong to `communication`.
 
 The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 105

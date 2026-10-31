@@ -73,7 +73,7 @@
 //! - Release 0.9.5 adds STN, XTR, ZDL, and ZFO: 101 NMEA formatters
 //!   (85 standard, 16 proprietary) and 1076 passing all-features tests,
 //!   including doctests
-//! - Unreleased additions ALM, FSI, MSK, and MSS bring current coverage to
+//! - Release 0.9.6 adds ALM, FSI, MSK, and MSS, bringing current coverage to
 //!   105 NMEA formatters (89 standard, 16 proprietary) and 1113 passing
 //!   all-features tests, including doctests
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
