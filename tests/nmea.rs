@@ -86,6 +86,8 @@ mod hdt;
 mod hmr;
 #[path = "nmea/hms.rs"]
 mod hms;
+#[path = "nmea/hrm.rs"]
+mod hrm;
 #[path = "nmea/hsc.rs"]
 mod hsc;
 #[path = "nmea/mda.rs"]
@@ -102,6 +104,8 @@ mod mtw;
 mod mwd;
 #[path = "nmea/mwv.rs"]
 mod mwv;
+#[path = "nmea/nak.rs"]
+mod nak;
 #[path = "nmea/osd.rs"]
 mod osd;
 #[path = "nmea/pashr.rs"]
@@ -142,6 +146,8 @@ mod rma;
 mod rmb;
 #[path = "nmea/rmc.rs"]
 mod rmc;
+#[path = "nmea/ror.rs"]
+mod ror;
 #[path = "nmea/rot.rs"]
 mod rot;
 #[path = "nmea/rpm.rs"]
@@ -152,6 +158,8 @@ mod rsa;
 mod rsd;
 #[path = "nmea/rte.rs"]
 mod rte;
+#[path = "nmea/spw.rs"]
+mod spw;
 #[path = "nmea/stn.rs"]
 mod stn;
 #[path = "nmea/ths.rs"]

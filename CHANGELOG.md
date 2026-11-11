@@ -2,6 +2,11 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
+## [Unreleased]
+
+### Added
+- HRM heel and roll measurements, NAK negative acknowledgements, ROR rudder orders including the IEC 2024 extension, and SPW password sentences. SPW transmits passwords in plaintext.
+
 ## [0.9.6] - 2026-10-31
 
 ### Added

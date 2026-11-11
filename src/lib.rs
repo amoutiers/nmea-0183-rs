@@ -67,14 +67,17 @@
 //!
 //! ## Features
 //!
-//! - `nmea` (default): all 89 standard NMEA sentence types
+//! - `nmea` (default): all 93 standard NMEA sentence types
 //! - `nmea_proprietary` (default) — all 16 proprietary NMEA sentence types
 //! - `ais` (default) — decoding for all numeric AIS Types 1-27, encoder support for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27, plus ABM, BBM and VSD sentences
 //! - Release 0.9.5 adds STN, XTR, ZDL, and ZFO: 101 NMEA formatters
 //!   (85 standard, 16 proprietary) and 1076 passing all-features tests,
 //!   including doctests
-//! - Release 0.9.6 adds ALM, FSI, MSK, and MSS, bringing current coverage to
-//!   105 NMEA formatters (89 standard, 16 proprietary) and 1113 passing
+//! - Release 0.9.6 adds ALM, FSI, MSK, and MSS: 105 NMEA formatters
+//!   (89 standard, 16 proprietary) and 1113 passing all-features tests,
+//!   including doctests
+//! - Unreleased additions HRM, NAK, ROR, and SPW bring current coverage to
+//!   109 NMEA formatters (93 standard, 16 proprietary) and 1136 passing
 //!   all-features tests, including doctests
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
 
@@ -132,6 +135,7 @@ macro_rules! nmea_item {
             feature = "hdt",
             feature = "hmr",
             feature = "hms",
+            feature = "hrm",
             feature = "hsc",
             feature = "mda",
             feature = "msk",
@@ -140,6 +144,7 @@ macro_rules! nmea_item {
             feature = "mtw",
             feature = "mwd",
             feature = "mwv",
+            feature = "nak",
             feature = "osd",
             feature = "pashr",
             feature = "pcdin",
@@ -160,11 +165,13 @@ macro_rules! nmea_item {
             feature = "rma",
             feature = "rmb",
             feature = "rmc",
+            feature = "ror",
             feature = "rot",
             feature = "rpm",
             feature = "rsa",
             feature = "rsd",
             feature = "rte",
+            feature = "spw",
             feature = "stn",
             feature = "ths",
             feature = "trd",

@@ -3,7 +3,7 @@ use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 /// HRM — Heel angle, roll period and roll amplitude measurement device.
 ///
 /// Wire: `heel_angle,roll_period,roll_amplitude_port,roll_amplitude_starboard,status,roll_peak_hold_port,roll_peak_hold_starboard,peak_hold_reset_time,peak_hold_reset_day,peak_hold_reset_month,peak_hold_reset_year,heel_angle_alert_threshold,sentence_status`
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Hrm {
     /// Actual heel angle in degrees. Positive is starboard, negative is port.
     pub heel_angle: Option<f32>,
@@ -35,10 +35,10 @@ pub struct Hrm {
 
 impl Hrm {
     /// Parse fields from a decoded NMEA frame.
-    /// Always returns `Some`; missing or malformed fields become `None`.
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    /// Missing or malformed fields become `None`.
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             heel_angle: r.f32(),
             roll_period: r.f32(),
             roll_amplitude_port: r.f32(),
@@ -52,7 +52,7 @@ impl Hrm {
             peak_hold_reset_year: r.u16(),
             heel_angle_alert_threshold: r.f32(),
             sentence_status: r.char(),
-        })
+        }
     }
 }
 

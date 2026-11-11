@@ -1,6 +1,7 @@
 use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
-#[derive(Debug, Clone, PartialEq)]
+/// NAK negative acknowledgement.
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Nak {
     pub talker_id: Option<String>,
     pub formatter: Option<String>,
@@ -10,15 +11,15 @@ pub struct Nak {
 }
 
 impl Nak {
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             talker_id: r.string(),
             formatter: r.string(),
             identifier: r.string(),
             reason: r.string(),
             text: r.string(),
-        })
+        }
     }
 }
 

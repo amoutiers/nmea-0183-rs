@@ -21,9 +21,9 @@ Historical `nmea-kit` releases remain available in the original repository.
 | **Edition** | 2024 |
 | **Dependencies** | 0 |
 | **License** | MIT OR Apache-2.0 |
-| **NMEA sentences** | 105 (bidirectional: parse + encode) |
+| **NMEA sentences** | 109 (bidirectional: parse + encode) |
 | **AIS application sentences** | 2 (bidirectional: parse + encode) |
-| **All-features tests** | 1113 passed, including doctests |
+| **All-features tests** | 1136 passed, including doctests |
 | **AIS message types** | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
 
 - **Shared frame layer** — handles `$` parametric and `!` encapsulated framing, IEC 61162-450 tag blocks
@@ -330,7 +330,9 @@ ZDL (`zdl`), and ZFO (`zfo`). The last three also belong to `waypoints_routes`.
 The 0.9.6 additions are ALM (`alm`, `satellites`), FSI (`fsi`), MSK (`msk`),
 and MSS (`mss`). The last three also belong to `communication`.
 
-The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 105
+The unreleased additions are HRM (`heading`), NAK (`safety_alarms`), ROR (`steering`), and SPW (`communication`). SPW carries its password in plaintext.
+
+The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 109
 bidirectional NMEA formatters, two AIS application sentences, and AIS message
 Types 1-27 decoding. [`SENTENCES.md`](SENTENCES.md) is the complete coverage
 matrix, including categories, proprietary formatters, and protocol references.
@@ -378,7 +380,7 @@ NMEA line limit.
 
 | Issue                  | `nmea` 0.7.0 / `ais` 0.12.0         | `nmea-0183-rs`                               |
 | ---------------------- | ----------------------------------- | ---------------------------------------- |
-| NMEA sentence coverage | 29 typed sentence variants          | 105 NMEA types + 2 AIS application sentences |
+| NMEA sentence coverage | 29 typed sentence variants          | 109 NMEA types + 2 AIS application sentences |
 | AIS message coverage   | 23 numeric Types: 1-21, 24, 27      | All numeric Types 1-27                    |
 | Encoding               | Read-only                           | All NMEA + Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24, 27 |
 | Error distinction      | Can't tell unsupported vs malformed | Frame errors vs content errors           |
@@ -398,7 +400,7 @@ nmea-0183-rs = "0.9"
 
 | Feature | Default | Enables |
 | --- | --- | --- |
-| `nmea` | yes | All 89 standard NMEA sentence types |
+| `nmea` | yes | All 93 standard NMEA sentence types |
 | `nmea_proprietary` | yes | All 16 proprietary NMEA sentence types |
 | `ais` | yes | 24 AIS message decoders, transponder encoding, ABM/BBM, and VSD |
 

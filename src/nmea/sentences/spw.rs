@@ -1,6 +1,7 @@
 use crate::nmea::field::{FieldReader, FieldWriter, NmeaEncodable};
 
-#[derive(Debug, Clone, PartialEq)]
+/// SPW security password sentence. Passwords are transmitted as plain text.
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Spw {
     pub protected_sentence: Option<String>,
     pub identifier: Option<String>,
@@ -9,14 +10,14 @@ pub struct Spw {
 }
 
 impl Spw {
-    pub fn parse(fields: &[&str]) -> Option<Self> {
+    pub fn parse(fields: &[&str]) -> Self {
         let mut r = FieldReader::new(fields);
-        Some(Self {
+        Self {
             protected_sentence: r.string(),
             identifier: r.string(),
             password_level: r.u8(),
             password: r.string(),
-        })
+        }
     }
 }
 

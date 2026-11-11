@@ -88,6 +88,8 @@ mod hdt;
 mod hmr;
 #[cfg(feature = "hms")]
 mod hms;
+#[cfg(feature = "hrm")]
+mod hrm;
 #[cfg(feature = "hsc")]
 mod hsc;
 #[cfg(feature = "mda")]
@@ -104,6 +106,8 @@ mod mtw;
 mod mwd;
 #[cfg(feature = "mwv")]
 mod mwv;
+#[cfg(feature = "nak")]
+mod nak;
 #[cfg(feature = "osd")]
 mod osd;
 #[cfg(feature = "pashr")]
@@ -146,6 +150,8 @@ mod rma;
 mod rmc;
 #[cfg(feature = "rsd")]
 mod rsd;
+#[cfg(feature = "ror")]
+mod ror;
 #[cfg(feature = "rot")]
 mod rot;
 #[cfg(feature = "rpm")]
@@ -154,6 +160,8 @@ mod rpm;
 mod rsa;
 #[cfg(feature = "rte")]
 mod rte;
+#[cfg(feature = "spw")]
+mod spw;
 #[cfg(feature = "stn")]
 mod stn;
 #[cfg(feature = "ths")]
@@ -299,6 +307,8 @@ pub use hdt::*;
 pub use hmr::*;
 #[cfg(feature = "hms")]
 pub use hms::*;
+#[cfg(feature = "hrm")]
+pub use hrm::*;
 #[cfg(feature = "hsc")]
 pub use hsc::*;
 #[cfg(feature = "mda")]
@@ -315,6 +325,8 @@ pub use mtw::*;
 pub use mwd::*;
 #[cfg(feature = "mwv")]
 pub use mwv::*;
+#[cfg(feature = "nak")]
+pub use nak::*;
 #[cfg(feature = "osd")]
 pub use osd::*;
 #[cfg(feature = "pashr")]
@@ -355,6 +367,8 @@ pub use rmb::*;
 pub use rma::*;
 #[cfg(feature = "rmc")]
 pub use rmc::*;
+#[cfg(feature = "ror")]
+pub use ror::*;
 #[cfg(feature = "rot")]
 pub use rot::*;
 #[cfg(feature = "rpm")]
@@ -365,6 +379,8 @@ pub use rsa::*;
 pub use rsd::*;
 #[cfg(feature = "rte")]
 pub use rte::*;
+#[cfg(feature = "spw")]
+pub use spw::*;
 #[cfg(feature = "stn")]
 pub use stn::*;
 #[cfg(feature = "ths")]

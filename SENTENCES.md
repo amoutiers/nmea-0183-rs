@@ -18,20 +18,21 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 
 ## Current status
 
-- **82** des **133** formatters IEC 61162-1:2024 de cette matrice sont supportés, dont les quatre formatters AIS `ABM`, `BBM`, `VDM` et `VDO`.
-- **51** formatters IEC 61162-1:2024 restent à intégrer.
+- **86** des **133** formatters IEC 61162-1:2024 de cette matrice sont supportés, dont les quatre formatters AIS `ABM`, `BBM`, `VDM` et `VDO`.
+- **47** formatters IEC 61162-1:2024 restent à intégrer.
 - **11** formatters supplémentaires sont supportés hors de la liste IEC 2024.
 - La version 0.9.3 comprenait 93 formatters NMEA, dont 77 standard et 16 propriétaires.
 - La version 0.9.4 ajoute DSI, DSR, HMR et HMS, soit 97 formatters NMEA, dont 81 standard et 16 propriétaires.
 - La version 0.9.5 ajoute STN, XTR, ZDL et ZFO, soit 101 formatters NMEA, dont 85 standard et 16 propriétaires.
 - La version 0.9.6 ajoute ALM, FSI, MSK et MSS, soit 105 formatters NMEA, dont 89 standard et 16 propriétaires.
-- La suite all-features actuelle compte 1113 tests réussis, doctests inclus.
+- Les ajouts non publiés HRM, NAK, ROR et SPW portent le total à 109 formatters NMEA, dont 93 standard et 16 propriétaires.
+- La suite all-features actuelle compte 1136 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 
 **Features Cargo**
 
 - `default` active `nmea`, `nmea_proprietary` et `ais`.
-- `nmea` regroupe les 89 formatters NMEA standard supportés.
+- `nmea` regroupe les 93 formatters NMEA standard supportés.
 - `nmea_proprietary` regroupe les 16 formatters propriétaires supportés.
 - `ais` active le décodage et l’encodage AIS, ainsi que `ABM`, `BBM` et `VSD`.
 
@@ -96,7 +97,7 @@ Feature Cargo : `heading`.
 | `HCR` | Heading correction report |   | 4.10<br>(2012) | 4.30<br>(2023) |
 | `HMR` | Heading monitor receive | ✓ | 2.30<br>(1998) | 4.30<br>(2023) |
 | `HMS` | Heading monitor set | ✓ | 2.30<br>(1998) | 4.30<br>(2023) |
-| `HRM` | Heel angle, roll period and roll amplitude measurement device |   | 4.10<br>(2012) | 4.30<br>(2023) |
+| `HRM` | Heel angle, roll period and roll amplitude measurement device | ✓ | 4.10<br>(2012) | 4.30<br>(2023) |
 
 ### Course & Speed
 
@@ -139,7 +140,7 @@ Feature Cargo : `depth`.
 
 ### Steering
 
-Feature Cargo : `steering` pour `APB`, `RPM` et `RSA` ; `heading` pour `TRD`.
+Feature Cargo : `steering` pour `APB`, `ROR`, `RPM` et `RSA` ; `heading` pour `TRD`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -152,7 +153,7 @@ Feature Cargo : `steering` pour `APB`, `RPM` et `RSA` ; `heading` pour `TRD`.
 | `HTC` | Heading/track control command |   | 2.30<br>(1998) | 4.30<br>(2023) |
 | `HTD` | Heading/track control data |   | 2.30<br>(1998) | 4.30<br>(2023) |
 | `PRC` | Propulsion remote control status |   | 3.01<br>(2002) | 4.30<br>(2023) |
-| `ROR` | Rudder order status |   | 3.01<br>(2002) | 4.30<br>(2023) |
+| `ROR` | Rudder order status | ✓ | 3.01<br>(2002) | 4.30<br>(2023) |
 | `TRC` | Thruster control data |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `TRD` | Thruster response data | ✓ | 3.01<br>(2002) | 4.30<br>(2023) |
 | `ASD` | Autopilot system data |   | 2.10<br>(1995) | 2.10<br>(1995) |
@@ -257,7 +258,7 @@ Feature Cargo : `safety_alarms`.
 | `AGL` | Alert group list |   | 4.30<br>(2023) | 4.30<br>(2023) |
 | `AKD` | Acknowledge detail alarm condition |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `MOB` | Man over board notification |   | 4.10<br>(2012) | 4.30<br>(2023) |
-| `NAK` | Negative acknowledgement |   | 4.00<br>(2008) | 4.30<br>(2023) |
+| `NAK` | Negative acknowledgement | ✓ | 4.00<br>(2008) | 4.30<br>(2023) |
 | `NSR` | Navigation status report |   | 4.10<br>(2012) | 4.30<br>(2023) |
 | `SM1` | SafetyNET message, all ships/NavArea |   | 4.10<br>(2012) | 4.30<br>(2023) |
 | `SM2` | SafetyNET message, coastal warning area |   | 4.10<br>(2012) | 4.30<br>(2023) |
@@ -296,7 +297,7 @@ Feature Cargo : `communication`.
 | `NRX` | MSI received message |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `RLM` | Return link message |   | 4.10<br>(2012) | 4.30<br>(2023) |
 | `SFI` | Scanning frequency information |   | 2.10<br>(1995) | 4.30<br>(2023) |
-| `SPW` | Security password sentence |   | 4.10<br>(2012) | 4.30<br>(2023) |
+| `SPW` | Security password sentence | ✓ | 4.10<br>(2012) | 4.30<br>(2023) |
 | `TUT` | Transmission of multi-language text |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `UID` | User identification code transmission |   | 3.01<br>(2002) | 4.30<br>(2023) |
 | `VER` | Version | ✓ | 4.00<br>(2008) | 4.30<br>(2023) |

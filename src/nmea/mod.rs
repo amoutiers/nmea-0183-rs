@@ -186,6 +186,7 @@ nmea_sentences![
         ["hms", Hms, "HMS"],
         ["hdg", Hdg, "HDG"],
         ["hdm", Hdm, "HDM"],
+        ["hrm", Hrm, "HRM"],
         ["hsc", Hsc, "HSC"],
         ["rot", Rot, "ROT"],
         ["ths", Ths, "THS"],
@@ -210,6 +211,7 @@ nmea_sentences![
         ["zfo", Zfo, "ZFO"],
         ["ztg", Ztg, "ZTG"],
         // Rudder
+        ["ror", Ror, "ROR"],
         ["rsa", Rsa, "RSA"],
         // Speed
         ["vbw", Vbw, "VBW"],
@@ -245,6 +247,7 @@ nmea_sentences![
         ["dor", Dor, "DOR"],
         ["eve", Eve, "EVE"],
         ["fir", Fir, "FIR"],
+        ["nak", Nak, "NAK"],
         // Vessel systems
         ["stn", Stn, "STN"],
         // Communication
@@ -255,6 +258,7 @@ nmea_sentences![
         ["fsi", Fsi, "FSI"],
         ["msk", Msk, "MSK"],
         ["mss", Mss, "MSS"],
+        ["spw", Spw, "SPW"],
         ["txt", Txt, "TXT"],
         ["ver", Ver, "VER"],
         // Heartbeat
