@@ -2,10 +2,15 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
-## [Unreleased]
+## [0.9.7] - 2026-11-11
 
 ### Added
-- HRM heel and roll measurements, NAK negative acknowledgements, ROR rudder orders including the IEC 2024 extension, and SPW password sentences. SPW transmits passwords in plaintext.
+- HRM (Heel angle, roll period and roll amplitude measurement device): heel, roll, peak hold, reset time, and alert threshold measurements. Available with `hrm` and `heading`.
+- NAK (Negative acknowledgement): affected talker and formatter, identifier, reason code, and descriptive text. Available with `nak` and `safety_alarms`.
+- ROR (Rudder order status): rudder orders and statuses, including center and bow rudder fields from IEC 61162-1:2024. Available with `ror` and `steering`.
+- SPW (Security password sentence): protected formatter, identifier, password level, and password. Passwords are transmitted in plaintext. Available with `spw` and `communication`.
+
+NMEA sentence coverage: 105 → 109 types.
 
 ## [0.9.6] - 2026-10-31
 
@@ -509,6 +514,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.9.7]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.7
 [0.9.6]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.6
 [0.9.5]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.5
 [0.9.4]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.4

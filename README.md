@@ -8,6 +8,7 @@
 Bidirectional NMEA 0183 parser/encoder with AIS decoding and transponder-message encoding, written in Rust.
 
 This repository is a continuation of [nmea-kit](https://github.com/amoutiers/nmea-kit).
+Version 0.9.7 adds support for HRM, NAK, ROR, and SPW.
 Version 0.9.6 adds support for ALM, FSI, MSK, and MSS.
 Version 0.9.5 adds support for STN, XTR, ZDL, and ZFO.
 Version 0.9.0 was the first release under the `nmea-0183-rs` crate name.
@@ -16,7 +17,7 @@ Historical `nmea-kit` releases remain available in the original repository.
 | | |
 | --- | --- |
 | **Crate** | `nmea-0183-rs` |
-| **Version** | 0.9.6 |
+| **Version** | 0.9.7 |
 | **MSRV** | 1.85.0 |
 | **Edition** | 2024 |
 | **Dependencies** | 0 |
@@ -330,7 +331,7 @@ ZDL (`zdl`), and ZFO (`zfo`). The last three also belong to `waypoints_routes`.
 The 0.9.6 additions are ALM (`alm`, `satellites`), FSI (`fsi`), MSK (`msk`),
 and MSS (`mss`). The last three also belong to `communication`.
 
-The unreleased additions are HRM (`heading`), NAK (`safety_alarms`), ROR (`steering`), and SPW (`communication`). SPW carries its password in plaintext.
+The 0.9.7 additions are HRM (`heading`), NAK (`safety_alarms`), ROR (`steering`), and SPW (`communication`). SPW carries its password in plaintext.
 
 The default feature set enables `nmea`, `nmea_proprietary`, and `ais`: 109
 bidirectional NMEA formatters, two AIS application sentences, and AIS message

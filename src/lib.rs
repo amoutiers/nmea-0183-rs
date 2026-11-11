@@ -76,7 +76,7 @@
 //! - Release 0.9.6 adds ALM, FSI, MSK, and MSS: 105 NMEA formatters
 //!   (89 standard, 16 proprietary) and 1113 passing all-features tests,
 //!   including doctests
-//! - Unreleased additions HRM, NAK, ROR, and SPW bring current coverage to
+//! - Release 0.9.7 adds HRM, NAK, ROR, and SPW, bringing coverage to
 //!   109 NMEA formatters (93 standard, 16 proprietary) and 1136 passing
 //!   all-features tests, including doctests
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types

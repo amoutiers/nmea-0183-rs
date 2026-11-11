@@ -1,10 +1,10 @@
 # nmea-0183-rs
 
-## Release 0.9.6 snapshot
+## Release 0.9.7 snapshot
 
-- 105 NMEA formatters: 89 standard and 16 proprietary; two AIS application sentences.
-- 1113 tests passed across the all-features unit, integration, and doctest targets.
-- ALM, FSI, MSK, and MSS were added in 0.9.6.
+- 109 NMEA formatters: 93 standard and 16 proprietary; two AIS application sentences.
+- 1136 tests passed across the all-features unit, integration, and doctest targets.
+- HRM, NAK, ROR, and SPW were added in 0.9.7.
 
 ## Agent instructions
 
