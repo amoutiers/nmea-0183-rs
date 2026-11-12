@@ -3,7 +3,7 @@
 ## Release 0.9.7 snapshot
 
 - 109 NMEA formatters: 93 standard and 16 proprietary; two AIS application sentences.
-- 1136 tests passed across the all-features unit, integration, and doctest targets.
+- 1242 tests passed across the all-features unit, integration, and doctest targets.
 - HRM, NAK, ROR, and SPW were added in 0.9.7.
 
 ## Agent instructions

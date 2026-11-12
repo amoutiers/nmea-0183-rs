@@ -2,11 +2,6 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
-## [Unreleased]
-
-### Changed
-- `parse_frame()` rejects non-ASCII data fields with the new `FrameError::NonAsciiData`, including Unicode trailing whitespace previously removed by trimming. Existing tag, checksum and address errors retain priority. Compatible ASCII parsing, literal `^HH` escapes, tag blocks and strict API diagnostics are unchanged.
-
 ## [0.9.7] - 2026-11-12
 
 ### Added
@@ -17,6 +12,7 @@ All notable changes to nmea-0183-rs are documented here.
 
 ### Changed
 - Include integration tests in the published crate so they can be run from the downloaded package.
+- `parse_frame()` rejects non-ASCII data fields with the new `FrameError::NonAsciiData`, including Unicode trailing whitespace previously removed by trimming. Existing tag, checksum and address errors retain priority. Compatible ASCII parsing, literal `^HH` escapes, tag blocks and strict API diagnostics are unchanged.
 
 NMEA sentence coverage: 105 → 109 types.
 

@@ -24,7 +24,7 @@ Historical `nmea-kit` releases remain available in the original repository.
 | **License** | MIT OR Apache-2.0 |
 | **NMEA sentences** | 109 (bidirectional: parse + encode) |
 | **AIS application sentences** | 2 (bidirectional: parse + encode) |
-| **All-features tests** | 1136 passed, including doctests |
+| **All-features tests** | 1242 passed, including doctests |
 | **AIS message types** | All numeric Types 1-27 decoded; Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27 also encoded |
 
 - **Shared frame layer** — handles `$` parametric and `!` encapsulated framing, IEC 61162-450 tag blocks

@@ -77,7 +77,7 @@
 //!   (89 standard, 16 proprietary) and 1113 passing all-features tests,
 //!   including doctests
 //! - Release 0.9.7 adds HRM, NAK, ROR, and SPW, bringing coverage to
-//!   109 NMEA formatters (93 standard, 16 proprietary) and 1136 passing
+//!   109 NMEA formatters (93 standard, 16 proprietary) and 1242 passing
 //!   all-features tests, including doctests
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
 
