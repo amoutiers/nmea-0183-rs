@@ -8,7 +8,7 @@ use crate::FrameError;
 /// - XOR checksum validation
 /// - Talker ID + sentence type extraction
 /// - Proprietary sentence detection (`$P...`)
-/// - Field splitting by `,`
+/// - ASCII data validation and field splitting by `,`
 ///
 /// # Proprietary sentences
 ///
@@ -81,6 +81,12 @@ pub(crate) fn invalid_tag_character(tag: &str) -> Option<char> {
 /// [`crate::parse_frame_strict`] when the complete wire sentence must satisfy
 /// the strict frame envelope.
 ///
+/// Data fields must contain only ASCII characters. ASCII controls and `^HH`
+/// escape sequences keep their compatible behavior; escapes are not decoded.
+/// Non-ASCII whitespace at the end of a field is rejected even without a
+/// checksum. Existing tag, checksum and address errors take precedence over
+/// [`FrameError::NonAsciiData`]. Tag block content is outside this ASCII check.
+///
 /// Proprietary sentences (address starting with `P`) are detected
 /// automatically: `talker` will be `""` and `sentence_type` will
 /// contain the full address (e.g. `"PASHR"`, `"PSKPDPT"`).
@@ -102,6 +108,7 @@ pub(crate) fn invalid_tag_character(tag: &str) -> Option<char> {
 /// assert_eq!(frame.fields.len(), 8);
 /// ```
 pub fn parse_frame(line: &str) -> Result<NmeaFrame<'_>, FrameError> {
+    let trailing_whitespace = &line[line.trim_end().len()..];
     let line = line.trim();
     if line.is_empty() {
         return Err(FrameError::Empty);
@@ -170,6 +177,13 @@ pub fn parse_frame(line: &str) -> Result<NmeaFrame<'_>, FrameError> {
     } else {
         ""
     };
+
+    // Without a checksum, trim may have hidden Unicode whitespace in the last field.
+    if !fields_str.is_ascii()
+        || (checksum_str.is_none() && addr_end < body.len() && !trailing_whitespace.is_ascii())
+    {
+        return Err(FrameError::NonAsciiData);
+    }
 
     // A present-but-empty remainder (address followed by a comma) is one empty
     // field; only the absence of any comma after the address means zero fields.

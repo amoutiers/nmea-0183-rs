@@ -57,7 +57,11 @@ match sentence {
 ```
 
 `parse_frame()` is the permissive API for real-world device input: it accepts
-common deviations such as a missing checksum or terminator. Use
+common deviations such as a missing checksum or terminator. Data fields must be
+ASCII, including trailing whitespace: Unicode fields now return
+`FrameError::NonAsciiData`. Existing checksum and address errors take precedence.
+ASCII `^HH` escapes remain literal, and ASCII controls and tag blocks retain their
+compatible parsing rules. Use
 `parse_frame_strict()` when the complete wire sentence must satisfy the strict
 frame envelope:
 
@@ -305,7 +309,7 @@ flowchart TD
 when present, and extracts the talker ID and sentence type. `parse_frame()` keeps
 device-compatible framing behavior. `validate_sentence()` and
 `parse_frame_strict()` additionally require the canonical address, checksum,
-terminator, character set, escape grammar, and 82-byte sentence limit.
+terminator, stricter ASCII character rules, escape grammar, and 82-byte sentence limit.
 
 Strict validation covers the shared frame envelope only. It does not add
 formatter-specific semantic validation, serial baud or electrical checks,

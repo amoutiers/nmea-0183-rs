@@ -359,6 +359,9 @@ fn encode_accepts_minimum_proprietary_address() {
 
 #[test]
 fn public_errors_have_informative_display() {
+    let data = FrameError::NonAsciiData.to_string();
+    assert!(data.contains("data"));
+    assert!(data.contains("non-ASCII"));
     use nmea_0183_rs::EncodeError;
     let checksum = FrameError::BadChecksum {
         expected: 0x12,
@@ -372,4 +375,244 @@ fn public_errors_have_informative_display() {
             .to_string()
             .contains("communication_state")
     );
+}
+
+// Synthetic framing counterexamples; XOR the raw UTF-8 bytes independently.
+fn ascii_test_sentence(body: &str) -> String {
+    let checksum = body[1..].bytes().fold(0u8, |acc, byte| acc ^ byte);
+    format!("{body}*{checksum:02X}\r\n")
+}
+
+#[test]
+fn frame_rejects_non_ascii_data() {
+    for address in ["$GPTXT", "!AIVDM", "$PABC", "$GPXYZ"] {
+        for value in ["é", "漢", "🙂", "e\u{301}", "\u{80}"] {
+            for fields in [
+                format!("{value},A,B"),
+                format!("A,{value},B"),
+                format!("A,B,{value}"),
+            ] {
+                let body = format!("{address},{fields}");
+                for line in [body.clone(), ascii_test_sentence(&body)] {
+                    assert_eq!(
+                        parse_frame(&line),
+                        Err(FrameError::NonAsciiData),
+                        "{line:?}"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn frame_rejects_unicode_trailing_whitespace() {
+    for whitespace in ['\u{a0}', '\u{2003}', '\u{202f}', '\u{3000}', '\u{85}'] {
+        for value in [whitespace.to_string(), format!("A{whitespace}")] {
+            for ending in ["", "\r\n", " \t\r\n"] {
+                let body = format!("$GPXYZ,{value}{ending}");
+                for line in [body.clone(), ascii_test_sentence(&body)] {
+                    assert_eq!(
+                        parse_frame(&line),
+                        Err(FrameError::NonAsciiData),
+                        "{line:?}"
+                    );
+                }
+            }
+        }
+    }
+    for body in ["$GPXYZ,A\u{a0},", "$GPXYZ,A\r\n\u{a0}"] {
+        assert_eq!(parse_frame(body), Err(FrameError::NonAsciiData), "{body:?}");
+    }
+}
+
+#[test]
+fn frame_keeps_ascii_fields_and_empty_fields() {
+    for (body, expected) in [
+        ("$GPXYZ", vec![]),
+        ("$GPXYZ,", vec![""]),
+        ("$GPXYZ,,", vec!["", ""]),
+        ("$GPXYZ,A,,B,", vec!["A", "", "B", ""]),
+    ] {
+        for line in [
+            body.to_string(),
+            format!("{body}\r\n"),
+            ascii_test_sentence(body),
+            ascii_test_sentence(body).trim_end().to_string(),
+        ] {
+            assert_eq!(
+                parse_frame(&line).expect("ASCII frame").fields,
+                expected,
+                "{line:?}"
+            );
+        }
+    }
+}
+
+#[test]
+fn frame_keeps_compatible_ascii_data() {
+    let fields = ["raw$!\\~ text", "A\0B", "A\tB", "A\rB", "A\nB", "A\u{7f}B"];
+    let body = format!("$GPXYZ,{}", fields.join(","));
+    for line in [body.clone(), ascii_test_sentence(&body)] {
+        assert_eq!(parse_frame(&line).expect("compatible ASCII").fields, fields);
+    }
+    assert_eq!(
+        parse_frame(" \t$GPXYZ,A \t\r\n")
+            .expect("ASCII trim")
+            .fields,
+        ["A"]
+    );
+    let body = "$GPXYZ,raw*text";
+    assert_eq!(parse_frame(body), Err(FrameError::MalformedChecksum));
+    assert_eq!(
+        parse_frame(&ascii_test_sentence(body))
+            .expect("last star")
+            .fields,
+        ["raw*text"]
+    );
+}
+
+#[test]
+fn frame_keeps_ascii_escapes_verbatim() {
+    let fields = ["^2C", "^E9", "^00", "^7F", "^GG", "^2c", "^", "^2"];
+    let body = format!("$GPXYZ,{}", fields.join(","));
+    for line in [body.clone(), ascii_test_sentence(&body)] {
+        assert_eq!(parse_frame(&line).expect("literal escapes").fields, fields);
+    }
+}
+
+#[test]
+fn frame_keeps_permissive_envelope() {
+    for (address, talker, sentence_type) in [
+        ("$RMC", "", "RMC"),
+        ("$gpRMC", "gp", "RMC"),
+        ("$GPRMCX", "GPR", "MCX"),
+        ("$PABC", "", "PABC"),
+    ] {
+        let body = format!("{address},A");
+        for line in [body.clone(), ascii_test_sentence(&body)] {
+            let frame = parse_frame(&line).expect("noncanonical ASCII address");
+            assert_eq!((frame.talker, frame.sentence_type), (talker, sentence_type));
+            assert_eq!(frame.fields, ["A"]);
+        }
+    }
+    let wire = ascii_test_sentence("!**TTD,1,1,0,ABC,0");
+    let frame = parse_frame(&wire).expect("TTD address with trailing checksum");
+    assert_eq!(
+        (frame.prefix, frame.talker, frame.sentence_type),
+        ('!', "**", "TTD")
+    );
+    assert_eq!(
+        parse_frame("$GPRMC,9*5e")
+            .expect("lowercase checksum")
+            .fields,
+        ["9"]
+    );
+    let body = format!("$GPXYZ,{}", "A".repeat(90));
+    assert_eq!(
+        parse_frame(&ascii_test_sentence(&body))
+            .expect("over 82 bytes")
+            .fields,
+        ["A".repeat(90)]
+    );
+}
+
+#[test]
+fn frame_keeps_whitespace_outside_data() {
+    assert_eq!(
+        parse_frame("\u{a0}$GPXYZ,A")
+            .expect("leading Unicode whitespace")
+            .fields,
+        ["A"]
+    );
+    assert_eq!(parse_frame("\u{a0}"), Err(FrameError::Empty));
+    assert!(
+        parse_frame("$GPXYZ\u{a0}")
+            .expect("fieldless address")
+            .fields
+            .is_empty()
+    );
+    assert_eq!(parse_frame("\\s:é\\\u{a0}"), Err(FrameError::TooShort));
+    for ending in ["\u{a0}", "\r\n\u{a0}"] {
+        assert_eq!(
+            parse_frame(&format!("$GPRMC,9*5E{ending}"))
+                .expect("after checksum")
+                .fields,
+            ["9"]
+        );
+    }
+}
+
+#[test]
+fn frame_preserves_error_precedence() {
+    let body = "$GPXYZ,é";
+    let computed = body[1..].bytes().fold(0u8, |acc, byte| acc ^ byte);
+    let expected = computed ^ 0xff;
+    assert_eq!(
+        parse_frame(&format!("{body}*{expected:02X}")),
+        Err(FrameError::BadChecksum { expected, computed })
+    );
+    assert_eq!(
+        parse_frame(&format!("{body}*GG")),
+        Err(FrameError::MalformedChecksum)
+    );
+    assert_eq!(
+        parse_frame(&ascii_test_sentence(body)),
+        Err(FrameError::NonAsciiData)
+    );
+    assert_eq!(parse_frame(body), Err(FrameError::NonAsciiData));
+    assert_eq!(parse_frame("$GP,é\u{a0}"), Err(FrameError::TooShort));
+    assert_eq!(parse_frame("$Aé,é\u{a0}"), Err(FrameError::NonAsciiAddress));
+    assert_eq!(
+        parse_frame("XGPXYZ,é\u{a0}"),
+        Err(FrameError::InvalidPrefix('X'))
+    );
+    assert_eq!(
+        parse_frame("\\s:tag$GPXYZ,é\u{a0}"),
+        Err(FrameError::MalformedTagBlock)
+    );
+}
+
+#[test]
+fn frame_keeps_tag_block_contract() {
+    for content in ["s:é", "s:A\tB"] {
+        let computed = content.bytes().fold(0u8, |acc, byte| acc ^ byte);
+        for tag_checksum in [false, true] {
+            let tag = if tag_checksum {
+                format!("\\{content}*{computed:02X}\\")
+            } else {
+                format!("\\{content}\\")
+            };
+            for sentence_checksum in [false, true] {
+                for (body, unicode) in [("$GPXYZ,A", false), ("$GPXYZ,é\u{a0}", true)] {
+                    let sentence = if sentence_checksum {
+                        ascii_test_sentence(body)
+                    } else {
+                        body.to_string()
+                    };
+                    let line = format!("{tag}{sentence}");
+                    if unicode {
+                        assert_eq!(
+                            parse_frame(&line),
+                            Err(FrameError::NonAsciiData),
+                            "{line:?}"
+                        );
+                    } else {
+                        let frame = parse_frame(&line).expect("permissive tag content");
+                        assert_eq!(frame.tag_block, Some(content));
+                        assert_eq!(frame.fields, ["A"]);
+                    }
+                }
+            }
+        }
+        let expected = computed ^ 0xff;
+        assert_eq!(
+            parse_frame(&format!("\\{content}*{expected:02X}\\$GPXYZ,é")),
+            Err(FrameError::BadTagChecksum { expected, computed })
+        );
+        assert_eq!(
+            parse_frame(&format!("\\{content}*GG\\$GPXYZ,é")),
+            Err(FrameError::MalformedTagBlock)
+        );
+    }
 }

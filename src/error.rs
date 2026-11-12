@@ -19,6 +19,8 @@ pub enum FrameError {
     TooShort,
     /// Address (talker + type) contains non-ASCII bytes (NMEA addresses are ASCII).
     NonAsciiAddress,
+    /// A data field contains non-ASCII characters.
+    NonAsciiData,
 }
 
 impl core::fmt::Display for FrameError {
@@ -42,6 +44,7 @@ impl core::fmt::Display for FrameError {
             }
             Self::TooShort => write!(f, "sentence too short"),
             Self::NonAsciiAddress => write!(f, "address field contains non-ASCII bytes"),
+            Self::NonAsciiData => write!(f, "data field contains non-ASCII bytes"),
         }
     }
 }

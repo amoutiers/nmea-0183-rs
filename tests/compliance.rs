@@ -339,3 +339,120 @@ fn strict_data_progress_is_bounded() {
         }
     });
 }
+
+#[test]
+fn strict_keeps_unicode_diagnostics() {
+    bounded::run_bounded("strict_keeps_unicode_diagnostics", || {
+        for character in ['é', '\u{a0}'] {
+            let body = format!("$GPTXT,A{character}");
+            let computed = body[1..].bytes().fold(0u8, |acc, byte| acc ^ byte);
+            for checksum in [computed, computed ^ 0xff] {
+                let wire = format!("{body}*{checksum:02X}\r\n");
+                let expected = ComplianceError::InvalidDataCharacter(character);
+                assert_eq!(parse_frame_strict(&wire), Err(expected.clone()));
+                assert_eq!(validate_sentence(&wire), Err(expected));
+            }
+            let wire = sentence(&body);
+            assert_eq!(
+                parse_frame_strict(wire.trim_end()),
+                Err(ComplianceError::MissingTerminator)
+            );
+            assert_eq!(
+                validate_sentence(wire.trim_end()),
+                Err(ComplianceError::MissingTerminator)
+            );
+            assert_eq!(
+                parse_frame_strict(&format!("{body}\r\n")),
+                Err(ComplianceError::MissingChecksum)
+            );
+            assert_eq!(
+                validate_sentence(&format!("{body}\r\n")),
+                Err(ComplianceError::MissingChecksum)
+            );
+        }
+    });
+}
+
+#[test]
+fn strict_keeps_escape_control_and_tag_rules() {
+    bounded::run_bounded("strict_keeps_escape_control_and_tag_rules", || {
+        let wire = sentence("$GPTXT,^E9");
+        assert_eq!(
+            parse_frame_strict(&wire).expect("ASCII escape").fields,
+            ["^E9"]
+        );
+        validate_sentence(&wire).expect("ASCII escape");
+        for escape in ["^GG", "^2c"] {
+            let wire = sentence(&format!("$GPTXT,{escape}"));
+            let expected = ComplianceError::MalformedEscape { offset: 7 };
+            assert_eq!(parse_frame_strict(&wire), Err(expected.clone()));
+            assert_eq!(validate_sentence(&wire), Err(expected));
+        }
+        for character in ['\0', '\t', '\u{7f}'] {
+            let wire = sentence(&format!("$GPTXT,A{character}B"));
+            let expected = ComplianceError::InvalidDataCharacter(character);
+            assert_eq!(parse_frame_strict(&wire), Err(expected.clone()));
+            assert_eq!(validate_sentence(&wire), Err(expected));
+        }
+        let wire = tagged("s:é", &sentence("$GPTXT,A"));
+        let expected = ComplianceError::InvalidTagBlockCharacter('é');
+        assert_eq!(parse_frame_strict(&wire), Err(expected.clone()));
+        assert_eq!(validate_sentence(&wire), Err(expected));
+        assert_eq!(
+            encode_frame('$', "GP", "TXT", &["é"]),
+            Err(nmea_0183_rs::EncodeError::InvalidFieldCharacter('é'))
+        );
+        assert_eq!(
+            encode_frame_strict('$', "GP", "TXT", &["é"]),
+            Err(StrictEncodeError::Encode(
+                nmea_0183_rs::EncodeError::InvalidFieldCharacter('é')
+            ))
+        );
+    });
+}
+
+#[test]
+fn strict_preserves_combined_error_precedence() {
+    bounded::run_bounded("strict_preserves_combined_error_precedence", || {
+        let unicode_body = "$GPTXT,é";
+        let unicode_computed = unicode_body[1..].bytes().fold(0u8, |acc, byte| acc ^ byte);
+        let unicode_bad = format!("{unicode_body}*{:02X}\r\n", unicode_computed ^ 0xff);
+        let ascii_body = "$GPTXT,A";
+        let computed = ascii_body[1..].bytes().fold(0u8, |acc, byte| acc ^ byte);
+        let expected = computed ^ 0xff;
+        let ascii_bad = format!("{ascii_body}*{expected:02X}\r\n");
+        let tag = "s:source";
+        let tag_computed = tag.bytes().fold(0u8, |acc, byte| acc ^ byte);
+        let tag_expected = tag_computed ^ 0xff;
+        let bad_tag = format!("\\{tag}*{tag_expected:02X}\\");
+        for (wire, error) in [
+            (
+                format!("\\s:source{}", sentence(unicode_body)),
+                ComplianceError::Frame(FrameError::MalformedTagBlock),
+            ),
+            (unicode_bad, ComplianceError::InvalidDataCharacter('é')),
+            (
+                format!("\\{tag}*GG\\{}", sentence(unicode_body)),
+                ComplianceError::InvalidDataCharacter('é'),
+            ),
+            (
+                format!("{bad_tag}{}", sentence(unicode_body)),
+                ComplianceError::InvalidDataCharacter('é'),
+            ),
+            (
+                format!("{bad_tag}{ascii_bad}"),
+                ComplianceError::Frame(FrameError::BadTagChecksum {
+                    expected: tag_expected,
+                    computed: tag_computed,
+                }),
+            ),
+            (
+                tagged("s:é", &ascii_bad),
+                ComplianceError::Frame(FrameError::BadChecksum { expected, computed }),
+            ),
+        ] {
+            assert_eq!(parse_frame_strict(&wire), Err(error.clone()), "{wire:?}");
+            assert_eq!(validate_sentence(&wire), Err(error), "{wire:?}");
+        }
+    });
+}
