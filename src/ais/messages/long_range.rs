@@ -122,21 +122,11 @@ mod tests {
     #[test]
     fn long_range_position_sentinel() {
         let mut parser = AisParser::new();
-        let frame = parse_frame("!AIVDM,1,1,,A,KCQ9r=hrFUnH7P00,0*41").expect("valid");
+        let frame = parse_frame("!AIVDM,1,1,,A,K1mg=5Cn`>6bTOwv,0*63").expect("valid");
         let msg = parser.decode(&frame).expect("decoded");
         if let AisDecodeOutcome::Message(AisMessage::LongRangePosition(pos)) = msg {
-            if let Some(lat) = pos.latitude {
-                assert!(
-                    (-90.0..=90.0).contains(&lat),
-                    "lat sentinel not filtered: {lat}"
-                );
-            }
-            if let Some(lon) = pos.longitude {
-                assert!(
-                    (-180.0..=180.0).contains(&lon),
-                    "lon sentinel not filtered: {lon}"
-                );
-            }
+            assert_eq!(pos.latitude, None);
+            assert_eq!(pos.longitude, None);
         } else {
             panic!("expected LongRangePosition, got {msg:?}");
         }

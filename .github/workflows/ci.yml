@@ -27,13 +27,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Check each feature without defaults
+      - name: Test each feature without defaults
         run: |
           set -euo pipefail
-          cargo check --no-default-features
+          cargo test --no-default-features
           features="$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.name == "nmea-0183-rs") | .features | keys[] | select(. != "default")')"
           while IFS= read -r feature; do
-            cargo check --no-default-features --features "$feature"
+            cargo test --no-default-features --features "$feature"
           done <<< "$features"
 
   clippy:
@@ -77,3 +77,22 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: bash .github/scripts/test-release-notes.sh
+
+  package-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test distributed package outside checkout
+        run: |
+          set -euo pipefail
+          metadata="$(cargo metadata --format-version 1 --no-deps)"
+          name="$(jq -r '.packages[0].name' <<< "$metadata")"
+          version="$(jq -r '.packages[0].version' <<< "$metadata")"
+          target="$(jq -r '.target_directory' <<< "$metadata")"
+          cargo package --no-verify
+          scratch="$(mktemp -d)"
+          trap 'rm -rf "$scratch"' EXIT
+          tar -xzf "$target/package/$name-$version.crate" -C "$scratch"
+          cd "$scratch/$name-$version"
+          CARGO_TARGET_DIR="$scratch/target" cargo test --all-features --offline
