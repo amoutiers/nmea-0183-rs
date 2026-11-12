@@ -52,22 +52,24 @@ fn roundtrip() {
 
 #[test]
 fn bbm_default_and_strict_encoding() {
-    use nmea_0183_rs::{ComplianceError, StrictEncodeError, parse_frame_strict};
-    let value = Bbm::default();
-    let line = value.to_sentence_strict("AI").expect("strict envelope");
-    assert!(parse_frame_strict(&line).is_ok());
-    let sentence = AisSentence::parse(&parse_frame(&line).expect("frame"));
-    assert_eq!(
-        sentence.to_sentence_strict("AI").expect("enum encode"),
-        line
-    );
-    assert_eq!(sentence.to_sentence("AI").expect("compatible enum"), line);
-    assert!(matches!(
-        sentence.to_sentence_strict("ai"),
-        Err(StrictEncodeError::Compliance(
-            ComplianceError::InvalidAddressCharacter('a')
-        ))
-    ));
+    super::bounded::run_bounded("bbm::bbm_default_and_strict_encoding", || {
+        use nmea_0183_rs::{ComplianceError, StrictEncodeError, parse_frame_strict};
+        let value = Bbm::default();
+        let line = value.to_sentence_strict("AI").expect("strict envelope");
+        assert!(parse_frame_strict(&line).is_ok());
+        let sentence = AisSentence::parse(&parse_frame(&line).expect("frame"));
+        assert_eq!(
+            sentence.to_sentence_strict("AI").expect("enum encode"),
+            line
+        );
+        assert_eq!(sentence.to_sentence("AI").expect("compatible enum"), line);
+        assert!(matches!(
+            sentence.to_sentence_strict("ai"),
+            Err(StrictEncodeError::Compliance(
+                ComplianceError::InvalidAddressCharacter('a')
+            ))
+        ));
+    });
 }
 
 #[test]
@@ -80,33 +82,35 @@ fn parser_is_infallible_and_lenient() {
 
 #[test]
 fn unknown_preserves_its_owned_envelope() {
-    for input in [
-        "!AIXYZ,1,,",
-        "$GPXYZ,1,,",
-        "$PTEST,1,,",
-        "\\s:receiver\\!AIXYZ,1,,",
-        "\\\\!AIXYZ,1,,",
-    ] {
-        let value = {
-            let owned = input.to_owned();
-            AisSentence::parse(&parse_frame(&owned).expect("frame"))
-        };
-        let line = value.to_sentence("ignored").expect("unknown encode");
-        assert_eq!(
-            parse_frame(&line).expect("reparse"),
-            parse_frame(input).expect("original")
-        );
-        assert_eq!(
-            value.to_sentence_strict("ignored").expect("strict unknown"),
-            line
-        );
-    }
-    let value = AisSentence::parse(&parse_frame("!aiXYZ,1").expect("compatible"));
-    assert!(value.to_sentence("AI").is_ok());
-    assert!(matches!(
-        value.to_sentence_strict("AI"),
-        Err(nmea_0183_rs::StrictEncodeError::Compliance(_))
-    ));
+    super::bounded::run_bounded("bbm::unknown_preserves_its_owned_envelope", || {
+        for input in [
+            "!AIXYZ,1,,",
+            "$GPXYZ,1,,",
+            "$PTEST,1,,",
+            "\\s:receiver\\!AIXYZ,1,,",
+            "\\\\!AIXYZ,1,,",
+        ] {
+            let value = {
+                let owned = input.to_owned();
+                AisSentence::parse(&parse_frame(&owned).expect("frame"))
+            };
+            let line = value.to_sentence("ignored").expect("unknown encode");
+            assert_eq!(
+                parse_frame(&line).expect("reparse"),
+                parse_frame(input).expect("original")
+            );
+            assert_eq!(
+                value.to_sentence_strict("ignored").expect("strict unknown"),
+                line
+            );
+        }
+        let value = AisSentence::parse(&parse_frame("!aiXYZ,1").expect("compatible"));
+        assert!(value.to_sentence("AI").is_ok());
+        assert!(matches!(
+            value.to_sentence_strict("AI"),
+            Err(nmea_0183_rs::StrictEncodeError::Compliance(_))
+        ));
+    });
 }
 
 #[test]

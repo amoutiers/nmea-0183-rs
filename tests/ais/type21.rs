@@ -54,3 +54,42 @@ fn type21_values() {
         other => panic!("expected AidToNavigation, got {other:?}"),
     }
 }
+
+// Synthetic one-hot probes for the public flags at their documented bit offsets.
+#[test]
+fn type21_flags_are_exact() {
+    let kind = 21;
+    for (set_bit, expected) in [
+        (None, [false, false, false, false, false]),
+        (Some(163), [true, false, false, false, false]),
+        (Some(259), [false, true, false, false, false]),
+        (Some(268), [false, false, true, false, false]),
+        (Some(269), [false, false, false, true, false]),
+        (Some(270), [false, false, false, false, true]),
+    ] {
+        let mut bits = vec![0; 272];
+        super::set_ais_bits(&mut bits, 0, 6, kind);
+        if let Some(bit) = set_bit {
+            super::set_ais_bits(&mut bits, bit, 1, 1);
+        }
+        let wire = super::ais_frame_from_bits(&bits);
+        match expect_message(
+            AisParser::new()
+                .decode(&parse_frame(&wire).expect("frame"))
+                .expect("decode"),
+        ) {
+            AisMessage::AidToNavigation(message) => assert_eq!(
+                [
+                    message.position_accuracy,
+                    message.off_position,
+                    message.raim,
+                    message.virtual_aid,
+                    message.assigned_mode
+                ],
+                expected,
+                "type {kind}, bit {set_bit:?}"
+            ),
+            other => panic!("unexpected {other:?}"),
+        }
+    }
+}

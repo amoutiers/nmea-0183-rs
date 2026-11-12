@@ -70,6 +70,9 @@ pub(crate) fn encode_armor(bits: &[u8]) -> (String, u8) {
 }
 
 /// Extract an unsigned integer from a bit slice at the given offset and length.
+///
+/// Each consumed element must be a canonical bit (0 or 1), MSB first.
+/// Values outside this input domain are unspecified; this precondition is not validated.
 pub fn extract_u32(bits: &[u8], offset: usize, len: usize) -> Option<u32> {
     if len > 32 {
         return None;
@@ -86,6 +89,9 @@ pub fn extract_u32(bits: &[u8], offset: usize, len: usize) -> Option<u32> {
 }
 
 /// Extract a signed integer from a bit slice (two's complement).
+///
+/// Each consumed element must be a canonical bit (0 or 1), MSB first.
+/// Values outside this input domain are unspecified; this precondition is not validated.
 pub fn extract_i32(bits: &[u8], offset: usize, len: usize) -> Option<i32> {
     let raw = extract_u32(bits, offset, len)?;
     // Check sign bit
@@ -101,6 +107,9 @@ pub fn extract_i32(bits: &[u8], offset: usize, len: usize) -> Option<i32> {
 }
 
 /// Extract a 6-bit ASCII string from a bit slice.
+///
+/// Each consumed element must be a canonical bit (0 or 1), MSB first.
+/// Values outside this input domain are unspecified; this precondition is not validated.
 /// AIS text uses a custom 6-bit encoding: 0=@ (space), 1-26=A-Z, etc.
 pub fn extract_string(bits: &[u8], offset: usize, num_chars: usize) -> Option<String> {
     let bit_len = num_chars.checked_mul(6)?;
@@ -128,6 +137,55 @@ pub fn extract_string(bits: &[u8], offset: usize, num_chars: usize) -> Option<St
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn canonical_bit_extraction_matches_integer_oracle() {
+        for width in 1..=8 {
+            for value in 0_u32..(1 << width) {
+                let mut bits = vec![0, 1];
+                bits.extend((0..width).rev().map(|shift| ((value >> shift) & 1) as u8));
+                bits.push(1);
+                assert_eq!(extract_u32(&bits, 2, width), Some(value));
+                let signed = if value < (1 << (width - 1)) {
+                    value as i32
+                } else {
+                    value as i32 - (1 << width)
+                };
+                assert_eq!(extract_i32(&bits, 2, width), Some(signed));
+            }
+        }
+        for (width, value, signed) in [
+            (31, 0, 0),
+            (31, 1, 1),
+            (31, 0x3fff_ffff, 1_073_741_823),
+            (31, 0x4000_0000, -1_073_741_824),
+            (31, 0x7fff_ffff, -1),
+            (32, 0, 0),
+            (32, 1, 1),
+            (32, 0x7fff_ffff, 2_147_483_647),
+            (32, 0x8000_0000, -2_147_483_648),
+            (32, 0xffff_ffff, -1),
+        ] {
+            let bits: Vec<u8> = (0..width)
+                .rev()
+                .map(|shift| ((value >> shift) & 1) as u8)
+                .collect();
+            assert_eq!(extract_u32(&bits, 0, width), Some(value));
+            assert_eq!(extract_i32(&bits, 0, width), Some(signed));
+        }
+        for bits in [&[][..], &[1][..]] {
+            assert_eq!(extract_u32(bits, bits.len(), 0), Some(0));
+            assert_eq!(extract_i32(bits, bits.len(), 0), Some(0));
+            assert_eq!(extract_u32(bits, bits.len(), 1), None);
+            assert_eq!(extract_i32(bits, bits.len(), 1), None);
+        }
+        assert_eq!(extract_u32(&[1, 0], 0, 2), Some(2));
+        assert_eq!(extract_i32(&[1, 0], 0, 2), Some(-2));
+        assert_eq!(extract_u32(&[0; 33], 0, 33), None);
+        assert_eq!(extract_i32(&[0; 33], 0, 33), None);
+        assert_eq!(extract_u32(&[1], usize::MAX, 1), None);
+        assert_eq!(extract_i32(&[1], usize::MAX, 1), None);
+    }
 
     #[test]
     fn decode_simple() {

@@ -93,3 +93,52 @@ fn gsv_values() {
     assert_eq!(gsv.sats[3].snr, Some(25));
     assert!(gsv.signal_id.is_none());
 }
+
+#[test]
+fn gsv_one_satellite_signal_id() {
+    let report = Gsv::parse(&["1", "1", "1", "09", "73", "246", "35", "B"]);
+    assert_eq!(report.signal_id, Some('B'));
+    assert_eq!(
+        report.sats,
+        vec![SatInfo {
+            prn: Some(9),
+            elevation: Some(73),
+            azimuth: Some(246),
+            snr: Some(35)
+        }]
+    );
+}
+
+#[test]
+fn gsv_signal_id_with_missing_prn() {
+    let report = Gsv::parse(&["1", "1", "1", "", "73", "246", "35", "B"]);
+    assert_eq!(report.signal_id, Some('B'));
+    assert_eq!(
+        report.sats,
+        vec![SatInfo {
+            prn: None,
+            elevation: Some(73),
+            azimuth: Some(246),
+            snr: Some(35)
+        }]
+    );
+}
+
+#[test]
+fn gsv_incomplete_tail_is_not_signal_id() {
+    for tail in [&["B", "X"][..], &["B", "X", "Y"][..]] {
+        let mut fields = vec!["1", "1", "1", "09", "73", "246", "35"];
+        fields.extend_from_slice(tail);
+        let report = Gsv::parse(&fields);
+        assert_eq!(report.signal_id, None);
+        assert_eq!(
+            report.sats,
+            vec![SatInfo {
+                prn: Some(9),
+                elevation: Some(73),
+                azimuth: Some(246),
+                snr: Some(35)
+            }]
+        );
+    }
+}

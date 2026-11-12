@@ -346,3 +346,30 @@ fn frame_reencoding_validates_fields_and_keeps_proprietary_address() {
         Err(EncodeError::InvalidFieldCharacter(','))
     );
 }
+
+#[test]
+fn encode_accepts_minimum_proprietary_address() {
+    let wire = encode_frame('$', "", "PABC", &["1"]).expect("minimum proprietary address");
+    assert_eq!(wire, "$PABC,1*0D\r\n");
+    let frame = parse_frame(&wire).expect("reparse");
+    assert_eq!(frame.talker, "");
+    assert_eq!(frame.sentence_type, "PABC");
+    assert_eq!(frame.fields, ["1"]);
+}
+
+#[test]
+fn public_errors_have_informative_display() {
+    use nmea_0183_rs::EncodeError;
+    let checksum = FrameError::BadChecksum {
+        expected: 0x12,
+        computed: 0x34,
+    }
+    .to_string();
+    assert!(checksum.contains("12"));
+    assert!(checksum.contains("34"));
+    assert!(
+        EncodeError::InvalidAisField("communication_state")
+            .to_string()
+            .contains("communication_state")
+    );
+}

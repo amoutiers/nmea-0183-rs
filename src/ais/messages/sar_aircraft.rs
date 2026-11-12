@@ -6,6 +6,9 @@ use crate::ais::armor::{extract_i32, extract_u32};
 
 /// AIS Type 9 — Standard SAR Aircraft Position Report.
 ///
+/// Decoding through [`crate::ais::AisParser`] requires at least 168 bits;
+/// trailing bits are ignored.
+///
 /// 168-bit fixed-length message from search and rescue aircraft.
 /// Unlike vessel position reports, altitude is in meters and SOG is in whole knots (not 1/10).
 #[derive(Debug, Clone, PartialEq)]

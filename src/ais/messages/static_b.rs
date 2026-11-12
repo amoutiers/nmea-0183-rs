@@ -34,6 +34,9 @@ pub enum StaticDataReport {
 
 impl StaticDataReport {
     /// Decode a Type 24 static data report.
+    ///
+    /// Part B requires at least 168 bits and ignores trailing bits; part A requires at least 160 bits.
+    /// Consumed elements must be canonical bits (0 or 1), MSB first.
     pub fn decode(bits: &[u8]) -> Option<Self> {
         if bits.len() < 160 {
             return None;

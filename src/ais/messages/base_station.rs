@@ -10,6 +10,9 @@ use super::utils::{decode_latitude, decode_longitude};
 
 /// AIS Type 4 — Base Station Report.
 ///
+/// Decoding through [`crate::ais::AisParser`] requires at least 168 bits;
+/// trailing bits are ignored.
+///
 /// ITU-R M.1371 bit layout (168 bits):
 /// - bits   0–5:   message type (= 4)
 /// - bits   6–7:   repeat indicator

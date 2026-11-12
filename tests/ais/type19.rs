@@ -46,3 +46,29 @@ fn type19_values() {
         other => panic!("expected Position, got {other:?}"),
     }
 }
+
+// Synthetic one-hot probes for the public flags at their documented bit offsets.
+#[test]
+fn type19_flags_are_exact() {
+    let kind = 19;
+    for (set_bit, expected) in [(None, [false]), (Some(56), [true])] {
+        let mut bits = vec![0; 312];
+        super::set_ais_bits(&mut bits, 0, 6, kind);
+        if let Some(bit) = set_bit {
+            super::set_ais_bits(&mut bits, bit, 1, 1);
+        }
+        let wire = super::ais_frame_from_bits(&bits);
+        match expect_message(
+            AisParser::new()
+                .decode(&parse_frame(&wire).expect("frame"))
+                .expect("decode"),
+        ) {
+            AisMessage::Position(message) => assert_eq!(
+                [message.position_accuracy],
+                expected,
+                "type {kind}, bit {set_bit:?}"
+            ),
+            other => panic!("unexpected {other:?}"),
+        }
+    }
+}

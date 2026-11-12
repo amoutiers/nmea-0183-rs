@@ -230,3 +230,189 @@ fn canonical_api_preserves_diagnostics() {
         Some(AisDecodeError::MissingFragmentFields { actual: 0 })
     );
 }
+
+// Synthetic robustness probes, not conforming device captures. ITU-R M.1371-5 lengths.
+fn robustness_frame(kind: u8, length: usize, addressed: bool) -> String {
+    let mut bits = vec![0_u8; length];
+    for (index, bit) in bits[..6].iter_mut().enumerate() {
+        *bit = (kind >> (5 - index)) & 1;
+    }
+    if addressed {
+        bits[38] = 1;
+    }
+    super::ais_frame_from_bits(&bits)
+}
+#[test]
+fn message_minimum_lengths() {
+    for (kind, minimum) in [
+        (4, 168),
+        (11, 168),
+        (6, 88),
+        (7, 72),
+        (13, 72),
+        (8, 56),
+        (10, 72),
+        (12, 72),
+        (14, 40),
+        (16, 96),
+        (17, 80),
+        (18, 168),
+        (19, 312),
+        (20, 72),
+        (21, 272),
+        (22, 168),
+        (23, 160),
+        (25, 40),
+        (26, 64),
+        (27, 96),
+    ] {
+        let short = robustness_frame(kind, minimum - 1, false);
+        assert_eq!(
+            AisParser::new().decode(&parse_frame(&short).expect("frame")),
+            Err(AisDecodeError::InvalidMessage {
+                msg_type: Some(kind)
+            }),
+            "type {kind}"
+        );
+        let boundary = robustness_frame(kind, minimum, false);
+        let message = super::expect_message(
+            AisParser::new()
+                .decode(&parse_frame(&boundary).expect("frame"))
+                .expect("boundary"),
+        );
+        assert!(
+            matches!(
+                (kind, message),
+                (4, AisMessage::BaseStation(_))
+                    | (11, AisMessage::UtcDateResponse(_))
+                    | (6, AisMessage::BinaryAddressed(_))
+                    | (7 | 13, AisMessage::BinaryAck(_))
+                    | (8, AisMessage::BinaryBroadcast(_))
+                    | (10, AisMessage::UtcDateInquiry(_))
+                    | (12, AisMessage::SafetyAddressed(_))
+                    | (14, AisMessage::Safety(_))
+                    | (16, AisMessage::AssignmentMode(_))
+                    | (17, AisMessage::DgnssBroadcast(_))
+                    | (18 | 19, AisMessage::Position(_))
+                    | (20, AisMessage::DataLinkManagement(_))
+                    | (21, AisMessage::AidToNavigation(_))
+                    | (22, AisMessage::ChannelManagement(_))
+                    | (23, AisMessage::GroupAssignment(_))
+                    | (25, AisMessage::BinarySingleSlot(_))
+                    | (26, AisMessage::BinaryMultiSlot(_))
+                    | (27, AisMessage::LongRangePosition(_))
+            ),
+            "type {kind}"
+        );
+    }
+    for (kind, minimum) in [(25, 72), (26, 96)] {
+        let short = robustness_frame(kind, minimum - 1, true);
+        assert_eq!(
+            AisParser::new().decode(&parse_frame(&short).expect("frame")),
+            Err(AisDecodeError::InvalidMessage {
+                msg_type: Some(kind)
+            })
+        );
+        let boundary = robustness_frame(kind, minimum, true);
+        let result = AisParser::new()
+            .decode(&parse_frame(&boundary).expect("frame"))
+            .expect("decode");
+        match result {
+            AisDecodeOutcome::Message(AisMessage::BinarySingleSlot(m)) => {
+                assert_eq!(m.destination_mmsi, Some(0))
+            }
+            AisDecodeOutcome::Message(AisMessage::BinaryMultiSlot(m)) => {
+                assert_eq!(m.destination_mmsi, Some(0))
+            }
+            other => panic!("unexpected {other:?}"),
+        }
+    }
+}
+
+#[test]
+fn fragments_accept_five() {
+    use nmea_0183_rs::ais::fragments::FragmentCollector;
+    let mut collector = FragmentCollector::new();
+    for (number, payload) in [("1", "A"), ("2", "B"), ("3", "C"), ("4", "D")] {
+        assert!(
+            collector
+                .process(&["5", number, "0", "A", payload, "0"])
+                .expect("fragment")
+                .is_none()
+        );
+    }
+    let complete = collector
+        .process(&["5", "5", "0", "A", "E", "0"])
+        .expect("last fragment")
+        .expect("complete");
+    assert_eq!(complete.payload, "ABCDE");
+    assert_eq!(complete.channel, 'A');
+    assert_eq!(complete.fill_bits, 0);
+}
+
+#[test]
+fn fragments_accept_message_id_nine() {
+    use nmea_0183_rs::ais::fragments::FragmentCollector;
+    let mut collector = FragmentCollector::new();
+    assert!(
+        collector
+            .process(&["2", "1", "9", "A", "A", "0"])
+            .expect("first")
+            .is_none()
+    );
+    let complete = collector
+        .process(&["2", "2", "9", "A", "B", "0"])
+        .expect("last")
+        .expect("complete");
+    assert_eq!(complete.payload, "AB");
+    assert_eq!(complete.channel, 'A');
+    assert_eq!(complete.fill_bits, 0);
+}
+
+#[test]
+fn fragments_accept_capacity_256() {
+    use nmea_0183_rs::ais::fragments::FragmentCollector;
+    let mut collector = FragmentCollector::new();
+    assert!(
+        collector
+            .process(&["2", "1", "0", "B", &"A".repeat(128), "0"])
+            .expect("first")
+            .is_none()
+    );
+    let complete = collector
+        .process(&["2", "2", "0", "B", &"B".repeat(128), "3"])
+        .expect("last")
+        .expect("complete");
+    assert_eq!(
+        complete.payload,
+        format!("{}{}", "A".repeat(128), "B".repeat(128))
+    );
+    assert_eq!(complete.channel, 'B');
+    assert_eq!(complete.fill_bits, 3);
+}
+
+#[test]
+fn signed_bit_extraction_accepts_zero_length() {
+    use nmea_0183_rs::ais::armor::extract_i32;
+    assert_eq!(extract_i32(&[], 0, 0), Some(0));
+    assert_eq!(extract_i32(&[1], 1, 0), Some(0));
+}
+
+#[test]
+fn ais_text_alphabet_is_exact() {
+    use nmea_0183_rs::ais::armor::extract_string;
+    const ALPHABET: &str = r##"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_ !"#$%&'()*+,-./0123456789:;<=>?"##;
+    let bits: Vec<u8> = (0_u8..64)
+        .flat_map(|value| (0..6).rev().map(move |shift| (value >> shift) & 1))
+        .collect();
+    assert_eq!(extract_string(&bits, 0, 64), Some(ALPHABET.to_string()));
+}
+
+#[test]
+fn public_ais_errors_have_informative_display() {
+    assert!(
+        AisDecodeError::MissingFragmentFields { actual: 2 }
+            .to_string()
+            .contains('2')
+    );
+}

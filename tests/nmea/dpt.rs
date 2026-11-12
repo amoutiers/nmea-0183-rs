@@ -44,18 +44,20 @@ fn dpt_values() {
 
 #[test]
 fn dpt_nonfinite_is_an_error_not_missing_data() {
-    use nmea_0183_rs::{EncodeError, StrictEncodeError};
-    for value in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY] {
-        let dpt = Dpt {
-            depth: Some(value),
-            offset: None,
-            rangescale: None,
-        };
-        assert_eq!(dpt.encode(), Err(EncodeError::NonFiniteNumber));
-        assert_eq!(dpt.to_sentence("SD"), Err(EncodeError::NonFiniteNumber));
-        assert_eq!(
-            dpt.to_sentence_strict("SD"),
-            Err(StrictEncodeError::Encode(EncodeError::NonFiniteNumber))
-        );
-    }
+    super::bounded::run_bounded("dpt::dpt_nonfinite_is_an_error_not_missing_data", || {
+        use nmea_0183_rs::{EncodeError, StrictEncodeError};
+        for value in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY] {
+            let dpt = Dpt {
+                depth: Some(value),
+                offset: None,
+                rangescale: None,
+            };
+            assert_eq!(dpt.encode(), Err(EncodeError::NonFiniteNumber));
+            assert_eq!(dpt.to_sentence("SD"), Err(EncodeError::NonFiniteNumber));
+            assert_eq!(
+                dpt.to_sentence_strict("SD"),
+                Err(StrictEncodeError::Encode(EncodeError::NonFiniteNumber))
+            );
+        }
+    });
 }

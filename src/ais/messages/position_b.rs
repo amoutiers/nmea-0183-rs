@@ -9,6 +9,9 @@ use super::utils::{decode_cog, decode_heading, decode_latitude, decode_longitude
 
 impl PositionReport {
     /// Decode a Type 18 Class B standard position report.
+    ///
+    /// Requires at least 168 bits; trailing bits are ignored.
+    /// Consumed elements must be canonical bits (0 or 1), MSB first.
     pub fn decode_class_b(bits: &[u8]) -> Option<Self> {
         if bits.len() < 168 {
             return None;

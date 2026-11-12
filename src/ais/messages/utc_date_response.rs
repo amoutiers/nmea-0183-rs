@@ -5,6 +5,9 @@ use crate::ais::armor::{extract_i32, extract_u32};
 
 /// AIS Type 11 — UTC/Date Response.
 ///
+/// Decoding through [`crate::ais::AisParser`] requires at least 168 bits;
+/// trailing bits are ignored.
+///
 /// Same bit layout as Type 4 (168 bits). Sent by mobile stations in response to Type 10 interrogation.
 #[derive(Debug, Clone, PartialEq)]
 pub struct UtcDateResponse {

@@ -73,3 +73,58 @@ fn indicators_require_one_character() {
     }
     assert!(Xdr::parse(&["P", "1", "B"]).groups.is_empty());
 }
+
+#[test]
+fn xdr_single_oversized_group_progress() {
+    super::bounded::run_bounded("xdr::xdr_single_oversized_group_progress", || {
+        let report = Xdr {
+            groups: vec![XdrGroup {
+                sensor_type: Some('C'),
+                value: Some(1.0),
+                unit: Some('C'),
+                name: Some("A".repeat(65)),
+            }],
+        };
+        let lines = report
+            .to_sentences("II")
+            .expect("oversized indivisible group");
+        assert_eq!(lines.len(), 1);
+        assert_eq!(lines[0].len(), 83);
+        assert_eq!(
+            Xdr::parse(&parse_frame(&lines[0]).expect("frame").fields),
+            report
+        );
+    });
+}
+
+#[test]
+fn xdr_exactly_82_characters_stays_in_one_sentence() {
+    super::bounded::run_bounded(
+        "xdr::xdr_exactly_82_characters_stays_in_one_sentence",
+        || {
+            let report = Xdr {
+                groups: vec![
+                    XdrGroup {
+                        sensor_type: Some('C'),
+                        value: Some(1.0),
+                        unit: Some('C'),
+                        name: Some("A".repeat(28)),
+                    },
+                    XdrGroup {
+                        sensor_type: Some('C'),
+                        value: Some(1.0),
+                        unit: Some('C'),
+                        name: Some("B".repeat(29)),
+                    },
+                ],
+            };
+            let lines = report.to_sentences("II").expect("exact limit");
+            assert_eq!(lines.len(), 1);
+            assert_eq!(lines[0].len(), 82);
+            assert_eq!(
+                Xdr::parse(&parse_frame(&lines[0]).expect("frame").fields),
+                report
+            );
+        },
+    );
+}

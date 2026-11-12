@@ -221,3 +221,6 @@ mod ztg;
 
 #[path = "nmea/api.rs"]
 mod api;
+
+#[path = "support/bounded.rs"]
+mod bounded;

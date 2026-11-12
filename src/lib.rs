@@ -216,3 +216,11 @@ pub use frame::*;
 
 nmea_item! { pub use nmea::NmeaSentence; }
 nmea_item! { pub use nmea::NmeaEncodable; }
+
+#[cfg(all(test, any(feature = "mwd", feature = "xdr")))]
+mod test_support {
+    include!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/support/bounded.rs"
+    ));
+}

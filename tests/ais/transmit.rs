@@ -1,6 +1,6 @@
 use super::expect_message;
 use nmea_0183_rs::ais::AisDecodeOutcome;
-use nmea_0183_rs::ais::armor::{decode_armor, extract_u32};
+use nmea_0183_rs::ais::armor::extract_u32;
 use nmea_0183_rs::ais::messages::NavigationStatus;
 use nmea_0183_rs::ais::messages::PositionTimestamp;
 use nmea_0183_rs::ais::transmit::{
@@ -32,7 +32,16 @@ fn payload_bits(line: &str) -> Vec<u8> {
     let frame = parse_frame(line).expect("parse encoded AIS sentence");
     let payload = frame.fields[4];
     let fill_bits = frame.fields[5].parse::<u8>().expect("parse fill bits");
-    decode_armor(payload, fill_bits).expect("decode emitted armor")
+    // Independent AIS six-bit alphabet oracle, MSB first.
+    let mut bits: Vec<u8> = payload
+        .bytes()
+        .flat_map(|byte| {
+            let value = if byte < 88 { byte - 48 } else { byte - 56 };
+            (0..6).rev().map(move |shift| (value >> shift) & 1)
+        })
+        .collect();
+    bits.truncate(bits.len() - usize::from(fill_bits));
+    bits
 }
 
 fn check_timestamp_roundtrip(
@@ -385,6 +394,16 @@ fn class_a_position_encodes_to_a_decodable_vdm_sentence() {
         for (raw, timestamp) in TIMESTAMP_CASES {
             let mut candidate = report.clone();
             candidate.message_type = message_type;
+            let type_bits = match message_type {
+                ClassAPositionType::PositionReport => [0, 0, 0, 0, 0, 1],
+                ClassAPositionType::AssignedPositionReport => [0, 0, 0, 0, 1, 0],
+                ClassAPositionType::SpecialPositionReport => [0, 0, 0, 0, 1, 1],
+            };
+            let wire = candidate
+                .to_sentences(AisTransmitOptions::vdm(AisChannel::A))
+                .expect("class A type");
+            assert_eq!(payload_bits(&wire[0])[..6], type_bits);
+
             candidate.timestamp = timestamp;
             check_timestamp_roundtrip(&candidate, raw, timestamp, 137);
         }
@@ -841,72 +860,940 @@ fn assert_byte_aligned_message(report: &impl AisEncodable, unpadded_len: usize) 
 
 #[test]
 fn safety_text_is_byte_aligned_at_all_lengths() {
-    for count in 0..=161 {
-        let text = "A".repeat(count);
-        let broadcast = SafetyBroadcast {
-            repeat_indicator: 0,
-            mmsi: 244_670_316,
-            text: text.clone(),
-        };
-        assert_byte_aligned_message(&broadcast, 40 + 6 * count);
-        let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
-        assert!(matches!(
-            decode_lines(&broadcast.to_sentences(options).expect("encode")),
-            AisMessage::Safety(value) if value.text == text
-        ));
-        if count <= 156 {
-            let addressed = SafetyAddressed {
-                repeat_indicator: 0,
-                mmsi: 244_670_316,
-                sequence: 0,
-                destination_mmsi: 235_009_217,
-                retransmit: false,
-                text: text.clone(),
-            };
-            assert_byte_aligned_message(&addressed, 72 + 6 * count);
-            assert!(matches!(
-                decode_lines(&addressed.to_sentences(options).expect("encode")),
-                AisMessage::SafetyAddressed(value) if value.text == text
-            ));
-        }
-    }
+    super::bounded::run_bounded(
+        "transmit::safety_text_is_byte_aligned_at_all_lengths",
+        || {
+            for count in 0..=161 {
+                let text = "A".repeat(count);
+                let broadcast = SafetyBroadcast {
+                    repeat_indicator: 0,
+                    mmsi: 244_670_316,
+                    text: text.clone(),
+                };
+                assert_byte_aligned_message(&broadcast, 40 + 6 * count);
+                let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+                assert!(matches!(
+                    decode_lines(&broadcast.to_sentences(options).expect("encode")),
+                    AisMessage::Safety(value) if value.text == text
+                ));
+                if count <= 156 {
+                    let addressed = SafetyAddressed {
+                        repeat_indicator: 0,
+                        mmsi: 244_670_316,
+                        sequence: 0,
+                        destination_mmsi: 235_009_217,
+                        retransmit: false,
+                        text: text.clone(),
+                    };
+                    assert_byte_aligned_message(&addressed, 72 + 6 * count);
+                    assert!(matches!(
+                        decode_lines(&addressed.to_sentences(options).expect("encode")),
+                        AisMessage::SafetyAddressed(value) if value.text == text
+                    ));
+                }
+            }
+        },
+    );
 }
 
 #[test]
 fn aton_extension_is_byte_aligned_at_all_lengths() {
-    let mut report = AidToNavigation {
+    super::bounded::run_bounded(
+        "transmit::aton_extension_is_byte_aligned_at_all_lengths",
+        || {
+            let mut report = AidToNavigation {
+                repeat_indicator: 0,
+                mmsi: 992_001_001,
+                aid_type: 1,
+                name: "TEST".to_string(),
+                longitude: None,
+                latitude: None,
+                position_accuracy: false,
+                dimension_to_bow: 0,
+                dimension_to_stern: 0,
+                dimension_to_port: 0,
+                dimension_to_starboard: 0,
+                position_fixing_device: 0,
+                timestamp: PositionTimestamp::NotAvailable,
+                off_position: false,
+                regional_application: 0,
+                raim: false,
+                virtual_aid: false,
+                assigned_mode: false,
+                name_extension: None,
+            };
+            assert_byte_aligned_message(&report, 272);
+            for count in 1..=14 {
+                let extension = "A".repeat(count);
+                report.name_extension = Some(extension.clone());
+                assert_byte_aligned_message(&report, 272 + 6 * count);
+                let lines = report
+                    .to_sentences(AisTransmitOptions::vdm(AisChannel::A))
+                    .expect("encode AtoN");
+                assert!(matches!(
+                    decode_lines(&lines),
+                    AisMessage::AidToNavigation(value)
+                        if value.name_extension.as_deref() == Some(extension.as_str())
+                ));
+            }
+        },
+    );
+}
+
+fn boundary_classaposition() -> ClassAPosition {
+    ClassAPosition {
+        message_type: ClassAPositionType::PositionReport,
+        repeat_indicator: 0,
+        mmsi: 244_670_316,
+        navigation_status: NavigationStatus::UnderWayEngine,
+        rate_of_turn: None,
+        sog: Some(10.0),
+        position_accuracy: true,
+        longitude: Some(4.379_285),
+        latitude: Some(51.894_75),
+        cog: Some(70.6),
+        heading: Some(71),
+        timestamp: PositionTimestamp::Exact(5),
+        maneuver_indicator: 1,
+        raim: false,
+        communication_state: 0,
+    }
+}
+
+fn boundary_basestation() -> BaseStation {
+    BaseStation {
+        repeat_indicator: 0,
+        mmsi: 111_222_333,
+        year: Some(2026),
+        month: Some(7),
+        day: Some(28),
+        hour: Some(12),
+        minute: Some(30),
+        second: Some(15),
+        position_accuracy: true,
+        longitude: Some(2.352_2),
+        latitude: Some(48.856_6),
+        position_fixing_device: 1,
+        transmission_control: false,
+        raim: true,
+        communication_state: 42,
+    }
+}
+
+fn boundary_saraircraft() -> SarAircraft {
+    SarAircraft {
+        repeat_indicator: 0,
+        mmsi: 111_222_334,
+        altitude: Some(300),
+        sog: Some(120),
+        position_accuracy: true,
+        longitude: Some(2.352_2),
+        latitude: Some(48.856_6),
+        cog: Some(91.2),
+        timestamp: PositionTimestamp::DeadReckoning,
+        regional_application: 0,
+        dte: false,
+        assigned_mode: false,
+        raim: false,
+        communication_state: ClassBCommunicationState::Sotdma(0),
+    }
+}
+
+fn boundary_longrangeposition() -> LongRangePosition {
+    LongRangePosition {
+        mmsi: 244_670_316,
+        position_accuracy: true,
+        raim: false,
+        navigation_status: NavigationStatus::UnderWayEngine,
+        longitude: Some(2.35),
+        latitude: Some(48.85),
+        sog: Some(5),
+        cog: Some(91),
+        gnss_position_status: true,
+    }
+}
+
+fn boundary_classastaticvoyage() -> ClassAStaticVoyage {
+    ClassAStaticVoyage {
+        repeat_indicator: 0,
+        mmsi: 366_123_456,
+        ais_version: 3,
+        imo: 9_876_543,
+        callsign: "WDC1234".to_string(),
+        vessel_name: "TEST VESSEL".to_string(),
+        ship_type: 70,
+        dimension_to_bow: 100,
+        dimension_to_stern: 30,
+        dimension_to_port: 10,
+        dimension_to_starboard: 10,
+        position_fixing_device: 1,
+        eta_month: Some(7),
+        eta_day: Some(28),
+        eta_hour: Some(12),
+        eta_minute: Some(30),
+        draught_meters: Some(6.5),
+        destination: "LE HAVRE".to_string(),
+        dte: false,
+    }
+}
+
+fn boundary_aidtonavigation() -> AidToNavigation {
+    AidToNavigation {
         repeat_indicator: 0,
         mmsi: 992_001_001,
         aid_type: 1,
-        name: "TEST".to_string(),
-        longitude: None,
-        latitude: None,
-        position_accuracy: false,
-        dimension_to_bow: 0,
-        dimension_to_stern: 0,
-        dimension_to_port: 0,
-        dimension_to_starboard: 0,
-        position_fixing_device: 0,
-        timestamp: PositionTimestamp::NotAvailable,
+        name: "TEST BUOY".to_string(),
+        longitude: Some(2.352_2),
+        latitude: Some(48.856_6),
+        position_accuracy: true,
+        dimension_to_bow: 2,
+        dimension_to_stern: 2,
+        dimension_to_port: 1,
+        dimension_to_starboard: 1,
+        position_fixing_device: 1,
+        timestamp: PositionTimestamp::Inoperative,
         off_position: false,
         regional_application: 0,
         raim: false,
         virtual_aid: false,
         assigned_mode: false,
-        name_extension: None,
+        name_extension: Some("WEST".to_string()),
+    }
+}
+
+#[test]
+fn classaposition_sog_boundaries() {
+    let mut report = boundary_classaposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0.0), Some(102.2)] {
+        report.sog = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [
+        Some(-0.1),
+        Some(102.3),
+        Some(f32::NAN),
+        Some(f32::INFINITY),
+        Some(f32::NEG_INFINITY),
+    ] {
+        report.sog = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("sog")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classaposition_cog_boundaries() {
+    let mut report = boundary_classaposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0.0), Some(359.9)] {
+        report.cog = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [
+        Some(-0.1),
+        Some(360.0),
+        Some(f32::NAN),
+        Some(f32::INFINITY),
+        Some(f32::NEG_INFINITY),
+    ] {
+        report.cog = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("cog")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classaposition_heading_boundaries() {
+    let mut report = boundary_classaposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(359)] {
+        report.heading = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    {
+        let value = Some(360);
+        report.heading = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("heading")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classaposition_rate_of_turn_boundaries() {
+    let mut report = boundary_classaposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(-127), Some(127)] {
+        report.rate_of_turn = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    {
+        let value = Some(-128);
+        report.rate_of_turn = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("rate_of_turn")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classaposition_latitude_boundaries() {
+    let mut report = boundary_classaposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0.0), Some(-90.0), Some(90.0)] {
+        report.latitude = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [
+        Some(-90.001),
+        Some(90.001),
+        Some(f64::NAN),
+        Some(f64::INFINITY),
+        Some(f64::NEG_INFINITY),
+    ] {
+        report.latitude = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("latitude")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classaposition_longitude_boundaries() {
+    let mut report = boundary_classaposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0.0), Some(-180.0), Some(180.0)] {
+        report.longitude = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [
+        Some(-180.001),
+        Some(180.001),
+        Some(f64::NAN),
+        Some(f64::INFINITY),
+        Some(f64::NEG_INFINITY),
+    ] {
+        report.longitude = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("longitude")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn longrangeposition_latitude_boundaries() {
+    let mut report = boundary_longrangeposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0.0), Some(-90.0), Some(90.0)] {
+        report.latitude = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [
+        Some(-90.001),
+        Some(90.001),
+        Some(f64::NAN),
+        Some(f64::INFINITY),
+        Some(f64::NEG_INFINITY),
+    ] {
+        report.latitude = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("latitude")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn longrangeposition_longitude_boundaries() {
+    let mut report = boundary_longrangeposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0.0), Some(-180.0), Some(180.0)] {
+        report.longitude = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [
+        Some(-180.001),
+        Some(180.001),
+        Some(f64::NAN),
+        Some(f64::INFINITY),
+        Some(f64::NEG_INFINITY),
+    ] {
+        report.longitude = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("longitude")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn basestation_year_boundaries() {
+    let mut report = boundary_basestation();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(1), Some(9999)] {
+        report.year = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(0), Some(10000)] {
+        report.year = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("year")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn basestation_month_boundaries() {
+    let mut report = boundary_basestation();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(1), Some(12)] {
+        report.month = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(0), Some(13)] {
+        report.month = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("month")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn basestation_day_boundaries() {
+    let mut report = boundary_basestation();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(1), Some(31)] {
+        report.day = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(0), Some(32)] {
+        report.day = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("day")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn basestation_hour_boundaries() {
+    let mut report = boundary_basestation();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0), Some(23)] {
+        report.hour = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(24), Some(255)] {
+        report.hour = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("hour")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn basestation_minute_boundaries() {
+    let mut report = boundary_basestation();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0), Some(59)] {
+        report.minute = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(60), Some(255)] {
+        report.minute = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("minute")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn basestation_second_boundaries() {
+    let mut report = boundary_basestation();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0), Some(59)] {
+        report.second = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(60), Some(255)] {
+        report.second = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("second")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classastaticvoyage_eta_month_boundaries() {
+    let mut report = boundary_classastaticvoyage();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(1), Some(12)] {
+        report.eta_month = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(0), Some(13)] {
+        report.eta_month = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("eta_month")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classastaticvoyage_eta_day_boundaries() {
+    let mut report = boundary_classastaticvoyage();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(1), Some(31)] {
+        report.eta_day = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(0), Some(32)] {
+        report.eta_day = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("eta_day")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classastaticvoyage_eta_hour_boundaries() {
+    let mut report = boundary_classastaticvoyage();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0), Some(23)] {
+        report.eta_hour = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(24), Some(255)] {
+        report.eta_hour = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("eta_hour")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classastaticvoyage_eta_minute_boundaries() {
+    let mut report = boundary_classastaticvoyage();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0), Some(59)] {
+        report.eta_minute = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(60), Some(255)] {
+        report.eta_minute = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("eta_minute")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn saraircraft_altitude_boundaries() {
+    let mut report = boundary_saraircraft();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0), Some(4094)] {
+        report.altitude = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(4095), Some(4096)] {
+        report.altitude = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("altitude")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn saraircraft_sog_boundaries() {
+    let mut report = boundary_saraircraft();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0), Some(1022)] {
+        report.sog = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(1023), Some(1024)] {
+        report.sog = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("sog")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn longrangeposition_sog_boundaries() {
+    let mut report = boundary_longrangeposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0), Some(62)] {
+        report.sog = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(63), Some(64)] {
+        report.sog = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("sog")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn longrangeposition_cog_boundaries() {
+    let mut report = boundary_longrangeposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0), Some(359)] {
+        report.cog = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [Some(360), Some(511)] {
+        report.cog = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("cog")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn classastaticvoyage_draught_meters_boundaries() {
+    let mut report = boundary_classastaticvoyage();
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    for value in [None, Some(0.1), Some(25.5)] {
+        report.draught_meters = value;
+        assert!(report.to_sentences(options).is_ok(), "{value:?}");
+    }
+    for value in [
+        Some(0.0),
+        Some(25.6),
+        Some(f32::NAN),
+        Some(f32::INFINITY),
+        Some(f32::NEG_INFINITY),
+    ] {
+        report.draught_meters = value;
+        assert_eq!(
+            report.to_sentences(options),
+            Err(EncodeError::InvalidAisField("draught_meters")),
+            "{value:?}"
+        );
+    }
+}
+
+#[test]
+fn safety_addressed_text_limit() {
+    let mut report = SafetyAddressed {
+        repeat_indicator: 0,
+        mmsi: 244670316,
+        sequence: 0,
+        destination_mmsi: 235009217,
+        retransmit: false,
+        text: "A".repeat(156),
     };
-    assert_byte_aligned_message(&report, 272);
-    for count in 1..=14 {
-        let extension = "A".repeat(count);
-        report.name_extension = Some(extension.clone());
-        assert_byte_aligned_message(&report, 272 + 6 * count);
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    let lines = report.to_sentences(options).expect("156 accepted");
+    let bits: Vec<_> = lines.iter().flat_map(|line| payload_bits(line)).collect();
+    assert_eq!(bits.len(), 1008);
+    assert_eq!(
+        parse_frame(lines.last().expect("last fragment"))
+            .expect("frame")
+            .fields[5],
+        "0"
+    );
+    for character in bits[72..].chunks_exact(6) {
+        assert_eq!(character, [0, 0, 0, 0, 0, 1]);
+    }
+    report.text.push('A');
+    assert_eq!(
+        report.to_sentences(options),
+        Err(EncodeError::AisTextTooLong {
+            field: "text",
+            max_chars: 156,
+            actual_chars: 157
+        })
+    );
+}
+
+#[test]
+fn aton_extension_limit() {
+    let mut report = boundary_aidtonavigation();
+    report.name_extension = Some("A".repeat(14));
+    let options = AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1);
+    let lines = report.to_sentences(options).expect("14 accepted");
+    let bits: Vec<_> = lines.iter().flat_map(|line| payload_bits(line)).collect();
+    for character in bits[272..356].chunks_exact(6) {
+        assert_eq!(character, [0, 0, 0, 0, 0, 1]);
+    }
+    assert!(bits[356..].iter().all(|&bit| bit == 0));
+    report.name_extension = Some("A".repeat(15));
+    assert_eq!(
+        report.to_sentences(options),
+        Err(EncodeError::AisTextTooLong {
+            field: "name_extension",
+            max_chars: 14,
+            actual_chars: 15
+        })
+    );
+}
+
+#[test]
+fn class_a_wire_sentinels_and_extremes() {
+    let mut report = boundary_classaposition();
+    let options = AisTransmitOptions::vdm(AisChannel::A);
+    report.sog = None;
+    report.cog = None;
+    report.heading = None;
+    report.latitude = None;
+    report.longitude = None;
+    report.rate_of_turn = None;
+    let lines = report.to_sentences(options).expect("encode");
+    let bits = payload_bits(&lines[0]);
+    for (offset, width, expected) in [
+        (42, 8, 128),
+        (50, 10, 1023),
+        (61, 28, 108600000),
+        (89, 27, 54600000),
+        (116, 12, 3600),
+        (128, 9, 511),
+    ] {
+        assert_eq!(
+            bits[offset..offset + width]
+                .iter()
+                .fold(0_u32, |v, b| (v << 1) | u32::from(*b)),
+            expected
+        );
+    }
+    report.sog = Some(102.2);
+    report.cog = Some(359.9);
+    report.heading = Some(359);
+    for (latitude, longitude) in [(-90.0, -180.0), (0.0, 0.0), (90.0, 180.0)] {
+        report.latitude = Some(latitude);
+        report.longitude = Some(longitude);
+        let lines = report.to_sentences(options).expect("extremes");
+        let bits = payload_bits(&lines[0]);
+        for (offset, width, expected) in [
+            (61, 28, (longitude * 600000.0) as i32),
+            (89, 27, (latitude * 600000.0) as i32),
+        ] {
+            let raw = bits[offset..offset + width]
+                .iter()
+                .fold(0_i64, |v, b| (v << 1) | i64::from(*b));
+            let signed = if bits[offset] == 1 {
+                raw - (1_i64 << width)
+            } else {
+                raw
+            };
+            assert_eq!(signed, i64::from(expected));
+        }
+        assert_eq!(extract_u32(&bits, 50, 10), Some(1022));
+        assert_eq!(extract_u32(&bits, 116, 12), Some(3599));
+    }
+}
+
+#[test]
+fn specialized_wire_sentinels_and_extremes() {
+    let options = AisTransmitOptions::vdm(AisChannel::A);
+    let mut long = boundary_longrangeposition();
+    long.latitude = None;
+    long.longitude = None;
+    long.sog = None;
+    long.cog = None;
+    let lines = long.to_sentences(options).expect("sentinels");
+    let bits = payload_bits(&lines[0]);
+    for (offset, width, expected) in [(44, 18, 108600), (62, 17, 54600), (79, 6, 63), (85, 9, 511)]
+    {
+        assert_eq!(
+            bits[offset..offset + width]
+                .iter()
+                .fold(0_u32, |v, b| (v << 1) | u32::from(*b)),
+            expected
+        );
+    }
+    for (lat, lon) in [(-90.0, -180.0), (0.0, 0.0), (90.0, 180.0)] {
+        long.latitude = Some(lat);
+        long.longitude = Some(lon);
+        let lines = long.to_sentences(options).expect("extremes");
+        let bits = payload_bits(&lines[0]);
+        for (offset, width, expected) in [
+            (44, 18, (lon * 600.0) as i32),
+            (62, 17, (lat * 600.0) as i32),
+        ] {
+            let raw = bits[offset..offset + width]
+                .iter()
+                .fold(0_i64, |v, b| (v << 1) | i64::from(*b));
+            assert_eq!(
+                if bits[offset] == 1 {
+                    raw - (1_i64 << width)
+                } else {
+                    raw
+                },
+                i64::from(expected)
+            );
+        }
+    }
+    let mut sar = boundary_saraircraft();
+    sar.altitude = None;
+    sar.sog = None;
+    let lines = sar.to_sentences(options).expect("SAR sentinels");
+    let bits = payload_bits(&lines[0]);
+    assert_eq!(extract_u32(&bits, 38, 12), Some(4095));
+    assert_eq!(extract_u32(&bits, 50, 10), Some(1023));
+}
+
+#[test]
+fn class_b_communication_state_bits() {
+    let mut report = ClassBPosition {
+        repeat_indicator: 0,
+        mmsi: 235_009_217,
+        sog: Some(5.4),
+        position_accuracy: true,
+        longitude: Some(2.352_2),
+        latitude: Some(48.856_6),
+        cog: Some(91.2),
+        heading: Some(91),
+        timestamp: PositionTimestamp::Exact(15),
+        transmit_power_low: false,
+        class_b_cs: true,
+        display_available: true,
+        dsc_capable: false,
+        full_band_capable: true,
+        message_22_capable: true,
+        assigned_mode: false,
+        raim: false,
+        communication_state: ClassBCommunicationState::Itdma(0),
+    };
+    for (state, selector, expected) in [
+        (
+            ClassBCommunicationState::Sotdma(0x12345),
+            0,
+            "0010010001101000101",
+        ),
+        (
+            ClassBCommunicationState::Itdma(0x54321),
+            1,
+            "1010100001100100001",
+        ),
+    ] {
+        report.communication_state = state;
         let lines = report
             .to_sentences(AisTransmitOptions::vdm(AisChannel::A))
-            .expect("encode AtoN");
-        assert!(matches!(
-            decode_lines(&lines),
-            AisMessage::AidToNavigation(value)
-                if value.name_extension.as_deref() == Some(extension.as_str())
-        ));
+            .expect("radio encode");
+        let bits = payload_bits(&lines[0]);
+        assert_eq!(bits[148], selector);
+        assert_eq!(
+            bits[149..168],
+            expected.bytes().map(|b| b - b'0').collect::<Vec<_>>()
+        );
+    }
+    for state in [
+        ClassBCommunicationState::Sotdma(1 << 19),
+        ClassBCommunicationState::Itdma(1 << 19),
+    ] {
+        report.communication_state = state;
+        assert_eq!(
+            report.to_sentences(AisTransmitOptions::vdm(AisChannel::A)),
+            Err(EncodeError::InvalidAisField("communication_state"))
+        );
+    }
+}
+
+#[test]
+fn sar_communication_state_bits() {
+    let mut report = boundary_saraircraft();
+    for (state, selector, expected) in [
+        (
+            ClassBCommunicationState::Sotdma(0x12345),
+            0,
+            "0010010001101000101",
+        ),
+        (
+            ClassBCommunicationState::Itdma(0x54321),
+            1,
+            "1010100001100100001",
+        ),
+    ] {
+        report.communication_state = state;
+        let lines = report
+            .to_sentences(AisTransmitOptions::vdm(AisChannel::A))
+            .expect("radio encode");
+        let bits = payload_bits(&lines[0]);
+        assert_eq!(bits[148], selector);
+        assert_eq!(
+            bits[149..168],
+            expected.bytes().map(|b| b - b'0').collect::<Vec<_>>()
+        );
+    }
+    for state in [
+        ClassBCommunicationState::Sotdma(1 << 19),
+        ClassBCommunicationState::Itdma(1 << 19),
+    ] {
+        report.communication_state = state;
+        assert_eq!(
+            report.to_sentences(AisTransmitOptions::vdm(AisChannel::A)),
+            Err(EncodeError::InvalidAisField("communication_state"))
+        );
+    }
+}
+
+#[test]
+fn safety_text_emits_exact_alphabet() {
+    const ALPHABET: &str = r##"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_ !"#$%&'()*+,-./0123456789:;<=>?"##;
+    let report = SafetyBroadcast {
+        repeat_indicator: 0,
+        mmsi: 123456789,
+        text: ALPHABET.to_string(),
+    };
+    let lines = report
+        .to_sentences(AisTransmitOptions::vdm(AisChannel::A).with_sequence_id(1))
+        .expect("alphabet encode");
+    let bits: Vec<u8> = lines.iter().flat_map(|line| payload_bits(line)).collect();
+    assert_eq!(bits.len(), 424);
+    assert_eq!(bits[..6], [0, 0, 1, 1, 1, 0]);
+    let expected: Vec<u8> = (0_u8..64)
+        .flat_map(|value| (0..6).rev().map(move |shift| (value >> shift) & 1))
+        .collect();
+    assert_eq!(bits[40..424], expected);
+    match decode_lines(&lines) {
+        AisMessage::Safety(message) => assert_eq!(message.text, ALPHABET),
+        other => panic!("unexpected {other:?}"),
     }
 }

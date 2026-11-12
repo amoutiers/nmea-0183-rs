@@ -50,3 +50,46 @@ fn type_24_part_b_values_gpsd() {
         other => panic!("expected StaticReport(PartB), got {other:?}"),
     }
 }
+
+// Synthetic suffix probes for the accepted minimum-length contract.
+#[test]
+fn type24_trailing_bits_preserve_report() {
+    let decode = |bits: &[u8]| {
+        let wire = super::ais_frame_from_bits(bits);
+        nmea_0183_rs::ais::AisParser::new()
+            .decode(&nmea_0183_rs::parse_frame(&wire).expect("frame"))
+    };
+    for kind in [24] {
+        let mut bits: Vec<u8> = (0..168).map(|index| u8::from(index % 3 == 0)).collect();
+        super::set_ais_bits(&mut bits, 0, 6, kind);
+        super::set_ais_bits(&mut bits, 6, 2, 2);
+        super::set_ais_bits(&mut bits, 8, 30, 123456789);
+        super::set_ais_bits(&mut bits, 38, 2, 1);
+        let expected = super::expect_message(decode(&bits).expect("168 bits"));
+        for length in [169, 174, 192] {
+            let mut extended = bits.clone();
+            extended.extend((168..length).map(|index| u8::from(index % 2 == 0)));
+            assert_eq!(
+                super::expect_message(decode(&extended).expect("suffix accepted")),
+                expected
+            );
+            if let nmea_0183_rs::ais::AisMessage::StaticReport(report) = &expected {
+                assert_eq!(
+                    nmea_0183_rs::ais::StaticDataReport::decode(&extended).as_ref(),
+                    Some(report)
+                );
+            } else {
+                panic!("expected static report");
+            }
+        }
+        assert!(decode(&bits[..167]).is_err());
+        assert!(nmea_0183_rs::ais::StaticDataReport::decode(&bits[..167]).is_none());
+        let mut part_a = bits[..160].to_vec();
+        super::set_ais_bits(&mut part_a, 38, 2, 0);
+        assert!(matches!(
+            nmea_0183_rs::ais::StaticDataReport::decode(&part_a),
+            Some(nmea_0183_rs::ais::StaticDataReport::PartA { .. })
+        ));
+        assert!(decode(&part_a).is_ok());
+    }
+}

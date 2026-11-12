@@ -137,9 +137,11 @@ mod tests {
 
     #[test]
     fn mwd_strict_sentence_rejects_invalid_talker() {
-        let mwd = Mwd::parse(&[]);
-        assert!(mwd.to_sentence("wi").is_ok());
-        assert!(mwd.to_sentence_strict("wi").is_err());
-        mwd.to_sentence_strict("WI").expect("strict MWD");
+        crate::test_support::run_bounded("nmea::sentences::mwd::tests::mwd_strict_sentence_rejects_invalid_talker", || {
+            let mwd = Mwd::parse(&[]);
+            assert!(mwd.to_sentence("wi").is_ok());
+            assert!(mwd.to_sentence_strict("wi").is_err());
+            mwd.to_sentence_strict("WI").expect("strict MWD");
+        });
     }
 }

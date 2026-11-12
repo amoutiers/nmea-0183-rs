@@ -44,3 +44,12 @@ fn type8_values() {
         other => panic!("expected BinaryBroadcast, got {other:?}"),
     }
 }
+
+#[test]
+fn type8_binary_data() {
+    // GPSD ais.nmea: six-bit AIS alphabet expanded independently, excluding 56 header bits.
+    match expect_message(AisParser::new().decode(&parse_frame("!AIVDM,1,1,,B,83aDChPj2d<dL<uM=hhhI?a@6HP0,0*40").expect("frame")).expect("decode")) {
+        AisMessage::BinaryBroadcast(m)=>assert_eq!(m.data, "1100001100101100011100001100111101011101001101110000110000110000011001001111101001010000000110011000100000000000".bytes().map(|b| b-b'0').collect::<Vec<_>>()),
+        other=>panic!("{other:?}")
+    }
+}

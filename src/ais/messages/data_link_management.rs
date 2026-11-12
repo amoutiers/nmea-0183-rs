@@ -16,6 +16,8 @@ pub struct SlotReservation {
 pub struct DataLinkManagement {
     pub repeat_indicator: u8,
     pub mmsi: u32,
+    /// At most four complete reservations, in wire order.
+    /// Additional reservation blocks and incomplete trailing blocks are ignored.
     pub reservations: Vec<SlotReservation>,
 }
 

@@ -68,6 +68,9 @@ pub struct ClassBExtendedData {
 
 impl PositionReport {
     /// Decode a Type 1/2/3 Class A position report from AIS bits.
+    ///
+    /// Requires at least 168 bits; trailing bits are ignored.
+    /// Consumed elements must be canonical bits (0 or 1), MSB first.
     pub fn decode_class_a(bits: &[u8]) -> Option<Self> {
         if bits.len() < 168 {
             return None;

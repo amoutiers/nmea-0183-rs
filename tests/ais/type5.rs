@@ -65,3 +65,20 @@ fn type5_values() {
         other => panic!("expected StaticVoyage, got {other:?}"),
     }
 }
+
+// Exact raw-bit boundaries, not a fictitious overlength single-fragment capture.
+#[test]
+fn type5_minimum_bit_length() {
+    use nmea_0183_rs::ais::messages::StaticVoyageData;
+    let mut bits = vec![0; 424];
+    super::set_ais_bits(&mut bits, 0, 6, 5);
+    assert_eq!(StaticVoyageData::decode(&bits[..423]), None);
+    let message = StaticVoyageData::decode(&bits).expect("minimum Type 5");
+    assert_eq!(message.mmsi, 0);
+    assert_eq!(message.imo, 0);
+    assert_eq!(message.callsign, "");
+    assert_eq!(message.vessel_name, "");
+    assert_eq!(message.eta_month, None);
+    assert_eq!(message.draught_meters, None);
+    assert!(!message.dte);
+}

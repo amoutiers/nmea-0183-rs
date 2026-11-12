@@ -80,3 +80,36 @@ fn roundtrip() {
     let parsed = Gga::parse(&frame.fields);
     assert_eq!(original, parsed);
 }
+
+#[test]
+fn gga_negative_ddmm_magnitudes_are_rejected() {
+    use nmea_0183_rs::EncodeError;
+    for value in [-1.0, -100.0, -150.0] {
+        for (lat, lon) in [(Some(value), None), (None, Some(value))] {
+            let report = Gga {
+                lat,
+                lon,
+                ..Default::default()
+            };
+            assert_eq!(
+                report.to_sentence("GP"),
+                Err(EncodeError::InvalidCoordinate)
+            );
+        }
+    }
+    for value in [0.0, -0.0, 100.0, 150.0] {
+        let report = Gga {
+            lat: Some(value),
+            lon: Some(value),
+            ns: Some('N'),
+            ew: Some('E'),
+            ..Default::default()
+        };
+        let wire = report.to_sentence("GP").expect("valid DDMM magnitude");
+        let frame = parse_frame(&wire).expect("coordinate frame");
+        if value == 0.0 {
+            assert_eq!(frame.fields[1], "0000.0");
+            assert_eq!(frame.fields[3], "00000.0");
+        }
+    }
+}

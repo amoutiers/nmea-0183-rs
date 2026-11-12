@@ -38,7 +38,44 @@ fn type6_values() {
             assert_eq!(ba.mmsi, 2443808);
             assert_eq!(ba.dac, 1);
             assert_eq!(ba.fid, 14);
+            assert_eq!(ba.dest_mmsi, 329176500);
+            assert_eq!(ba.sequence, 0);
+            assert!(ba.retransmit);
+            // GPSD fixture, independently unarmored after its 88-bit header.
+            assert_eq!(
+                ba.data,
+                "00000000011010001100000000000000000000001111111110111110000010000000100010111101"
+                    .bytes()
+                    .map(|bit| bit - b'0')
+                    .collect::<Vec<_>>()
+            );
         }
         other => panic!("expected BinaryAddressed, got {other:?}"),
+    }
+}
+
+// Synthetic one-hot probes for the public flags at their documented bit offsets.
+#[test]
+fn type6_flags_are_exact() {
+    let kind = 6;
+    for (set_bit, expected) in [(None, [false]), (Some(70), [true])] {
+        let mut bits = vec![0; 88];
+        super::set_ais_bits(&mut bits, 0, 6, kind);
+        if let Some(bit) = set_bit {
+            super::set_ais_bits(&mut bits, bit, 1, 1);
+        }
+        let wire = super::ais_frame_from_bits(&bits);
+        match expect_message(
+            AisParser::new()
+                .decode(&parse_frame(&wire).expect("frame"))
+                .expect("decode"),
+        ) {
+            AisMessage::BinaryAddressed(message) => assert_eq!(
+                [message.retransmit],
+                expected,
+                "type {kind}, bit {set_bit:?}"
+            ),
+            other => panic!("unexpected {other:?}"),
+        }
     }
 }

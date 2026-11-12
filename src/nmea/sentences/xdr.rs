@@ -292,79 +292,85 @@ mod tests {
 
     #[test]
     fn xdr_to_sentences_empty() {
-        let xdr = Xdr { groups: vec![] };
-        let sentences = xdr.to_sentences("II").expect("encode");
-        assert_eq!(sentences.len(), 1);
-        assert!(sentences[0].starts_with("$IIXDR"));
+        crate::test_support::run_bounded("nmea::sentences::xdr::tests::xdr_to_sentences_empty", || {
+            let xdr = Xdr { groups: vec![] };
+            let sentences = xdr.to_sentences("II").expect("encode");
+            assert_eq!(sentences.len(), 1);
+            assert!(sentences[0].starts_with("$IIXDR"));
+        });
     }
 
     #[test]
     fn xdr_to_sentences_fits() {
-        // 2 groups — well within 82 chars, should produce a single sentence
-        let xdr = Xdr {
-            groups: vec![
-                XdrGroup {
-                    sensor_type: Some('P'),
-                    value: Some(1013.25),
-                    unit: Some('B'),
-                    name: Some("Baro".to_string()),
-                },
-                XdrGroup {
-                    sensor_type: Some('C'),
-                    value: Some(22.5),
-                    unit: Some('C'),
-                    name: Some("Temp".to_string()),
-                },
-            ],
-        };
-        let sentences = xdr.to_sentences("WI").expect("encode");
-        assert_eq!(sentences.len(), 1);
-        assert!(sentences[0].len() <= 82);
+        crate::test_support::run_bounded("nmea::sentences::xdr::tests::xdr_to_sentences_fits", || {
+            // 2 groups — well within 82 chars, should produce a single sentence
+            let xdr = Xdr {
+                groups: vec![
+                    XdrGroup {
+                        sensor_type: Some('P'),
+                        value: Some(1013.25),
+                        unit: Some('B'),
+                        name: Some("Baro".to_string()),
+                    },
+                    XdrGroup {
+                        sensor_type: Some('C'),
+                        value: Some(22.5),
+                        unit: Some('C'),
+                        name: Some("Temp".to_string()),
+                    },
+                ],
+            };
+            let sentences = xdr.to_sentences("WI").expect("encode");
+            assert_eq!(sentences.len(), 1);
+            assert!(sentences[0].len() <= 82);
+        });
     }
 
     #[test]
     fn xdr_to_sentences_split() {
-        // 12 groups with typical names — forces a split into multiple sentences
-        let groups: Vec<XdrGroup> = (0..12)
-            .map(|i| XdrGroup {
-                sensor_type: Some('C'),
-                value: Some(20.0 + i as f32),
-                unit: Some('C'),
-                name: Some(format!("SENSOR{i:02}")),
-            })
-            .collect();
-        let total = groups.len();
-        let xdr = Xdr { groups };
-        let sentences = xdr.to_sentences("WI").expect("encode");
+        crate::test_support::run_bounded("nmea::sentences::xdr::tests::xdr_to_sentences_split", || {
+            // 12 groups with typical names — forces a split into multiple sentences
+            let groups: Vec<XdrGroup> = (0..12)
+                .map(|i| XdrGroup {
+                    sensor_type: Some('C'),
+                    value: Some(20.0 + i as f32),
+                    unit: Some('C'),
+                    name: Some(format!("SENSOR{i:02}")),
+                })
+                .collect();
+            let total = groups.len();
+            let xdr = Xdr { groups };
+            let sentences = xdr.to_sentences("WI").expect("encode");
 
-        // Must have produced more than one sentence
-        assert!(
-            sentences.len() > 1,
-            "expected split, got {} sentence(s)",
-            sentences.len()
-        );
-
-        // Every sentence must be within 82 chars
-        for s in &sentences {
+            // Must have produced more than one sentence
             assert!(
-                s.len() <= 82,
-                "sentence too long ({} chars): {}",
-                s.len(),
-                s.trim()
+                sentences.len() > 1,
+                "expected split, got {} sentence(s)",
+                sentences.len()
             );
-        }
 
-        // All groups must be recoverable in order
-        let recovered: Vec<XdrGroup> = sentences
-            .iter()
-            .flat_map(|s| {
-                let frame = crate::parse_frame(s.trim()).expect("re-parse");
-                Xdr::parse(&frame.fields).groups
-            })
-            .collect();
-        assert_eq!(recovered.len(), total);
-        for (i, g) in recovered.iter().enumerate() {
-            assert_eq!(g.name, Some(format!("SENSOR{i:02}")));
-        }
+            // Every sentence must be within 82 chars
+            for s in &sentences {
+                assert!(
+                    s.len() <= 82,
+                    "sentence too long ({} chars): {}",
+                    s.len(),
+                    s.trim()
+                );
+            }
+
+            // All groups must be recoverable in order
+            let recovered: Vec<XdrGroup> = sentences
+                .iter()
+                .flat_map(|s| {
+                    let frame = crate::parse_frame(s.trim()).expect("re-parse");
+                    Xdr::parse(&frame.fields).groups
+                })
+                .collect();
+            assert_eq!(recovered.len(), total);
+            for (i, g) in recovered.iter().enumerate() {
+                assert_eq!(g.name, Some(format!("SENSOR{i:02}")));
+            }
+        });
     }
 }

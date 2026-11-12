@@ -81,3 +81,23 @@ fn hrm_extended_fields_roundtrip() {
     let line = original.to_sentence("IC").expect("encode HRM");
     assert_eq!(parse_frame(&line).expect("decode HRM").fields, fields);
 }
+
+#[test]
+fn hrm_peak_hold_semantics() {
+    let fields = [
+        "1", "2", "3", "4", "A", "5", "6", "123456", "7", "8", "2024", "9", "R",
+    ];
+    let h = Hrm::parse(&fields);
+    assert_eq!(
+        (h.roll_peak_hold_port, h.roll_peak_hold_starboard),
+        (Some(5.0), Some(6.0))
+    );
+    let h = Hrm {
+        roll_peak_hold_port: Some(5.0),
+        roll_peak_hold_starboard: Some(6.0),
+        ..Default::default()
+    };
+    let wire = h.to_sentence("IC").expect("encode");
+    let f = parse_frame(&wire).expect("frame");
+    assert_eq!(&f.fields[5..7], &["5", "6"]);
+}

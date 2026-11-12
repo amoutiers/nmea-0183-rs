@@ -30,16 +30,6 @@ fn ror_values_pynmea2_ship() {
 }
 
 #[test]
-fn ror_roundtrip() {
-    let frame = parse_frame("$AGROR,0.1,A,,V,B*1F").expect("valid ROR");
-    let original = Ror::parse(&frame.fields);
-
-    let sentence = original.to_sentence("AG").expect("encode ROR");
-    let frame = parse_frame(sentence.trim()).expect("re-parse ROR");
-    assert_eq!(Ror::parse(&frame.fields), original);
-}
-
-#[test]
 fn ror_extended_fields_iec2024() {
     let original = Ror::parse(&["1", "A", "2", "A", "B", "3", "A", "4", "V"]);
     let line = original.to_sentence("AG").expect("encode ROR");
@@ -78,4 +68,23 @@ fn ror_encode_roundtrip() {
         Ror::parse(&parse_frame(&line).expect("decode").fields),
         original
     );
+}
+
+#[test]
+fn ror_center_bow_semantics() {
+    let r = Ror::parse(&["1", "A", "2", "A", "B", "3", "A", "4", "V"]);
+    assert_eq!(
+        (r.center_order, r.center_status, r.bow_order, r.bow_status),
+        (Some(3.0), Some('A'), Some(4.0), Some('V'))
+    );
+    let r = Ror {
+        center_order: Some(3.0),
+        center_status: Some('A'),
+        bow_order: Some(4.0),
+        bow_status: Some('V'),
+        ..Default::default()
+    };
+    let wire = r.to_sentence("AG").expect("encode");
+    let f = parse_frame(&wire).expect("frame");
+    assert_eq!(&f.fields[5..9], &["3", "A", "4", "V"]);
 }

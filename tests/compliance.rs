@@ -16,195 +16,326 @@ fn tagged(content: &str, line: &str) -> String {
 
 #[test]
 fn strict_accepts_standard_query_proprietary_and_escaped_data() {
-    for line in [
-        sentence("$GPRMC,120000.00,A"),
-        sentence("$CCGPQ,GGA"),
-        sentence("$PABC,VALUE^2CWITH^24ESCAPES"),
-        sentence("$PABCvendor,VALUE"),
-        sentence("!AIVDM,1,1,,A,15N:;R0P00PD;88MD5MTDwwP2<0l,0"),
-        sentence("!**TTD,1,1,0,ABC,0"),
-    ] {
-        validate_sentence(&line).expect("strictly valid sentence");
-        parse_frame_strict(&line).expect("strict parse");
-    }
+    crate::bounded::run_bounded(
+        "strict_accepts_standard_query_proprietary_and_escaped_data",
+        || {
+            for line in [
+                sentence("$GPRMC,120000.00,A"),
+                sentence("$CCGPQ,GGA"),
+                sentence("$PABC,VALUE^2CWITH^24ESCAPES"),
+                sentence("$PABCvendor,VALUE"),
+                sentence("!AIVDM,1,1,,A,15N:;R0P00PD;88MD5MTDwwP2<0l,0"),
+                sentence("!**TTD,1,1,0,ABC,0"),
+            ] {
+                validate_sentence(&line).expect("strictly valid sentence");
+                parse_frame_strict(&line).expect("strict parse");
+            }
+        },
+    );
 }
 
 #[test]
 fn strict_length_excludes_tag_block() {
-    let line = sentence(&format!("$GPTXT,01,01,01,{}", "A".repeat(61)));
-    assert_eq!(line.len(), 82);
-    let tagged = tagged("s:SOURCE", &line);
-    assert!(tagged.len() > 82);
-    validate_sentence(&tagged).expect("tag block excluded from sentence length");
+    crate::bounded::run_bounded("strict_length_excludes_tag_block", || {
+        let line = sentence(&format!("$GPTXT,01,01,01,{}", "A".repeat(61)));
+        assert_eq!(line.len(), 82);
+        let tagged = tagged("s:SOURCE", &line);
+        assert!(tagged.len() > 82);
+        validate_sentence(&tagged).expect("tag block excluded from sentence length");
+    });
 }
 
 #[test]
 fn strict_rejects_missing_crlf_checksum_and_uppercase_violation() {
-    assert_eq!(
-        validate_sentence("$GPRMC,A*26"),
-        Err(ComplianceError::MissingTerminator)
+    crate::bounded::run_bounded(
+        "strict_rejects_missing_crlf_checksum_and_uppercase_violation",
+        || {
+            assert_eq!(
+                validate_sentence("$GPRMC,A*26"),
+                Err(ComplianceError::MissingTerminator)
+            );
+            assert_eq!(
+                validate_sentence("$GPRMC,A\r\n"),
+                Err(ComplianceError::MissingChecksum)
+            );
+            assert_eq!(
+                validate_sentence("$GPRMC,9*5e\r\n"),
+                Err(ComplianceError::LowercaseChecksum)
+            );
+            assert!(matches!(
+                validate_sentence(&sentence("$gpRMC,A")),
+                Err(ComplianceError::InvalidAddressCharacter(_))
+            ));
+        },
     );
-    assert_eq!(
-        validate_sentence("$GPRMC,A\r\n"),
-        Err(ComplianceError::MissingChecksum)
-    );
-    assert_eq!(
-        validate_sentence("$GPRMC,9*5e\r\n"),
-        Err(ComplianceError::LowercaseChecksum)
-    );
-    assert!(matches!(
-        validate_sentence(&sentence("$gpRMC,A")),
-        Err(ComplianceError::InvalidAddressCharacter(_))
-    ));
 }
 
 #[test]
 fn strict_rejects_leading_and_trailing_whitespace() {
-    let valid = sentence("$GPRMC,A");
-    assert_eq!(
-        validate_sentence(&format!(" {valid}")),
-        Err(ComplianceError::InvalidPrefix(' '))
-    );
-    assert_eq!(
-        validate_sentence(&format!("{} \r\n", valid.trim_end())),
-        Err(ComplianceError::Frame(FrameError::MalformedChecksum))
-    );
+    crate::bounded::run_bounded("strict_rejects_leading_and_trailing_whitespace", || {
+        let valid = sentence("$GPRMC,A");
+        assert_eq!(
+            validate_sentence(&format!(" {valid}")),
+            Err(ComplianceError::InvalidPrefix(' '))
+        );
+        assert_eq!(
+            validate_sentence(&format!("{} \r\n", valid.trim_end())),
+            Err(ComplianceError::Frame(FrameError::MalformedChecksum))
+        );
+    });
 }
 
 #[test]
 fn strict_rejects_overlong_fixture_but_lenient_parser_keeps_it() {
-    let fixture = "$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031*4F\r\n";
-    assert!(parse_frame(fixture).is_ok());
-    assert_eq!(
-        validate_sentence(fixture),
-        Err(ComplianceError::SentenceTooLong {
-            actual: fixture.len(),
-            maximum: 82,
-        })
+    crate::bounded::run_bounded(
+        "strict_rejects_overlong_fixture_but_lenient_parser_keeps_it",
+        || {
+            let fixture = "$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031*4F\r\n";
+            assert!(parse_frame(fixture).is_ok());
+            assert_eq!(
+                validate_sentence(fixture),
+                Err(ComplianceError::SentenceTooLong {
+                    actual: fixture.len(),
+                    maximum: 82,
+                })
+            );
+        },
     );
 }
 
 #[test]
 fn strict_accepts_exactly_82_and_rejects_83_bytes() {
-    let exact = sentence(&format!("$GPTXT,01,01,01,{}", "A".repeat(61)));
-    assert_eq!(exact.len(), 82);
-    validate_sentence(&exact).expect("82 bytes");
+    crate::bounded::run_bounded("strict_accepts_exactly_82_and_rejects_83_bytes", || {
+        let exact = sentence(&format!("$GPTXT,01,01,01,{}", "A".repeat(61)));
+        assert_eq!(exact.len(), 82);
+        validate_sentence(&exact).expect("82 bytes");
 
-    let over = sentence(&format!("$GPTXT,01,01,01,{}", "A".repeat(62)));
-    assert_eq!(over.len(), 83);
-    assert_eq!(
-        validate_sentence(&over),
-        Err(ComplianceError::SentenceTooLong {
-            actual: 83,
-            maximum: 82,
-        })
-    );
+        let over = sentence(&format!("$GPTXT,01,01,01,{}", "A".repeat(62)));
+        assert_eq!(over.len(), 83);
+        assert_eq!(
+            validate_sentence(&over),
+            Err(ComplianceError::SentenceTooLong {
+                actual: 83,
+                maximum: 82,
+            })
+        );
+    });
 }
 
 #[test]
 fn strict_rejects_invalid_address_shapes() {
-    for body in ["$RMC,A", "$GPRMCX,A", "$gpRMC,A", "$PabC,A", "$P12,A"] {
-        let line = sentence(body);
-        assert!(validate_sentence(&line).is_err(), "{body}");
-    }
+    crate::bounded::run_bounded("strict_rejects_invalid_address_shapes", || {
+        for body in ["$RMC,A", "$GPRMCX,A", "$gpRMC,A", "$PabC,A", "$P12,A"] {
+            let line = sentence(body);
+            assert!(validate_sentence(&line).is_err(), "{body}");
+        }
+    });
 }
 
 #[test]
 fn strict_validates_reserved_characters_and_escape_codes() {
-    for body in [
-        "$GPTXT,01,01,01,raw$",
-        "$GPTXT,01,01,01,raw!",
-        r"$GPTXT,01,01,01,raw\slash",
-        "$GPTXT,01,01,01,raw~tilde",
-        "$GPTXT,01,01,01,^",
-        "$GPTXT,01,01,01,^2",
-        "$GPTXT,01,01,01,^2c",
-        "$GPTXT,01,01,01,^GG",
-    ] {
-        let line = sentence(body);
-        assert!(validate_sentence(&line).is_err(), "{body:?}");
-    }
+    crate::bounded::run_bounded(
+        "strict_validates_reserved_characters_and_escape_codes",
+        || {
+            for body in [
+                "$GPTXT,01,01,01,raw$",
+                "$GPTXT,01,01,01,raw!",
+                r"$GPTXT,01,01,01,raw\slash",
+                "$GPTXT,01,01,01,raw~tilde",
+                "$GPTXT,01,01,01,^",
+                "$GPTXT,01,01,01,^2",
+                "$GPTXT,01,01,01,^2c",
+                "$GPTXT,01,01,01,^GG",
+            ] {
+                let line = sentence(body);
+                assert!(validate_sentence(&line).is_err(), "{body:?}");
+            }
 
-    validate_sentence(&sentence("$GPTXT,01,01,01,^24^21^5C^7E")).expect("uppercase ^HH escapes");
+            validate_sentence(&sentence("$GPTXT,01,01,01,^24^21^5C^7E"))
+                .expect("uppercase ^HH escapes");
+        },
+    );
 }
 
 #[test]
 fn strict_rejects_ascii_control_characters() {
-    for byte in ['\0', '\t', '\u{7f}'] {
-        let body = format!("$GPTXT,01,01,01,A{byte}B");
-        assert!(
-            matches!(
-                validate_sentence(&sentence(&body)),
-                Err(ComplianceError::InvalidDataCharacter(c)) if c == byte
-            ),
-            "control byte {byte:?}"
-        );
-    }
+    crate::bounded::run_bounded("strict_rejects_ascii_control_characters", || {
+        for byte in ['\0', '\t', '\u{7f}'] {
+            let body = format!("$GPTXT,01,01,01,A{byte}B");
+            assert!(
+                matches!(
+                    validate_sentence(&sentence(&body)),
+                    Err(ComplianceError::InvalidDataCharacter(c)) if c == byte
+                ),
+                "control byte {byte:?}"
+            );
+        }
+    });
 }
 
 #[test]
 fn strict_encoder_accepts_valid_standard_sentence() {
-    let line = encode_frame_strict('$', "GP", "RMC", &["120000.00", "A"]).expect("strict encode");
-    validate_sentence(&line).expect("strict output");
+    crate::bounded::run_bounded("strict_encoder_accepts_valid_standard_sentence", || {
+        let line =
+            encode_frame_strict('$', "GP", "RMC", &["120000.00", "A"]).expect("strict encode");
+        validate_sentence(&line).expect("strict output");
+    });
 }
 
 #[test]
 fn strict_encoder_rejects_legacy_addresses_and_overlong_output() {
-    assert!(encode_frame('$', "gp", "rmc", &["A"]).is_ok());
-    assert!(matches!(
-        encode_frame_strict('$', "gp", "rmc", &["A"]),
-        Err(StrictEncodeError::Compliance(
-            ComplianceError::InvalidAddressCharacter(_)
-        ))
-    ));
+    crate::bounded::run_bounded(
+        "strict_encoder_rejects_legacy_addresses_and_overlong_output",
+        || {
+            assert!(encode_frame('$', "gp", "rmc", &["A"]).is_ok());
+            assert!(matches!(
+                encode_frame_strict('$', "gp", "rmc", &["A"]),
+                Err(StrictEncodeError::Compliance(
+                    ComplianceError::InvalidAddressCharacter(_)
+                ))
+            ));
 
-    let long = "A".repeat(90);
-    assert!(encode_frame('$', "GP", "TXT", &[&long]).is_ok());
-    assert!(matches!(
-        encode_frame_strict('$', "GP", "TXT", &[&long]),
-        Err(StrictEncodeError::Compliance(
-            ComplianceError::SentenceTooLong { .. }
-        ))
-    ));
+            let long = "A".repeat(90);
+            assert!(encode_frame('$', "GP", "TXT", &[&long]).is_ok());
+            assert!(matches!(
+                encode_frame_strict('$', "GP", "TXT", &[&long]),
+                Err(StrictEncodeError::Compliance(
+                    ComplianceError::SentenceTooLong { .. }
+                ))
+            ));
+        },
+    );
 }
 
 #[test]
 fn strict_encoder_rejects_reserved_raw_data_but_accepts_escape() {
-    assert!(encode_frame('$', "GP", "TXT", &["raw$payload"]).is_ok());
-    assert!(encode_frame_strict('$', "GP", "TXT", &["raw$payload"]).is_err());
-    encode_frame_strict('$', "GP", "TXT", &["raw^24payload"]).expect("escaped dollar");
+    crate::bounded::run_bounded(
+        "strict_encoder_rejects_reserved_raw_data_but_accepts_escape",
+        || {
+            assert!(encode_frame('$', "GP", "TXT", &["raw$payload"]).is_ok());
+            assert!(encode_frame_strict('$', "GP", "TXT", &["raw$payload"]).is_err());
+            encode_frame_strict('$', "GP", "TXT", &["raw^24payload"]).expect("escaped dollar");
+        },
+    );
 }
 
 #[test]
 fn audit_strict_rejects_invalid_tag_characters() {
-    let line = sentence("$GPXYZ,1");
-    for bad in (0u8..=31).map(char::from).chain(['\u{7f}', 'é']) {
-        let input = tagged(&format!("s:source{bad}injected"), &line);
-        let frame = parse_frame(&input).expect("permissive frame");
-        assert_eq!(
-            frame.to_sentence(),
-            Err(nmea_0183_rs::EncodeError::InvalidTagBlockCharacter(bad))
-        );
-        assert_eq!(
-            parse_frame_strict(&input),
-            Err(ComplianceError::InvalidTagBlockCharacter(bad))
-        );
-        assert_eq!(
-            validate_sentence(&input),
-            Err(ComplianceError::InvalidTagBlockCharacter(bad))
-        );
-    }
+    crate::bounded::run_bounded("audit_strict_rejects_invalid_tag_characters", || {
+        let line = sentence("$GPXYZ,1");
+        for bad in (0u8..=31).map(char::from).chain(['\u{7f}', 'é']) {
+            let input = tagged(&format!("s:source{bad}injected"), &line);
+            let frame = parse_frame(&input).expect("permissive frame");
+            assert_eq!(
+                frame.to_sentence(),
+                Err(nmea_0183_rs::EncodeError::InvalidTagBlockCharacter(bad))
+            );
+            assert_eq!(
+                parse_frame_strict(&input),
+                Err(ComplianceError::InvalidTagBlockCharacter(bad))
+            );
+            assert_eq!(
+                validate_sentence(&input),
+                Err(ComplianceError::InvalidTagBlockCharacter(bad))
+            );
+        }
+    });
 }
 
 #[test]
 fn audit_strict_preserves_valid_tag_content() {
-    let line = sentence("$GPXYZ,1");
-    for content in ["", "s:receiver", "s:receiver,c:123"] {
-        for input in [tagged(content, &line), format!("\\{content}\\{line}")] {
-            let frame = parse_frame_strict(&input).expect("valid tagged sentence");
-            assert_eq!(frame.tag_block, Some(content));
-            let encoded = frame.to_sentence().expect("encode tag");
-            assert_eq!(parse_frame_strict(&encoded).expect("strict reparse"), frame);
+    crate::bounded::run_bounded("audit_strict_preserves_valid_tag_content", || {
+        let line = sentence("$GPXYZ,1");
+        for content in ["", "s:receiver", "s:receiver,c:123"] {
+            for input in [tagged(content, &line), format!("\\{content}\\{line}")] {
+                let frame = parse_frame_strict(&input).expect("valid tagged sentence");
+                assert_eq!(frame.tag_block, Some(content));
+                let encoded = frame.to_sentence().expect("encode tag");
+                assert_eq!(parse_frame_strict(&encoded).expect("strict reparse"), frame);
+            }
         }
-    }
+    });
+}
+
+#[test]
+fn public_errors_have_informative_display() {
+    let offset = ComplianceError::MalformedEscape { offset: 9 }.to_string();
+    assert!(offset.contains('9'));
+    let strict = StrictEncodeError::Compliance(ComplianceError::MissingTerminator).to_string();
+    assert!(strict.contains("CRLF"));
+}
+
+#[test]
+fn wrapped_errors_preserve_sources() {
+    use nmea_0183_rs::EncodeError;
+    use std::error::Error;
+    let frame = ComplianceError::Frame(FrameError::Empty);
+    assert_eq!(
+        frame
+            .source()
+            .expect("frame cause")
+            .downcast_ref::<FrameError>(),
+        Some(&FrameError::Empty)
+    );
+    assert!(ComplianceError::MissingChecksum.source().is_none());
+    let encode = StrictEncodeError::Encode(EncodeError::InvalidCoordinate);
+    assert_eq!(
+        encode
+            .source()
+            .expect("encode cause")
+            .downcast_ref::<EncodeError>(),
+        Some(&EncodeError::InvalidCoordinate)
+    );
+    let compliance = StrictEncodeError::Compliance(ComplianceError::MissingTerminator);
+    assert_eq!(
+        compliance
+            .source()
+            .expect("compliance cause")
+            .downcast_ref::<ComplianceError>(),
+        Some(&ComplianceError::MissingTerminator)
+    );
+}
+
+#[test]
+fn strict_checksum_and_error_details() {
+    crate::bounded::run_bounded("strict_checksum_and_error_details", || {
+        assert_eq!(
+            validate_sentence("$GPTXT,A*GG\r\n"),
+            Err(ComplianceError::Frame(FrameError::MalformedChecksum))
+        );
+        assert_eq!(
+            validate_sentence(&sentence("$GPéMC,A")),
+            Err(ComplianceError::InvalidAddressCharacter('é'))
+        );
+    });
+}
+
+#[test]
+fn strict_escape_offsets_and_progress() {
+    crate::bounded::run_bounded("strict_escape_offsets_and_progress", || {
+        for body in ["$GPTXT,AA^G0", "$GPTXT,AA^"] {
+            assert_eq!(
+                validate_sentence(&sentence(body)),
+                Err(ComplianceError::MalformedEscape { offset: 9 })
+            );
+        }
+        assert_eq!(validate_sentence(&sentence("$GPTXT,AA^24Z")), Ok(()));
+        assert_eq!(
+            validate_sentence(&sentence("$GPTXT,AA^24$")),
+            Err(ComplianceError::InvalidDataCharacter('$'))
+        );
+    });
+}
+
+#[path = "support/bounded.rs"]
+mod bounded;
+
+// Synthetic valid wire probes for cursor progress; sentence() calculates checksums.
+#[test]
+fn strict_data_progress_is_bounded() {
+    bounded::run_bounded("strict_data_progress_is_bounded", || {
+        for body in ["$GPTXT,,A", "$GPTXT,ABC^41", "$GPTXT,^41AB"] {
+            validate_sentence(&sentence(body)).expect("valid progress probe");
+        }
+    });
 }

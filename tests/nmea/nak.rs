@@ -47,3 +47,19 @@ fn nak_encode_roundtrip() {
         original
     );
 }
+
+#[test]
+fn nak_nonempty_text() {
+    let n = Nak::parse(&["UP", "AID", "999999990", "11", "DENIED"]);
+    assert_eq!(n.text.as_deref(), Some("DENIED"));
+}
+
+#[test]
+fn nak_nonempty_text_encoding() {
+    let value = Nak {
+        text: Some("DENIED".into()),
+        ..Default::default()
+    };
+    let wire = value.to_sentence("AN").expect("encode");
+    assert_eq!(parse_frame(&wire).expect("frame").fields[4], "DENIED");
+}
