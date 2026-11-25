@@ -67,7 +67,7 @@
 //!
 //! ## Features
 //!
-//! - `nmea` (default): all 93 standard NMEA sentence types
+//! - `nmea` (default): all 97 standard NMEA sentence types
 //! - `nmea_proprietary` (default) — all 16 proprietary NMEA sentence types
 //! - `ais` (default) — decoding for all numeric AIS Types 1-27, encoder support for Types 1/2/3, 4, 5, 9, 11, 12, 14, 18, 19, 21, 24 and 27, plus ABM, BBM and VSD sentences
 //! - Release 0.9.5 adds STN, XTR, ZDL, and ZFO: 101 NMEA formatters
@@ -79,6 +79,9 @@
 //! - Release 0.9.7 adds HRM, NAK, ROR, and SPW, bringing coverage to
 //!   109 NMEA formatters (93 standard, 16 proprietary) and 1242 passing
 //!   all-features tests, including doctests
+//! - Unreleased support adds HTC, HTD, PRC, and TRC through `steering`,
+//!   bringing coverage to 113 NMEA formatters (97 standard, 16 proprietary)
+//!   and 1266 passing all-features tests, including doctests
 //! - `dbs`, `dbt`, `dpt`, … — individual sentence types
 
 mod compliance;
@@ -137,6 +140,8 @@ macro_rules! nmea_item {
             feature = "hms",
             feature = "hrm",
             feature = "hsc",
+            feature = "htc",
+            feature = "htd",
             feature = "mda",
             feature = "msk",
             feature = "mss",
@@ -159,6 +164,7 @@ macro_rules! nmea_item {
             feature = "pknsh",
             feature = "pkwdwpl",
             feature = "pmtk",
+            feature = "prc",
             feature = "prdid",
             feature = "psoncms",
             feature = "pskpdpt",
@@ -174,6 +180,7 @@ macro_rules! nmea_item {
             feature = "spw",
             feature = "stn",
             feature = "ths",
+            feature = "trc",
             feature = "trd",
             feature = "tll",
             feature = "tlb",

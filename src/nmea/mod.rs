@@ -210,9 +210,13 @@ nmea_sentences![
         ["zdl", Zdl, "ZDL"],
         ["zfo", Zfo, "ZFO"],
         ["ztg", Ztg, "ZTG"],
-        // Rudder
+        // Steering and propulsion
+        ["htc", Htc, "HTC"],
+        ["htd", Htd, "HTD"],
+        ["prc", Prc, "PRC"],
         ["ror", Ror, "ROR"],
         ["rsa", Rsa, "RSA"],
+        ["trc", Trc, "TRC"],
         // Speed
         ["vbw", Vbw, "VBW"],
         ["vlw", Vlw, "VLW"],

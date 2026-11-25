@@ -92,6 +92,10 @@ mod hms;
 mod hrm;
 #[cfg(feature = "hsc")]
 mod hsc;
+#[cfg(feature = "htc")]
+mod htc;
+#[cfg(feature = "htd")]
+mod htd;
 #[cfg(feature = "mda")]
 mod mda;
 #[cfg(feature = "msk")]
@@ -136,6 +140,8 @@ mod pknsh;
 mod pkwdwpl;
 #[cfg(feature = "pmtk")]
 mod pmtk;
+#[cfg(feature = "prc")]
+mod prc;
 #[cfg(feature = "prdid")]
 mod prdid;
 #[cfg(feature = "psoncms")]
@@ -166,6 +172,8 @@ mod spw;
 mod stn;
 #[cfg(feature = "ths")]
 mod ths;
+#[cfg(feature = "trc")]
+mod trc;
 #[cfg(feature = "trd")]
 mod trd;
 #[cfg(feature = "tll")]
@@ -311,6 +319,10 @@ pub use hms::*;
 pub use hrm::*;
 #[cfg(feature = "hsc")]
 pub use hsc::*;
+#[cfg(feature = "htc")]
+pub use htc::*;
+#[cfg(feature = "htd")]
+pub use htd::*;
 #[cfg(feature = "mda")]
 pub use mda::*;
 #[cfg(feature = "msk")]
@@ -355,6 +367,8 @@ pub use pknsh::*;
 pub use pkwdwpl::*;
 #[cfg(feature = "pmtk")]
 pub use pmtk::*;
+#[cfg(feature = "prc")]
+pub use prc::*;
 #[cfg(feature = "prdid")]
 pub use prdid::*;
 #[cfg(feature = "psoncms")]
@@ -385,6 +399,8 @@ pub use spw::*;
 pub use stn::*;
 #[cfg(feature = "ths")]
 pub use ths::*;
+#[cfg(feature = "trc")]
+pub use trc::*;
 #[cfg(feature = "trd")]
 pub use trd::*;
 #[cfg(feature = "tll")]

@@ -18,21 +18,22 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 
 ## Current status
 
-- **86** des **133** formatters IEC 61162-1:2024 de cette matrice sont supportés, dont les quatre formatters AIS `ABM`, `BBM`, `VDM` et `VDO`.
-- **47** formatters IEC 61162-1:2024 restent à intégrer.
+- **90** des **133** formatters IEC 61162-1:2024 de cette matrice sont supportés, dont les quatre formatters AIS `ABM`, `BBM`, `VDM` et `VDO`.
+- **43** formatters IEC 61162-1:2024 restent à intégrer.
 - **11** formatters supplémentaires sont supportés hors de la liste IEC 2024.
 - La version 0.9.3 comprenait 93 formatters NMEA, dont 77 standard et 16 propriétaires.
 - La version 0.9.4 ajoute DSI, DSR, HMR et HMS, soit 97 formatters NMEA, dont 81 standard et 16 propriétaires.
 - La version 0.9.5 ajoute STN, XTR, ZDL et ZFO, soit 101 formatters NMEA, dont 85 standard et 16 propriétaires.
 - La version 0.9.6 ajoute ALM, FSI, MSK et MSS, soit 105 formatters NMEA, dont 89 standard et 16 propriétaires.
 - La version 0.9.7 ajoute HRM, NAK, ROR et SPW et porte le total à 109 formatters NMEA, dont 93 standard et 16 propriétaires.
-- La suite all-features actuelle compte 1242 tests réussis, doctests inclus.
+- Les ajouts en cours (HTC, HTD, PRC et TRC) portent le total à 113 formatters NMEA, dont 97 standard et 16 propriétaires.
+- La suite all-features actuelle compte 1266 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 
 **Features Cargo**
 
 - `default` active `nmea`, `nmea_proprietary` et `ais`.
-- `nmea` regroupe les 93 formatters NMEA standard supportés.
+- `nmea` regroupe les 97 formatters NMEA standard supportés.
 - `nmea_proprietary` regroupe les 16 formatters propriétaires supportés.
 - `ais` active le décodage et l’encodage AIS, ainsi que `ABM`, `BBM` et `VSD`.
 
@@ -140,7 +141,7 @@ Feature Cargo : `depth`.
 
 ### Steering
 
-Feature Cargo : `steering` pour `APB`, `ROR`, `RPM` et `RSA` ; `heading` pour `TRD`.
+La feature Cargo `steering` active `APB`, `HTC`, `HTD`, `PRC`, `ROR`, `RPM`, `RSA` et `TRC`. La feature `heading` active `TRD`.
 
 | Formatter | Description | Support | Première version NMEA<br>(année) | Dernière version NMEA<br>(année) |
 | --- | --- | :---: | :---: | :---: |
@@ -150,11 +151,11 @@ Feature Cargo : `steering` pour `APB`, `ROR`, `RPM` et `RSA` ; `heading` pour `T
 | `EPM` | Command or report long equipment property value |   | 4.30<br>(2023) | 4.30<br>(2023) |
 | `EPV` | Command or report equipment property value |   | 4.10<br>(2012) | 4.30<br>(2023) |
 | `ETL` | Engine telegraph operation status |   | 3.01<br>(2002) | 4.30<br>(2023) |
-| `HTC` | Heading/track control command |   | 2.30<br>(1998) | 4.30<br>(2023) |
-| `HTD` | Heading/track control data |   | 2.30<br>(1998) | 4.30<br>(2023) |
-| `PRC` | Propulsion remote control status |   | 3.01<br>(2002) | 4.30<br>(2023) |
+| `HTC` | Heading/track control command | ✓ | 2.30<br>(1998) | 4.30<br>(2023) |
+| `HTD` | Heading/track control data | ✓ | 2.30<br>(1998) | 4.30<br>(2023) |
+| `PRC` | Propulsion remote control status | ✓ | 3.01<br>(2002) | 4.30<br>(2023) |
 | `ROR` | Rudder order status | ✓ | 3.01<br>(2002) | 4.30<br>(2023) |
-| `TRC` | Thruster control data |   | 3.01<br>(2002) | 4.30<br>(2023) |
+| `TRC` | Thruster control data | ✓ | 3.01<br>(2002) | 4.30<br>(2023) |
 | `TRD` | Thruster response data | ✓ | 3.01<br>(2002) | 4.30<br>(2023) |
 | `ASD` | Autopilot system data |   | 2.10<br>(1995) | 2.10<br>(1995) |
 

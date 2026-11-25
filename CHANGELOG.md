@@ -2,6 +2,16 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
+## [Unreleased]
+
+### Added
+
+- HTC (Heading/track control command) and HTD (Heading/track control data). HTC supports the trailing sentence status and accepts legacy frames that omit it.
+- PRC (Propulsion remote control status) and TRC (Thruster control data).
+- The four formatters are available through `steering` and their individual features `htc`, `htd`, `prc`, and `trc`.
+
+NMEA sentence coverage: 109 → 113 types.
+
 ## [0.9.7] - 2026-11-12
 
 ### Added

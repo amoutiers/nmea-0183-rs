@@ -90,6 +90,10 @@ mod hms;
 mod hrm;
 #[path = "nmea/hsc.rs"]
 mod hsc;
+#[path = "nmea/htc.rs"]
+mod htc;
+#[path = "nmea/htd.rs"]
+mod htd;
 #[path = "nmea/mda.rs"]
 mod mda;
 #[path = "nmea/msk.rs"]
@@ -134,6 +138,8 @@ mod pknsh;
 mod pkwdwpl;
 #[path = "nmea/pmtk.rs"]
 mod pmtk;
+#[path = "nmea/prc.rs"]
+mod prc;
 #[path = "nmea/prdid.rs"]
 mod prdid;
 #[path = "nmea/pskpdpt.rs"]
@@ -168,6 +174,8 @@ mod ths;
 mod tlb;
 #[path = "nmea/tll.rs"]
 mod tll;
+#[path = "nmea/trc.rs"]
+mod trc;
 #[path = "nmea/trd.rs"]
 mod trd;
 #[path = "nmea/ttd.rs"]
