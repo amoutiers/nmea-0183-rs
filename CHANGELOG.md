@@ -2,13 +2,20 @@
 
 All notable changes to nmea-0183-rs are documented here.
 
-## [Unreleased]
+## [0.9.8] - 2026-11-26
 
 ### Added
 
-- HTC (Heading/track control command) and HTD (Heading/track control data). HTC supports the trailing sentence status and accepts legacy frames that omit it.
-- PRC (Propulsion remote control status) and TRC (Thruster control data).
+- HTC (Heading/track control command) covers rudder, heading, and track commands. Legacy frames can omit the trailing status flag.
+- HTD (Heading/track control data) reports the controller settings, steering limits, and vessel heading.
+- PRC (Propulsion remote control status) reports lever position, RPM and pitch demand, and the engine or shaft identifier.
+- TRC (Thruster control data) covers RPM, pitch, and azimuth demand, operating location, and sentence status.
 - The four formatters are available through `steering` and their individual features `htc`, `htd`, `prc`, and `trc`.
+
+### Fixed
+
+- Compile the bounded test helper only when its callers are enabled, avoiding unused-code warnings in isolated feature tests.
+- Remove the duplicate homepage URL from the manifest to avoid Cargo's redundant metadata warning.
 
 NMEA sentence coverage: 109 → 113 types.
 
@@ -528,6 +535,7 @@ AIS coverage expanded from 9 to 16 message types.
 - Zero external dependencies
 - CI: tests, clippy, rustfmt, doc checks on stable + MSRV 1.85.0
 
+[0.9.8]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.8
 [0.9.7]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.7
 [0.9.6]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.6
 [0.9.5]: https://github.com/amoutiers/nmea-0183-rs/releases/tag/v0.9.5

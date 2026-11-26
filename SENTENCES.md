@@ -26,7 +26,7 @@ La validation stricte de la crate porte sur l’enveloppe commune. Elle ne certi
 - La version 0.9.5 ajoute STN, XTR, ZDL et ZFO, soit 101 formatters NMEA, dont 85 standard et 16 propriétaires.
 - La version 0.9.6 ajoute ALM, FSI, MSK et MSS, soit 105 formatters NMEA, dont 89 standard et 16 propriétaires.
 - La version 0.9.7 ajoute HRM, NAK, ROR et SPW et porte le total à 109 formatters NMEA, dont 93 standard et 16 propriétaires.
-- Les ajouts en cours (HTC, HTD, PRC et TRC) portent le total à 113 formatters NMEA, dont 97 standard et 16 propriétaires.
+- La version 0.9.8 ajoute HTC, HTD, PRC et TRC, soit 113 formatters NMEA, dont 97 standard et 16 propriétaires.
 - La suite all-features actuelle compte 1266 tests réussis, doctests inclus.
 - Les features Cargo individuelles sont toutes représentées dans les tableaux ci-dessous.
 

@@ -1,10 +1,10 @@
 # nmea-0183-rs
 
-## Release 0.9.7 snapshot
+## Release 0.9.8 snapshot
 
-- 109 NMEA formatters: 93 standard and 16 proprietary; two AIS application sentences.
-- 1242 tests passed across the all-features unit, integration, and doctest targets.
-- HRM, NAK, ROR, and SPW were added in 0.9.7.
+- 113 NMEA formatters (97 standard and 16 proprietary), plus two AIS application sentences.
+- 1266 tests passed across the all-features unit, integration, and doctest targets.
+- HTC, HTD, PRC, and TRC were added in 0.9.8.
 
 ## Agent instructions
 
