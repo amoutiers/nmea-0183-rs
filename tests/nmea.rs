@@ -230,5 +230,6 @@ mod ztg;
 #[path = "nmea/api.rs"]
 mod api;
 
+#[cfg(any(feature = "nmea", feature = "dpt", feature = "xdr"))]
 #[path = "support/bounded.rs"]
 mod bounded;

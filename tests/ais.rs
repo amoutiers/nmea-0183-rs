@@ -142,5 +142,6 @@ mod type17;
 #[path = "ais/type23.rs"]
 mod type23;
 
+#[cfg(any(feature = "ais", feature = "abm", feature = "bbm"))]
 #[path = "support/bounded.rs"]
 mod bounded;
